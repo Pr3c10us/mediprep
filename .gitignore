@@ -1,0 +1,4 @@
+/.env
+/.idea
+/logs
+/node_modules

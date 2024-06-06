@@ -1,0 +1,37 @@
+{
+  "name": "mediprep",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "migrate": "node-pg-migrate -m ./stack/migrations",
+    "dev": "ts-node-dev --respawn --rs src/index.ts",
+    "build": "tsc -p .",
+    "start": "npm run build && node dist"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/pg": "^8.11.6",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "http-status-codes": "^2.3.0",
+    "morgan": "^1.10.0",
+    "pg": "^8.12.0",
+    "pg-error-enum": "^0.7.1",
+    "ts-node-dev": "^2.0.0",
+    "winston": "^3.13.0"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^20.14.2",
+    "node-pg-migrate": "^7.4.0",
+    "typescript": "^5.4.5"
+  }
+}
