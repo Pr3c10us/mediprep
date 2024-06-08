@@ -10,3 +10,8 @@ terraform {
 provider "azurerm" {
   features {}
 }
+
+resource "azurerm_resource_group" "mediprep" {
+  name = "mediprep-resources"
+  location = "West Europe"
+}

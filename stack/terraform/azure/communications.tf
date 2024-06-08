@@ -1,7 +1,3 @@
-resource "azurerm_resource_group" "mediprep" {
-  name = "mediprep-resources"
-  location = "West Europe"
-}
 
 resource "azurerm_communication_service" "mediprep" {
   name                = "mediprep-communicationservice"
