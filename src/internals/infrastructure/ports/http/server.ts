@@ -1,26 +1,29 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express, Request, Response, Router } from "express";
 import { Services } from "../../../app/services";
 import helmet from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import morgan from "morgan";
-import { SuccessResponse } from "../../../../pkg/response/success";
-import { write } from "fs";
+import { SuccessResponse } from "../../../../pkg/responses/success";
 import Logger from "../../../../pkg/utils/logger";
 import morganMiddleware from "../../../../pkg/middleware/morgan";
 import { Environment } from "../../../../pkg/configs/env";
+import { AdminHandler } from "./admin/handler";
+import ErrorHandlerMiddleware from "../../../../pkg/middleware/errorHandler";
+import Route404 from "../../../../pkg/middleware/route404";
 
 export class Server {
     services: Services;
     environmentVariables: Environment;
-    server: Express;
     port: number;
+    server: Express;
+    apiV1Router: Router;
 
     constructor(services: Services, environmentVariables: Environment) {
         this.services = services;
         this.environmentVariables = environmentVariables;
-        this.server = express();
         this.port = environmentVariables.port;
+        this.server = express();
+        this.apiV1Router = express.Router();
 
         this.server.use(express.json());
         this.server.use(express.urlencoded({ extended: false }));
@@ -35,12 +38,23 @@ export class Server {
         );
 
         this.health();
+        this.admin();
+
+        this.server.use("/api/v1", this.apiV1Router);
+
+        this.server.use(Route404);
+        this.server.use(ErrorHandlerMiddleware);
     }
 
     health = () => {
         this.server.get("/health", (req: Request, res: Response) => {
-            new SuccessResponse().send(res);
+            new SuccessResponse(res).send();
         });
+    };
+
+    admin = () => {
+        const router = new AdminHandler(this.services.AdminServices);
+        this.apiV1Router.use("/admin", router.router);
     };
 
     listen = () => {

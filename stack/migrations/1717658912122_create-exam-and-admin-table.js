@@ -26,10 +26,14 @@ exports.up = (pgm) => {
             notNull: true,
             unique: true,
         },
+        password: {
+            type: "varchar(256)",
+            notNull: true,
+        },
         roles: {
             type: "VARCHAR(32)[]",
             notNull: true,
-            default: pgm.func('ARRAY["viewer"]::VARCHAR(32)[]'),
+            default: pgm.func("ARRAY['viewer']::VARCHAR(32)[]"),
         },
         created_at: {
             type: "timestamp",

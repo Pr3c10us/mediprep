@@ -9,11 +9,14 @@ export class Environment {
     pgDBDatabase: string;
 
     cookieSecret: string;
+    cookieExpires : number;
+
     jwtSecret: string;
+    jwtExpires: string;
 
     nodeENV: string;
     port: number;
-    url: string
+    url: string;
 
     clientOrigin: string[];
     constructor() {
@@ -24,7 +27,13 @@ export class Environment {
         this.pgDBDatabase = this.getEnvORError("PG_DB_NAME");
 
         this.cookieSecret = this.getEnvORError("COOKIE_SECRET");
+        this.cookieExpires = this.getEnvAsInt(
+            "COOKIE_EXPIRES",
+            1000 * 60 * 60 * 24 * 7
+        );
+
         this.jwtSecret = this.getEnvORError("JWT_SECRET");
+        this.jwtExpires = this.getEnvAsString("JWT_EXPIRES", "7d");
 
         this.nodeENV = this.getEnvAsString("NODE_ENV", "development");
         this.port = this.getEnvAsInt("PORT", 5000);

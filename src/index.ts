@@ -1,9 +1,11 @@
+import "express-async-errors";
 import { Services } from "./internals/app/services";
 import { Adapter } from "./internals/infrastructure/adapters/adapters";
 import { Server } from "./internals/infrastructure/ports/http/server";
-import path from "path";
 import pg from "pg";
 import { Environment } from "./pkg/configs/env";
+
+
 
 const main = async () => {
     const environmentVariables = new Environment();

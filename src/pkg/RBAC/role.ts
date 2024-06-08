@@ -1,6 +1,6 @@
 export type AdminRole = {
     name: string;
-    permissions: string[];
+    permissions: Permission[];
 };
 
 export const AdminRoles: AdminRole[] = [
@@ -49,13 +49,23 @@ export const AdminRoles: AdminRole[] = [
 ];
 
 export class Roles {
-    roles: AdminRole[] = AdminRoles;
+    static roles: AdminRole[] = AdminRoles;
 
-    getRoleByName(name: string): AdminRole | undefined {
+    static getRoleByName(name: string): AdminRole | undefined {
         return this.roles.find((role) => role.name === name);
     }
-
-    getRoles(): AdminRole[] {
-        return this.roles;
-    }
 }
+
+export type Permission =
+    | "create_user"
+    | "read_user"
+    | "update_user"
+    | "create_exam"
+    | "read_exam"
+    | "update_exam"
+    | "delete_exam"
+    | "read_sales"
+    | "create_admin"
+    | "read_admin"
+    | "update_admin"
+    | "delete_admin";
