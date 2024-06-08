@@ -6,7 +6,7 @@ resource "azurerm_communication_service" "mediprep" {
 }
 
 resource "azurerm_email_communication_service" "mediprep" {
-  name                = "example-emailcommunicationservice"
+  name                = "mediprep-emailcommunicationservice"
   resource_group_name = azurerm_resource_group.mediprep.name
   data_location       = "United States"
 }
