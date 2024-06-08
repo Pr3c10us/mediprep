@@ -3,3 +3,6 @@
 /logs
 /node_modules
 /src/pkg/configs/default.json
+stack/terraform/azure/.terraform/providers/registry.terraform.io/hashicorp/azurerm/3.107.0/windows_amd64/terraform-provider-azurerm_v3.107.0_x5.exe
+stack/terraform/azure/.terraform/providers/registry.terraform.io/hashicorp/azurerm/3.107.0/windows_amd64/LICENSE.txt
+stack/terraform/azure/.terraform.lock.hcl
