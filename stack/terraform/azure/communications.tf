@@ -10,3 +10,7 @@ resource "azurerm_email_communication_service" "mediprep" {
   resource_group_name = azurerm_resource_group.mediprep.name
   data_location       = "United States"
 }
+
+# 19
+# 104 19
+# 359 88

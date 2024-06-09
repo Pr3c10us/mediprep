@@ -12,7 +12,7 @@ export interface AuthenticateAdmin {
     Handle: (email: string, password: string) => Promise<string | void>;
 }
 
-export class authenticateAdmin implements AuthenticateAdmin {
+export class AuthenticateAdminC implements AuthenticateAdmin {
     repository: AdminRepository;
 
     constructor(repository: AdminRepository) {

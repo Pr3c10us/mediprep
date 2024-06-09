@@ -9,7 +9,7 @@ export class Environment {
     pgDBDatabase: string;
 
     cookieSecret: string;
-    cookieExpires : number;
+    cookieExpires: number;
 
     jwtSecret: string;
     jwtExpires: string;
@@ -19,6 +19,14 @@ export class Environment {
     url: string;
 
     clientOrigin: string[];
+
+    azCommunicationConnectionString: string;
+    azCommunicationMailFrom: string;
+
+    kafkaClientId: string;
+    kafkaBroker: string[];
+    kafkaEmailGroupID: string;
+    kafkaEmailTopic: string;
     constructor() {
         this.pgDBUsername = this.getEnvAsString("PG_DB_USERNAME", "postgres");
         this.pgDBPassword = this.getEnvAsString("PG_DB_PASSWORD", "password");
@@ -40,6 +48,18 @@ export class Environment {
         this.url = this.getEnvAsString("URL", "http://localhost:5000");
 
         this.clientOrigin = [this.getEnvORError("CLIENT_ORIGIN_1")];
+
+        this.azCommunicationConnectionString = this.getEnvORError(
+            "AZURE_COMMUNICATION_SERVICE_CONNECTION_STRING"
+        );
+        this.azCommunicationMailFrom = this.getEnvORError(
+            "AZURE_COMMUNICATION_SERVICE_MAIL_FROM"
+        );
+
+        this.kafkaClientId = this.getEnvORError("KAFKA_CLIENT_ID");
+        this.kafkaBroker = [this.getEnvORError("KAFKA_BROKER")];
+        this.kafkaEmailGroupID = this.getEnvORError("KAFKA_EMAIL_GROUP_ID");
+        this.kafkaEmailTopic = this.getEnvORError("KAFKA_EMAIL_TOPIC");
     }
 
     getEnvORError = (key: string): string => {

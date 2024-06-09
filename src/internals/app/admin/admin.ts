@@ -1,22 +1,29 @@
 import { AdminRepository } from "../../domain/admins/repository";
-import { AddAdminCommand, addAdminCommand } from "./command/addAdmin";
+import { EmailQueueRepository } from "../../domain/queue/repository";
+import { AddAdminCommand, AddAdminCommandC } from "./command/addAdmin";
 import {
     AuthenticateAdmin,
-    authenticateAdmin,
+    AuthenticateAdminC,
 } from "./command/authenticateAdmin";
 
 export class Commands {
     addAdmin: AddAdminCommand;
     authenticateAdmin: AuthenticateAdmin;
 
-    constructor(repository: AdminRepository) {
-        this.addAdmin = new addAdminCommand(repository);
-        this.authenticateAdmin = new authenticateAdmin(repository);
+    constructor(
+        adminRepository: AdminRepository,
+        emailQueueRepository: EmailQueueRepository
+    ) {
+        this.addAdmin = new AddAdminCommandC(
+            adminRepository,
+            emailQueueRepository
+        );
+        this.authenticateAdmin = new AuthenticateAdminC(adminRepository);
     }
 }
 
 export class Queries {
-    constructor(repository: AdminRepository) {}
+    constructor(adminRepository: AdminRepository) {}
 }
 
 export class AdminServices {
@@ -24,9 +31,12 @@ export class AdminServices {
     Queries: Queries;
     adminRepository: AdminRepository;
 
-    constructor(repository: AdminRepository) {
-        this.adminRepository = repository;
-        this.Commands = new Commands(repository);
-        this.Queries = new Queries(repository);
+    constructor(
+        adminRepository: AdminRepository,
+        emailQueueRepository: EmailQueueRepository
+    ) {
+        this.adminRepository = adminRepository;
+        this.Commands = new Commands(adminRepository, emailQueueRepository);
+        this.Queries = new Queries(adminRepository);
     }
 }
