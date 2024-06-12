@@ -2,10 +2,7 @@ import {
     BadRequestError,
     UnAuthorizedError,
 } from "../../../../pkg/errors/customError";
-import {
-    compareHash,
-    signToken,
-} from "../../../../pkg/utils/encryption";
+import { compareHash, signToken } from "../../../../pkg/utils/encryption";
 import { AdminRepository } from "../../../domain/admins/repository";
 
 export interface AuthenticateAdmin {
@@ -22,12 +19,10 @@ export class AuthenticateAdminC implements AuthenticateAdmin {
     Handle = async (email: string, password: string): Promise<string> => {
         try {
             const admin = await this.repository.GetAdminByEmail(email);
-            if (!admin) {
-                throw new BadRequestError(
-                    `invalid email address ${email}`
-                );
+            if (!admin?.email || admin?.email != email) {
+                throw new BadRequestError(`invalid email address ${email}`);
             }
-            const passwordCorrect = compareHash(password, admin.password)
+            const passwordCorrect = compareHash(password, admin.password);
             if (!passwordCorrect) {
                 throw new UnAuthorizedError(`invalid password`);
             }

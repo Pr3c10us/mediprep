@@ -8,11 +8,13 @@ import ValidationMiddleware from "../../../../../pkg/middleware/validation";
 import {
     addAdminSchema,
     authenticateAdminSchema,
+    getAdminsFilterSchema,
 } from "../../../../../pkg/validations/admin";
 import { Admin } from "../../../../domain/admins/admin";
 import CheckPermission from "../../../../../pkg/middleware/checkPermission";
 import AuthorizeAdmin from "../../../../../pkg/middleware/authorization";
 import { date } from "zod";
+import { PaginationFilter } from "../../../../../pkg/types/pagination";
 
 export class AdminHandler {
     services: AdminServices;
@@ -21,6 +23,15 @@ export class AdminHandler {
     constructor(services: AdminServices) {
         this.services = services;
         this.router = Router();
+
+        this.router
+            .route("/")
+            .get(
+                AuthorizeAdmin(this.services.adminRepository),
+                CheckPermission("read_admin"),
+                ValidationMiddleware(getAdminsFilterSchema, "body"),
+                this.getAdmins
+            );
 
         this.router
             .route("/add")
@@ -59,5 +70,20 @@ export class AdminHandler {
             value: token,
         };
         new SuccessResponseWithCookies(res, cookie, { jwt: token }).send();
+    };
+
+    getAdmins = async (req: Request, res: Response) => {
+        const { limit, page, name, email } = req.query;
+        console.log({ qa: req.query });
+        const filter: PaginationFilter = {
+            limit: Number(limit),
+            page: Number(page),
+            name: String(name),
+            email: String(email),
+        };
+
+        const admins = this.services.Queries.getAdmins.handle(filter);
+
+        new SuccessResponse(res, { admins }).send();
     };
 }

@@ -5,6 +5,7 @@ import {
     AuthenticateAdmin,
     AuthenticateAdminC,
 } from "./command/authenticateAdmin";
+import { GetAdmins } from "./query/getAdmins";
 
 export class Commands {
     addAdmin: AddAdminCommand;
@@ -23,7 +24,10 @@ export class Commands {
 }
 
 export class Queries {
-    constructor(adminRepository: AdminRepository) {}
+    getAdmins: GetAdmins;
+    constructor(adminRepository: AdminRepository) {
+        this.getAdmins = new GetAdmins(adminRepository);
+    }
 }
 
 export class AdminServices {

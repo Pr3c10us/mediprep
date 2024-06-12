@@ -32,3 +32,10 @@ export const authenticateAdminSchema = z.object({
     email: z.string().email(),
     password: z.string(),
 });
+
+export const getAdminsFilterSchema = z.object({
+    limit: z.number().default(10),
+    page: z.number().default(1),
+    name: z.string().optional(),
+    email: z.string().optional(),
+});

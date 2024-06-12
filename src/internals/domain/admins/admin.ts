@@ -1,3 +1,5 @@
+import { Exam } from "../exams/exam";
+
 export type AdminAccess =
     | "SUPER_ADMIN"
     | "ADMIN"
@@ -17,6 +19,7 @@ export type Admin = {
     password?: string;
     roles: AdminRoles[];
     examAccess?: string[];
+    exams?: Exam[];
     createdAt?: Date;
     updatedAt?: Date;
 };
@@ -27,9 +30,9 @@ export const newAdmin = (
     roles: AdminRoles[],
     id?: string,
     password?: string,
-    examAccess?: string[],
     createdAt?: Date,
-    updatedAt?: Date
+    updatedAt?: Date,
+    exams?: Exam[]
 ): Admin => {
     return {
         name: name,
@@ -37,8 +40,8 @@ export const newAdmin = (
         roles: roles,
         id: id,
         password: password,
-        examAccess: examAccess,
         createdAt: createdAt,
         updatedAt: updatedAt,
+        exams: exams,
     };
 };
