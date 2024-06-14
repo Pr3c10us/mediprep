@@ -20,8 +20,16 @@ export class Environment {
 
     clientOrigin: string[];
 
+    azSessionId : string;
+    azClientId: string;
+    azClientSecret: string;
+    azTenantId: string;
+
     azCommunicationConnectionString: string;
     azCommunicationMailFrom: string;
+
+    azAccountStorageName: string;
+    azExamContainerName: string;
 
     kafkaClientId: string;
     kafkaBroker: string[];
@@ -49,11 +57,23 @@ export class Environment {
 
         this.clientOrigin = [this.getEnvORError("CLIENT_ORIGIN_1")];
 
+        this.azSessionId= this.getEnvORError("AZURE_SESSION_ID");
+        this.azClientId= this.getEnvORError("AZURE_CLIENT_ID")
+        this.azClientSecret= this.getEnvORError("AZURE_CLIENT_SECRET")
+        this.azTenantId= this.getEnvORError("AZURE_TENANT_ID")
+
         this.azCommunicationConnectionString = this.getEnvORError(
             "AZURE_COMMUNICATION_SERVICE_CONNECTION_STRING"
         );
         this.azCommunicationMailFrom = this.getEnvORError(
             "AZURE_COMMUNICATION_SERVICE_MAIL_FROM"
+        );
+
+        this.azAccountStorageName = this.getEnvORError(
+            "AZURE_STORAGE_ACCOUNT_NAME"
+        );
+        this.azExamContainerName = this.getEnvORError(
+            "AZURE_EXAM_CONTAINER_NAME"
         );
 
         this.kafkaClientId = this.getEnvORError("KAFKA_CLIENT_ID");

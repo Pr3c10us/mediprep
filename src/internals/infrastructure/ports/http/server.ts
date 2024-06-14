@@ -1,15 +1,16 @@
-import express, { Express, Request, Response, Router } from "express";
-import { Services } from "../../../app/services";
+import express, {Express, Request, Response, Router} from "express";
+import {Services} from "../../../app/services";
 import helmet from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { SuccessResponse } from "../../../../pkg/responses/success";
+import {SuccessResponse} from "../../../../pkg/responses/success";
 import Logger from "../../../../pkg/utils/logger";
 import morganMiddleware from "../../../../pkg/middleware/morgan";
-import { Environment } from "../../../../pkg/configs/env";
-import { AdminHandler } from "./admin/handler";
+import {Environment} from "../../../../pkg/configs/env";
+import {AdminHandler} from "./admin/handler";
 import ErrorHandlerMiddleware from "../../../../pkg/middleware/errorHandler";
 import Route404 from "../../../../pkg/middleware/route404";
+import {ExamHandler} from "./exam/handler";
 
 export class Server {
     services: Services;
@@ -26,7 +27,7 @@ export class Server {
         this.apiV1Router = express.Router();
 
         this.server.use(express.json());
-        this.server.use(express.urlencoded({ extended: false }));
+        this.server.use(express.urlencoded({extended: false}));
         this.server.use(helmet());
         this.server.use(cookieParser(environmentVariables.cookieSecret));
         this.server.use(morganMiddleware);
@@ -39,6 +40,7 @@ export class Server {
 
         this.health();
         this.admin();
+        this.exam();
 
         this.server.use("/api/v1", this.apiV1Router);
 
@@ -55,6 +57,11 @@ export class Server {
     admin = () => {
         const router = new AdminHandler(this.services.AdminServices);
         this.apiV1Router.use("/admin", router.router);
+    };
+
+    exam = () => {
+        const router = new ExamHandler(this.services.ExamServices, this.services.AdminServices);
+        this.apiV1Router.use("/exam", router.router);
     };
 
     listen = () => {

@@ -1,4 +1,4 @@
-import { PaginationFilter } from "../../../../pkg/types/pagination";
+import {PaginationFilter, PaginationMetaData} from "../../../../pkg/types/pagination";
 import { Admin } from "../../../domain/admins/admin";
 import { AdminRepository } from "../../../domain/admins/repository";
 
@@ -8,12 +8,12 @@ export class GetAdmins {
         this.adminRepository = adminRepository;
     }
 
-    handle = async (filter: PaginationFilter): Promise<Admin[]> => {
+    handle = async (filter: PaginationFilter): Promise<{ admins: Admin[], metadata: PaginationMetaData }> => {
         try {
-            const admins: Admin[] = await this.adminRepository.GetAdmins(
+            const {admins , metadata} = await this.adminRepository.GetAdmins(
                 filter
             );
-            return admins;
+            return {admins,metadata};
         } catch (error) {
             throw error
         }

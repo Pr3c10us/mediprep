@@ -31,8 +31,8 @@ export class Queries {
 }
 
 export class AdminServices {
-    Commands: Commands;
-    Queries: Queries;
+    commands: Commands;
+    queries: Queries;
     adminRepository: AdminRepository;
 
     constructor(
@@ -40,7 +40,7 @@ export class AdminServices {
         emailQueueRepository: EmailQueueRepository
     ) {
         this.adminRepository = adminRepository;
-        this.Commands = new Commands(adminRepository, emailQueueRepository);
-        this.Queries = new Queries(adminRepository);
+        this.commands = new Commands(adminRepository, emailQueueRepository);
+        this.queries = new Queries(adminRepository);
     }
 }

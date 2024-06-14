@@ -1,24 +1,26 @@
 import "express-async-errors";
-import { Services } from "./internals/app/services";
-import { Adapter } from "./internals/infrastructure/adapters/adapters";
-import { Server } from "./internals/infrastructure/ports/http/server";
-import pg, { PoolClient } from "pg";
-import { Environment } from "./pkg/configs/env";
-import { Kafka, logLevel } from "kafkajs";
-import { KafkaQueue } from "./internals/infrastructure/ports/kafka/queue";
+import {Services} from "./internals/app/services";
+import {Adapter} from "./internals/infrastructure/adapters/adapters";
+import {Server} from "./internals/infrastructure/ports/http/server";
+import pg, {Pool} from "pg";
+import {drizzle} from "drizzle-orm/node-postgres";
+import {Environment} from "./pkg/configs/env";
+import {Kafka, logLevel} from "kafkajs";
+import {KafkaQueue} from "./internals/infrastructure/ports/kafka/queue";
+import {getBlobClient} from "./pkg/azure/storage";
+import {BlobServiceClient} from "@azure/storage-blob";
 
-const getDBClient = async (
+const getDBClient = (
     environmentVariables: Environment
-): Promise<PoolClient> => {
+): Pool => {
     const { Pool } = pg;
-    const pool = new Pool({
+    return new Pool({
         user: environmentVariables.pgDBUsername,
         password: environmentVariables.pgDBPassword,
         host: environmentVariables.pgDBHost,
         port: environmentVariables.pgDBPort,
         database: environmentVariables.pgDBDatabase,
-    });
-    return await pool.connect();
+    })
 };
 
 const getKafka = async (environmentVariables: Environment): Promise<Kafka> => {
@@ -33,7 +35,7 @@ const getKafka = async (environmentVariables: Environment): Promise<Kafka> => {
     });
     const topics = [environmentVariables.kafkaEmailTopic];
     const admin = kafka.admin();
-    admin.connect();
+    await admin.connect();
     const topicExists = await admin.listTopics();
     const upsertTopics = topics.map(async (topic) => {
         //   Check if topic exists and create it if it doesn't
@@ -55,10 +57,12 @@ const getKafka = async (environmentVariables: Environment): Promise<Kafka> => {
 
 const main = async () => {
     const environmentVariables = new Environment();
-    const dbClient = await getDBClient(environmentVariables);
+    const dbClient = await getDBClient(environmentVariables).connect();
+    const dbDrizzle = drizzle(getDBClient(environmentVariables))
     const kafka = await getKafka(environmentVariables);
+    const azureBlobClient : BlobServiceClient = getBlobClient(environmentVariables)
 
-    const adapter: Adapter = new Adapter(dbClient, kafka, environmentVariables);
+    const adapter: Adapter = new Adapter(dbClient, dbDrizzle,azureBlobClient,kafka, environmentVariables);
     const services: Services = new Services(adapter);
     const httpServer: Server = new Server(services, environmentVariables);
     const kafkaQueue: KafkaQueue = new KafkaQueue(
@@ -68,7 +72,7 @@ const main = async () => {
     );
 
     httpServer.listen();
-    kafkaQueue.listen();
+    await kafkaQueue.listen();
 };
 
 main();

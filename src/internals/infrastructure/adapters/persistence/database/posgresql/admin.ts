@@ -1,13 +1,13 @@
-import { NotFoundError } from "../../../../../pkg/errors/customError";
+import { NotFoundError } from "../../../../../../pkg/errors/customError";
 import {
     AddAdminQuery,
     GetAdminByEmailQuery,
     GetAdminByIDQuery,
     GetAdminsWithFilterQuery,
-} from "../../../../../pkg/sqlQueries/admin";
-import { PaginationFilter } from "../../../../../pkg/types/pagination";
-import { Admin, newAdmin } from "../../../../domain/admins/admin";
-import { AdminRepository } from "../../../../domain/admins/repository";
+} from "../../../../../../pkg/sqlQueries/admin";
+import { PaginationFilter } from "../../../../../../pkg/types/pagination";
+import { Admin, newAdmin } from "../../../../../domain/admins/admin";
+import { AdminRepository } from "../../../../../domain/admins/repository";
 import { PoolClient } from "pg";
 
 export class AdminRepositoryPG implements AdminRepository {
@@ -50,7 +50,6 @@ export class AdminRepositoryPG implements AdminRepository {
                     result.admin_password,
                     result.admin_created_at,
                     result.admin_updated_at,
-                    result.exams
                 );
                 return admin;
             }
@@ -77,7 +76,6 @@ export class AdminRepositoryPG implements AdminRepository {
                     result.admin_password,
                     result.admin_created_at,
                     result.admin_updated_at,
-                    result.exams
                 );
                 return admin;
             }
@@ -110,7 +108,6 @@ export class AdminRepositoryPG implements AdminRepository {
                         row.password,
                         row.created_at,
                         row.updated_at,
-                        row.exams
                     );
                     return admin;
                 });

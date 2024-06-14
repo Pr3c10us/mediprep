@@ -15,3 +15,6 @@ resource "azurerm_resource_group" "mediprep" {
   name = "mediprep-resources"
   location = "West Europe"
 }
+
+data "azurerm_client_config" "mediprep" {
+}

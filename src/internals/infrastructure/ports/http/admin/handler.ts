@@ -17,8 +17,8 @@ import { date } from "zod";
 import { PaginationFilter } from "../../../../../pkg/types/pagination";
 
 export class AdminHandler {
-    services: AdminServices;
-    router: Router;
+    services;
+    router;
 
     constructor(services: AdminServices) {
         this.services = services;
@@ -29,7 +29,7 @@ export class AdminHandler {
             .get(
                 AuthorizeAdmin(this.services.adminRepository),
                 CheckPermission("read_admin"),
-                ValidationMiddleware(getAdminsFilterSchema, "body"),
+                ValidationMiddleware(getAdminsFilterSchema, "query"),
                 this.getAdmins
             );
 
@@ -52,7 +52,7 @@ export class AdminHandler {
 
     addAdminHandler = async (req: Request, res: Response) => {
         const admin = req.body as Admin;
-        const password = await this.services.Commands.addAdmin.Handle(admin);
+        const password = await this.services.commands.addAdmin.Handle(admin);
 
         new SuccessResponse(res, { password }, null).send();
     };
@@ -60,7 +60,7 @@ export class AdminHandler {
     authenticateAdmin = async (req: Request, res: Response) => {
         const { email, password } = req.body;
 
-        const token = await this.services.Commands.authenticateAdmin.Handle(
+        const token = await this.services.commands.authenticateAdmin.Handle(
             email,
             password
         );
@@ -74,16 +74,15 @@ export class AdminHandler {
 
     getAdmins = async (req: Request, res: Response) => {
         const { limit, page, name, email } = req.query;
-        console.log({ qa: req.query });
         const filter: PaginationFilter = {
-            limit: Number(limit),
-            page: Number(page),
-            name: String(name),
-            email: String(email),
+            limit: Number(limit) || 10,
+            page: Number(page) || 1,
+            name: name as string | undefined,
+            email:email as string | undefined
         };
 
-        const admins = this.services.Queries.getAdmins.handle(filter);
+        const {admins,metadata} = await this.services.queries.getAdmins.handle(filter);
 
-        new SuccessResponse(res, { admins }).send();
+        new SuccessResponse(res, { admins },metadata).send();
     };
 }
