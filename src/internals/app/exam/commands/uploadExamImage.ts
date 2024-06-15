@@ -19,15 +19,10 @@ export class UploadExamImageCommandC implements UploadExamImageCommand {
     async Handle(id: string, file: Express.Multer.File): Promise<void> {
         try {
             const examExist = await this.examRepository.GetExamById(id)
-            if (!examExist) {
-                throw new BadRequestError("exam does not exist")
-            }
 
-            //     upload image
             const imageUrl = await this.storageRepository.uploadExamImage(examExist.id as string,file)
-
             const updatedExam : EditExamParams = {
-                imageURL: imageUrl
+                imageURL: imageUrl,
             }
 
             await this.examRepository.EditExam(examExist.id as string,updatedExam)

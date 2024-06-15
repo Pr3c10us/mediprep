@@ -1,5 +1,6 @@
 import multer, {Multer} from "multer";
 import path from "path";
+import {BadRequestError} from "../errors/customError";
 
 export class MulterConfig {
     size: number
@@ -25,12 +26,12 @@ export class MulterConfig {
                 let ext = path.extname(file.originalname);
 
                 if (fileType == "tabularDocument" && ext !== '.csv') {
-                    return callback(new Error('Only csv files are allowed'))
+                    return callback(new BadRequestError('Only csv files are allowed'))
                 }
 
 
                 if (fileType == "image" && ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg') {
-                    return callback(new Error('Only images are allowed'))
+                    return callback(new BadRequestError('Only images are allowed'))
                 }
                 callback(null, true)
             },

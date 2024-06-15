@@ -24,7 +24,7 @@ export const Exams = pgTable('exam', {
     id: uuid('id').defaultRandom(),
     name: varchar('name', {length: 32}).unique(),
     description: text('description').notNull(),
-    imageUrl: varchar('image_url', {length: 128}),
+    imageURL: varchar('image_url', {length: 255}),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
 }, (t) => ({
@@ -59,7 +59,7 @@ export const courseSubjectRelation = relations(Courses, ({many}) => ({
 export const Subjects = pgTable('subject', {
     id: uuid('id').defaultRandom(),
     name: varchar('name', {length: 128}).unique().notNull(),
-    courseId: uuid('course_id').references(() => Exams.id, {onDelete: 'cascade', onUpdate: 'cascade'})
+    courseId: uuid('course_id').references(() => Courses.id, {onDelete: 'cascade', onUpdate: 'cascade'})
 }, (t) => ({
     pk: primaryKey({columns: [t.id]}),
 }))

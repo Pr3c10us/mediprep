@@ -2,6 +2,7 @@ import {StorageRepository} from "../../../../domain/storage/repository";
 import {BlobServiceClient, BlockBlobClient, ContainerClient} from "@azure/storage-blob";
 import {Environment} from "../../../../../pkg/configs/env";
 import path from "path";
+import {unlink} from "node:fs/promises";
 
 export class AzureStorageRepository implements StorageRepository {
     blobClient: BlobServiceClient
@@ -18,7 +19,7 @@ export class AzureStorageRepository implements StorageRepository {
         const blockBlobClient: BlockBlobClient = containerClient.getBlockBlobClient(blobNameWithExtension)
 
         await blockBlobClient.uploadFile(file.path)
-
+        await unlink(file.path)
         return `https://${this.environmentVariable.azAccountStorageName}.blob.core.windows.net/${this.environmentVariable.azExamContainerName}/${blobNameWithExtension}`
     }
 }

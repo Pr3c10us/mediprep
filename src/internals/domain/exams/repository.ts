@@ -12,11 +12,13 @@ export interface ExamRepository {
     AddCourse: (examId: string, course: Course) => Promise<void>
     EditCourseName: (id: string, name: string) => Promise<void>
     DeleteCourse: (id: string) => Promise<void>
+    GetCourseById: (courseId : string) => Promise<Course>
     GetCourses: (filter: PaginationFilter) => Promise<{ courses: Course[], metadata: PaginationMetaData }>
 
     AddSubject: (courseId: string, subject: Subject) => Promise<void>
     EditSubjectName: (id: string, name: string) => Promise<void>
     DeleteSubject: (id: string) => Promise<void>
+    GetSubjectById: (subjectId : string) => Promise<Subject>
     GetSubjects: (filter: PaginationFilter) => Promise<{ subjects: Subject[], metadata: PaginationMetaData }>
 
     AddQuestion: (subjectId: string, question: Question) => Promise<void>

@@ -69,14 +69,14 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         }
     }
 
-    async AddCourse(examId: string, subjectParams: Subject): Promise<void> {
+    async AddCourse(examId: string, courseParams: Course): Promise<void> {
         try {
             const examExist = await this.db.select().from(Exams).where(eq(Exams.id, examId))
             if (examExist.length < 1) {
                 throw new BadRequestError(`exam with exam id '${examId}' does not exist`)
             }
             await this.db.insert(Courses).values({
-                name: subjectParams.name,
+                name: courseParams.name,
                 examId: examId
             })
         } catch (error) {
@@ -92,7 +92,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
             }
             await this.db.insert(Subjects).values({
                 name: subjectParams.name,
-                courseId: courseId
+                courseId: courseExist[0].id
             })
         } catch (error) {
             throw error
@@ -209,7 +209,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                             id: row.id as string,
                             name: row.name as string,
                             description: row.description as string,
-                            imageURL: row.imageUrl as string,
+                            imageURL: row.imageURL as string,
                             createdAt: row.createdAt as Date,
                             updatedAt: row.updatedAt as Date
                         }
@@ -257,7 +257,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 let questions: Question[] = []
                 for await (let row of rows) {
                     const options = await this.db.select().from(Options).where(eq(Options.questionId, row.id as string))
-                    const question : Question = {
+                    const question: Question = {
                         id: row.id as string,
                         description: row.description as string,
                         question: row.question as string,
@@ -412,23 +412,52 @@ export class ExamRepositoryDrizzle implements ExamRepository {
     }
 
 
-    async GetExamById (id: string) : Promise<Exam> {
-    try {
-        const examResult = await this.db.select().from(Exams).where(eq(Exams.id,id))
-        if (examResult.length < 1) {
-            throw new BadRequestError(`exam with id '${id}' does not exist`)
+    async GetExamById(id: string): Promise<Exam> {
+        try {
+            const examResult = await this.db.select().from(Exams).where(eq(Exams.id, id))
+            if (examResult.length < 1) {
+                throw new BadRequestError(`exam with id '${id}' does not exist`)
+            }
+            return {
+                id: examResult[0].id as string,
+                name: examResult[0].name as string,
+                description: examResult[0].description as string,
+                imageURL: examResult[0].imageURL as string,
+                createdAt: examResult[0].createdAt as Date,
+                updatedAt: examResult[0].updatedAt as Date
+            }
+        } catch (error) {
+            throw error
         }
-        return {
-            id: examResult[0].id as string,
-            name:  examResult[0].name as string,
-            description:  examResult[0].description as string,
-            imageURL: examResult[0].imageUrl as string,
-            createdAt: examResult[0].createdAt as Date,
-            updatedAt:  examResult[0].updatedAt as Date
-        }
-    } catch (error) {
-        throw error
     }
-}
 
+    async GetCourseById(courseId: string): Promise<Course> {
+        try {
+            const courseResult = await this.db.select().from(Courses).where(eq(Courses.id, courseId))
+            if (courseResult.length < 1) {
+                throw new BadRequestError(`course does not exist`)
+            }
+            return {
+                id: courseResult[0].id as string,
+                name: courseResult[0].name as string,
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async GetSubjectById(subjectId: string): Promise<Subject> {
+        try {
+            const subjectResult = await this.db.select().from(Subjects).where(eq(Subjects.id, subjectId))
+            if (subjectResult.length < 1) {
+                throw new BadRequestError(`subject does not exist`)
+            }
+            return {
+                id: subjectResult[0].id as string,
+                name: subjectResult[0].name as string,
+            }
+        } catch (error) {
+            throw error
+        }
+    }
 }

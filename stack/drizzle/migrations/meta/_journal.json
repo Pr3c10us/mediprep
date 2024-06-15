@@ -57,6 +57,20 @@
       "when": 1718355946655,
       "tag": "0007_gifted_metal_master",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1718409583419,
+      "tag": "0008_clever_skullbuster",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1718417369540,
+      "tag": "0009_purple_power_man",
+      "breakpoints": true
     }
   ]
 }

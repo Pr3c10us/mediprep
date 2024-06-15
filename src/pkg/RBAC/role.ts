@@ -9,32 +9,32 @@ export const AdminRoles: AdminRole[] = [
         permissions: [
             "create_user",
             "read_user",
-            "update_user",
+            "edit_user",
             "create_exam",
             "read_exam",
-            "update_exam",
+            "edit_exam",
             "delete_exam",
             "read_sales",
             "create_admin",
             "read_admin",
-            "update_admin",
+            "edit_admin",
             "delete_admin",
         ],
     },
     // Able to create, update, and delete exams
     {
         name: "examiner",
-        permissions: ["create_exam", "read_exam", "update_exam", "delete_exam"],
+        permissions: ["create_exam", "read_exam", "edit_exam", "delete_exam"],
     },
     {
         name: "hr",
         permissions: [
             "create_user",
             "read_user",
-            "update_user",
+            "edit_user",
             "create_admin",
             "read_admin",
-            "update_admin",
+            "edit_admin",
         ],
     },
     {
@@ -59,13 +59,13 @@ export class Roles {
 export type Permission =
     | "create_user"
     | "read_user"
-    | "update_user"
+    | "edit_user"
     | "create_exam"
     | "read_exam"
-    | "update_exam"
+    | "edit_exam"
     | "delete_exam"
     | "read_sales"
     | "create_admin"
     | "read_admin"
-    | "update_admin"
+    | "edit_admin"
     | "delete_admin";

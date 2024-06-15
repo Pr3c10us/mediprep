@@ -17,12 +17,14 @@ export type EditExamParams = {
 export type Course = {
     id?: string;
     name: string;
+    examId? : string;
     subjects?: Subject[]
 }
 
 export type Subject = {
     id?: string;
     name: string;
+    courseId?: string;
     questions?: Question[]
 }
 
