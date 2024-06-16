@@ -14,7 +14,7 @@ export class AddCourseCommandC implements AddCourseCommand {
 
     async Handle(course: Course): Promise<void> {
         try {
-            await this.examRepository.AddCourse(course.examId as string,course)
+            await this.examRepository.AddCourse(course)
         } catch (error) {
             throw error
         }

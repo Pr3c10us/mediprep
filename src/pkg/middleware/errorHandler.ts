@@ -32,7 +32,7 @@ const ErrorHandlerMiddleware: ErrorRequestHandler = async (
                     res,
                     "Duplicate key value violates unique constraint",
                     StatusCodes.BAD_REQUEST,
-                    err.message
+                    err.detail || err.message
                 ).send();
 
             case "23503":
@@ -40,7 +40,7 @@ const ErrorHandlerMiddleware: ErrorRequestHandler = async (
                     res,
                     "Foreign key violation",
                     StatusCodes.BAD_REQUEST,
-                    err.message
+                    err.detail || err.message
                 ).send();
 
             case "42P01":
@@ -48,7 +48,15 @@ const ErrorHandlerMiddleware: ErrorRequestHandler = async (
                     res,
                     "undefined table",
                     StatusCodes.INTERNAL_SERVER_ERROR,
-                    err.message
+                    err.detail || err.message
+                ).send();
+
+            case "42703":
+                return new ErrorResponse(
+                    res,
+                    "undefined column",
+                    StatusCodes.INTERNAL_SERVER_ERROR,
+                    err.detail || err.message
                 ).send();
         }
     }

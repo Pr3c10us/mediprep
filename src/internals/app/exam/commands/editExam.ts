@@ -14,8 +14,7 @@ export class EditExamCommandC implements EditExamCommand {
 
     async Handle(id: string ,exam: Exam): Promise<void> {
         try {
-            const examResult = await this.examRepository.GetExamById(id)
-            await this.examRepository.EditExam(examResult.id as string,exam)
+            await this.examRepository.EditExam(id as string,exam)
         } catch (error) {
             throw error
         }

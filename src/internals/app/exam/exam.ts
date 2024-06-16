@@ -13,6 +13,10 @@ import {AddSubjectCommand, AddSubjectCommandC} from "./commands/addSubject";
 import {EditSubjectCommand, EditSubjectCommandC} from "./commands/editSubject";
 import {DeleteSubjectCommand, DeleteSubjectCommandC} from "./commands/deleteSubject";
 import {GetSubjectsQuery, GetSubjectsQueryC} from "./query/getSubjects";
+import {AddQuestionCommand, AddQuestionCommandC} from "./commands/addQuestion";
+import {EditQuestionCommand, EditQuestionCommandC} from "./commands/editQuestion";
+import {DeleteQuestionCommand, DeleteQuestionCommandC} from "./commands/deleteQuestion";
+import {GetQuestionsQuery, GetQuestionsQueryC} from "./query/getQuestions";
 
 export class Commands {
     addExam: AddExamCommand;
@@ -28,6 +32,10 @@ export class Commands {
     deleteSubject: DeleteSubjectCommand
     editSubject: EditSubjectCommand
 
+    addQuestion: AddQuestionCommand
+    deleteQuestion: DeleteQuestionCommand
+    editQuestion: EditQuestionCommand
+
     constructor(examRepository: ExamRepository, storageRepository: StorageRepository) {
         this.addExam = new AddExamCommandC(examRepository)
         this.deleteExam = new DeleteExamCommandC(examRepository)
@@ -41,6 +49,10 @@ export class Commands {
         this.addSubject = new  AddSubjectCommandC(examRepository)
         this.deleteSubject = new DeleteSubjectCommandC(examRepository)
         this.editSubject = new EditSubjectCommandC(examRepository)
+
+        this.addQuestion = new  AddQuestionCommandC(examRepository)
+        this.deleteQuestion = new DeleteQuestionCommandC(examRepository)
+        this.editQuestion = new EditQuestionCommandC(examRepository)
     }
 }
 
@@ -48,11 +60,13 @@ export class Queries {
     getExams: GetExamsQuery
     getCourses: GetCoursesQuery
     getSubjects: GetSubjectsQuery
+    getQuestions: GetQuestionsQuery
 
     constructor(examRepository: ExamRepository) {
         this.getExams = new GetExamsQueryC(examRepository)
         this.getCourses = new GetCoursesQueryC(examRepository)
         this.getSubjects = new GetSubjectsQueryC(examRepository)
+        this.getQuestions = new GetQuestionsQueryC(examRepository)
     }
 }
 

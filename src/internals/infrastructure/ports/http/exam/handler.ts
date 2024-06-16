@@ -11,13 +11,15 @@ import {
     courseSchema,
     editCourseSchema,
     editExamSchema,
+    editQuestionSchema,
     editSubjectSchema,
     examIdSchema,
-    getCommandFilterSchema,
+    getCommandFilterSchema, questionIdSchema,
+    questionSchema,
     subjectIdSchema,
     subjectSchema
 } from "../../../../../pkg/validations/exam";
-import {Course, Exam, Subject} from "../../../../domain/exams/exam";
+import {Course, EditQuestionParams, Exam, Option, Question, Subject} from "../../../../domain/exams/exam";
 import {SuccessResponse} from "../../../../../pkg/responses/success";
 import {BadRequestError} from "../../../../../pkg/errors/customError";
 import {MulterConfig} from "../../../../../pkg/utils/multer";
@@ -37,86 +39,97 @@ export class ExamHandler {
 
         // Exams Route
         this.router.route('/').post(
-            AuthorizeAdmin(this.adminServices.adminRepository),
             CheckPermission("create_exam"),
             ValidationMiddleware(addExamSchema, "body"),
             this.addExamHandler
         ).get(
-            AuthorizeAdmin(this.adminServices.adminRepository),
             CheckPermission("read_exam"),
             ValidationMiddleware(getCommandFilterSchema, "query"),
             this.getExamsHandler
         )
         this.router.route('/:id').patch(
-            AuthorizeAdmin(this.adminServices.adminRepository),
             CheckPermission("edit_exam"),
             ValidationMiddleware(editExamSchema, "body"),
             ValidationMiddleware(examIdSchema, "params"),
             this.editExamHandler
         ).delete(
-            AuthorizeAdmin(this.adminServices.adminRepository),
             CheckPermission("delete_exam"),
             ValidationMiddleware(examIdSchema, "params"),
             this.deleteExamHandler
         )
         this.router.route('/:id/image').patch(
-            AuthorizeAdmin(this.adminServices.adminRepository),
             CheckPermission("edit_exam"),
             ValidationMiddleware(examIdSchema, "params"),
             this.upload.single("image"),
             this.uploadExamImageHandler
         )
 
+
         // Courses Route
         this.router.route('/course').post(
-            AuthorizeAdmin(this.adminServices.adminRepository),
             CheckPermission("edit_exam"),
             ValidationMiddleware(courseSchema, "body"),
             this.addCourseHandler
         ).get(
-            AuthorizeAdmin(this.adminServices.adminRepository),
             CheckPermission("read_exam"),
             ValidationMiddleware(getCommandFilterSchema, "query"),
             this.getCoursesHandler
         )
         this.router.route('/course/:courseId').patch(
-            AuthorizeAdmin(this.adminServices.adminRepository),
             CheckPermission("edit_exam"),
             ValidationMiddleware(editCourseSchema, "body"),
             ValidationMiddleware(courseIdSchema, "params"),
             this.editCourseHandler
         ).delete(
-            AuthorizeAdmin(this.adminServices.adminRepository),
             CheckPermission("edit_exam"),
             ValidationMiddleware(courseIdSchema, "params"),
             this.deleteCourseHandler
         )
 
+
         // Subject Route
         this.router.route('/subject').post(
-            AuthorizeAdmin(this.adminServices.adminRepository),
             CheckPermission("edit_exam"),
             ValidationMiddleware(subjectSchema, "body"),
             this.addSubjectHandler
         ).get(
-            AuthorizeAdmin(this.adminServices.adminRepository),
             CheckPermission("read_exam"),
             ValidationMiddleware(getCommandFilterSchema, "query"),
             this.getSubjectsHandler
         )
         this.router.route('/subject/:subjectId').patch(
-            AuthorizeAdmin(this.adminServices.adminRepository),
             CheckPermission("edit_exam"),
             ValidationMiddleware(editSubjectSchema, "body"),
             ValidationMiddleware(subjectIdSchema, "params"),
             this.editSubjectHandler
         ).delete(
-            AuthorizeAdmin(this.adminServices.adminRepository),
             CheckPermission("edit_exam"),
             ValidationMiddleware(subjectIdSchema, "params"),
             this.deleteSubjectHandler
         )
 
+
+        // Subject Route
+        this.router.route('/question').post(
+            CheckPermission("edit_exam"),
+            ValidationMiddleware(questionSchema, "body"),
+            this.addQuestionHandler
+        ).get(
+            CheckPermission("read_exam"),
+            ValidationMiddleware(getCommandFilterSchema, "query"),
+            this.getQuestionsHandler
+        )
+
+        this.router.route('/question/:questionId').patch(
+            CheckPermission("edit_exam"),
+            ValidationMiddleware(editQuestionSchema, "body"),
+            ValidationMiddleware(questionIdSchema, "params"),
+            this.editQuestionHandler
+        ).delete(
+            CheckPermission("edit_exam"),
+            ValidationMiddleware(questionIdSchema, "params"),
+            this.deleteQuestionHandler
+        )
     }
 
     // Exams Handlers
@@ -161,7 +174,6 @@ export class ExamHandler {
 
         new SuccessResponse(res, {message: `exam ${req.body.name} updated`}).send()
     }
-
     uploadExamImageHandler = async (req: Request, res: Response) => {
         const file = req.file
         if (!file) throw new BadRequestError("issue uploading file")
@@ -170,6 +182,7 @@ export class ExamHandler {
 
         new SuccessResponse(res, {message: "image uploaded"}).send()
     }
+
 
     // Courses Handlers
     addCourseHandler = async (req: Request, res: Response) => {
@@ -210,6 +223,8 @@ export class ExamHandler {
         new SuccessResponse(res, {message: `course updated`}).send()
     }
 
+
+    // Subject Handlers
     addSubjectHandler = async (req: Request, res: Response) => {
         const subject: Subject = {
             name: req.body.name,
@@ -246,5 +261,64 @@ export class ExamHandler {
         await this.examServices.commands.editSubject.Handle(subject)
 
         new SuccessResponse(res, {message: `subject updated`}).send()
+    }
+
+
+    // Question Handlers
+    addQuestionHandler = async (req: Request, res: Response) => {
+        const options: Option[] = req.body.options.map((option: Option) => {
+            return option
+        })
+        const question: Question = {
+            description: req.body.description,
+            question: req.body.question,
+            explanation: req.body.explanation,
+            options,
+            subjectId: req.body.subjectId
+        }
+
+        await this.examServices.commands.addQuestion.Handle(question)
+
+        new SuccessResponse(res, {message: `question added to subject`}).send()
+    }
+    getQuestionsHandler = async (req: Request, res: Response) => {
+        const {limit, page, subjectId} = req.query;
+        const filter: PaginationFilter = {
+            limit: Number(limit) || 100,
+            page: Number(page) || 1,
+            subjectId: subjectId as string | undefined
+        };
+
+        const {questions, metadata} = await this.examServices.queries.getQuestions.handle(filter);
+
+        new SuccessResponse(res, {questions: questions}, metadata).send();
+    }
+    deleteQuestionHandler = async (req: Request, res: Response) => {
+        await this.examServices.commands.deleteQuestion.Handle(req.params.questionId)
+        new SuccessResponse(res, {message: `question deleted`}).send()
+    }
+    editQuestionHandler = async (req: Request, res: Response) => {
+        const question: EditQuestionParams = {
+            id: req.params.questionId,
+            description: req.body.description,
+            question: req.body.question,
+            explanation: req.body.explanation,
+            options: (req.body.options && req.body.options.length > 0) ? req.body.options.map((option: any) => {
+                return {
+                    index: option.index,
+                    value: option.value,
+                    answer: option.answer,
+                    explanation: option.explanation
+                }
+            }) : undefined,
+        }
+
+        if (!question.question && !question.description && !question.explanation && !question.options) {
+            throw new BadRequestError("Provide a question key to update")
+        }
+
+        await this.examServices.commands.editQuestion.Handle(question)
+
+        new SuccessResponse(res, {message: `question updated`}).send()
     }
 }

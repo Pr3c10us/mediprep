@@ -24,7 +24,6 @@ export class Adapter {
 
     constructor(
         dbClient: PoolClient,
-        dbDrizzle: NodePgDatabase,
         azureBlobClient: BlobServiceClient,
         kafka: Kafka,
         environmentVariables: Environment
@@ -33,8 +32,8 @@ export class Adapter {
         this.EmailQueueRepository = new EmailQueueRepositoryKafka(kafka);
         this.StorageRepository = new AzureStorageRepository(azureBlobClient,environmentVariables)
         // this.AdminRepository = new AdminRepositoryPG(dbClient);
-        this.AdminRepository = new AdminRepositoryDrizzle(dbDrizzle)
-        this.ExamRepository = new ExamRepositoryDrizzle(dbDrizzle)
+        this.AdminRepository = new AdminRepositoryDrizzle(dbClient)
+        this.ExamRepository = new ExamRepositoryDrizzle(dbClient)
         this.EmailRepository = new EmailRepositoryAzure(environmentVariables);
     }
 }

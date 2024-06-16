@@ -14,8 +14,7 @@ export class EditSubjectCommandC implements EditSubjectCommand {
 
     async Handle(subject: Subject): Promise<void> {
         try {
-            const subjectResult = await this.examRepository.GetSubjectById(subject.id as string)
-            await this.examRepository.EditSubjectName(subjectResult.id as string,subject.name)
+            await this.examRepository.EditSubjectName(subject.id as string,subject.name)
         } catch (error) {
             throw error
         }

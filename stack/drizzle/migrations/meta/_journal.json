@@ -71,6 +71,55 @@
       "when": 1718417369540,
       "tag": "0009_purple_power_man",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1718446303792,
+      "tag": "0010_medical_marvel_boy",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1718446918347,
+      "tag": "0011_small_blonde_phantom",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1718447611663,
+      "tag": "0012_lovely_thunderbolts",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1718447641651,
+      "tag": "0013_colorful_nick_fury",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1718482766124,
+      "tag": "0014_smooth_korvac",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1718484906519,
+      "tag": "0015_overconfident_james_howlett",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1718485182938,
+      "tag": "0016_first_iron_monger",
+      "breakpoints": true
     }
   ]
 }

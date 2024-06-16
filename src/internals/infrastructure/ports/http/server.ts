@@ -11,6 +11,7 @@ import {AdminHandler} from "./admin/handler";
 import ErrorHandlerMiddleware from "../../../../pkg/middleware/errorHandler";
 import Route404 from "../../../../pkg/middleware/route404";
 import {ExamHandler} from "./exam/handler";
+import AuthorizeAdmin from "../../../../pkg/middleware/authorization";
 
 export class Server {
     services: Services;
@@ -61,7 +62,7 @@ export class Server {
 
     exam = () => {
         const router = new ExamHandler(this.services.ExamServices, this.services.AdminServices);
-        this.apiV1Router.use("/exam", router.router);
+        this.apiV1Router.use("/exam", AuthorizeAdmin(this.services.AdminServices.adminRepository), router.router);
     };
 
     listen = () => {

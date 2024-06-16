@@ -3,6 +3,9 @@ export type PaginationFilter = {
     page: number;
     name?: string;
     email?: string;
+    subjectId?: string;
+    courseId? : string;
+    examId?: string;
 };
 
 export type PaginationMetaData = {

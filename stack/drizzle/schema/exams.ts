@@ -1,5 +1,5 @@
 import {boolean, integer, pgTable, primaryKey, text, timestamp, uuid, varchar} from 'drizzle-orm/pg-core';
-import {relations} from "drizzle-orm";
+import {InferSelectModel, relations} from "drizzle-orm";
 import {Admins} from "./admins";
 
 export const ExamAccess = pgTable('exam_access', {
@@ -82,6 +82,7 @@ export const Questions = pgTable('question', {
     questionImageUrl: varchar('question_image_url', {length: 128}),
     explanationImageUrl: varchar('explanation_image_url', {length: 128}),
     explanation: text('explanation').notNull(),
+    free: boolean('free'),
     subjectId: uuid('subject_id').references(() => Subjects.id, {onDelete: 'cascade', onUpdate: 'cascade'})
 }, (t) => ({
     pk: primaryKey({columns: [t.id]}),
@@ -97,14 +98,21 @@ export const questionRelation = relations(Questions, ({many}) => ({
     options: many(Options)
 }))
 
+export type Question = (InferSelectModel<typeof Questions> & {
+    options?: typeof Options[],
+    subject?: typeof Subjects
+}) | undefined
+
 export const Options = pgTable('option', {
+    id: uuid('id').defaultRandom(),
     index: integer('index').notNull(),
     value: text('value').notNull().unique(),
     selected: integer('selected').default(0),
     answer: boolean('answer').default(false),
+    explanation: text('explanation'),
     questionId: uuid('question_id').references(() => Questions.id, {onDelete: 'cascade', onUpdate: 'cascade'})
 }, (t) => ({
-    pk: primaryKey({columns: [t.index]}),
+    pk: primaryKey({columns: [t.id]}),
 }))
 
 export const optionRelation = relations(Options, ({one}) => ({

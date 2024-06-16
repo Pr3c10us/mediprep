@@ -1,18 +1,20 @@
 import {AdminRepository} from "../../../../../domain/admins/repository";
-import {NodePgDatabase} from "drizzle-orm/node-postgres";
+import {drizzle, NodePgDatabase} from "drizzle-orm/node-postgres";
 import {Admin, newAdmin} from "../../../../../domain/admins/admin";
 import {PaginationFilter, PaginationMetaData} from "../../../../../../pkg/types/pagination";
 import {Admins} from "../../../../../../../stack/drizzle/schema/admins"
 import {and, eq, ilike, sql} from "drizzle-orm";
 import {BadRequestError} from "../../../../../../pkg/errors/customError";
 import {ExamAccess} from "../../../../../../../stack/drizzle/schema/exams";
+import {PoolClient} from "pg";
+import  * as schema from "../../../../../../../stack/drizzle/schema/admins"
 
 export class AdminRepositoryDrizzle implements AdminRepository {
 
-    db: NodePgDatabase
+    db
 
-    constructor(db: NodePgDatabase) {
-        this.db = db
+    constructor(client: PoolClient) {
+        this.db = drizzle(client,{schema})
     }
 
     AddAdmin = async (adminParams: Admin): Promise<void> => {

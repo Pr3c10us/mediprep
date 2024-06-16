@@ -1,5 +1,5 @@
 import {ExamRepository} from "../../../../../domain/exams/repository";
-import {NodePgDatabase} from "drizzle-orm/node-postgres";
+import {drizzle} from "drizzle-orm/node-postgres";
 import {
     Course,
     EditExamParams,
@@ -9,16 +9,25 @@ import {
     Question,
     Subject
 } from "../../../../../domain/exams/exam";
-import {Courses, Exams, Options, Questions, Subjects} from "../../../../../../../stack/drizzle/schema/exams"
+import * as schema from "../../../../../../../stack/drizzle/schema/exams"
+import {
+    Courses,
+    Exams,
+    Options,
+    Question as QuestionT,
+    Questions,
+    Subjects
+} from "../../../../../../../stack/drizzle/schema/exams"
 import {PaginationFilter, PaginationMetaData} from "../../../../../../pkg/types/pagination";
-import {and, eq, ilike, sql} from "drizzle-orm";
+import {and, count, eq, ilike} from "drizzle-orm";
 import {BadRequestError} from "../../../../../../pkg/errors/customError";
+import {PoolClient} from "pg";
 
 export class ExamRepositoryDrizzle implements ExamRepository {
     db
 
-    constructor(db: NodePgDatabase) {
-        this.db = db
+    constructor(pool: PoolClient) {
+        this.db = drizzle(pool, {schema})
     }
 
     async AddExam(examParam: Exam): Promise<void> {
@@ -32,19 +41,37 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         }
     }
 
-    async AddQuestion(subjectId: string, questionParams: Question): Promise<void> {
+    async AddCourse(courseParams: Course): Promise<void> {
         try {
-            const subjectExist = await this.db.select().from(Subjects).where(eq(Subjects.id, subjectId))
-            if (subjectExist.length < 1) {
-                throw new BadRequestError(`subject with subject id '${subjectId}' does not exist`)
-            }
+            await this.db.insert(Courses).values({
+                name: courseParams.name,
+                examId: courseParams.examId
+            })
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async AddSubject(subjectParams: Subject): Promise<void> {
+        try {
+            await this.db.insert(Subjects).values({
+                name: subjectParams.name,
+                courseId: subjectParams.courseId
+            })
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async AddQuestion(questionParams: Question): Promise<void> {
+        try {
             await this.db.transaction(async (tx) => {
                 try {
                     const newQuestionResults = await tx.insert(Questions).values({
                         description: questionParams.description,
                         question: questionParams.question,
                         explanation: questionParams.explanation,
-                        subjectId: subjectId
+                        subjectId: questionParams.subjectId
                     }).returning()
                     const newQuestion = newQuestionResults[0]
                     let index = 0
@@ -54,6 +81,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                                 index: index,
                                 value: optionParams.value,
                                 answer: optionParams.answer,
+                                explanation: optionParams.explanation,
                                 questionId: newQuestion.id
                             })
                             index++
@@ -61,7 +89,11 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                     }
                     return
                 } catch (error) {
-                    tx.rollback()
+                    try {
+                        tx.rollback()
+                    } catch (e) {
+                        throw error
+                    }
                 }
             })
         } catch (error) {
@@ -69,47 +101,10 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         }
     }
 
-    async AddCourse(examId: string, courseParams: Course): Promise<void> {
-        try {
-            const examExist = await this.db.select().from(Exams).where(eq(Exams.id, examId))
-            if (examExist.length < 1) {
-                throw new BadRequestError(`exam with exam id '${examId}' does not exist`)
-            }
-            await this.db.insert(Courses).values({
-                name: courseParams.name,
-                examId: examId
-            })
-        } catch (error) {
-            throw error
-        }
-    }
-
-    async AddSubject(courseId: string, subjectParams: Subject): Promise<void> {
-        try {
-            const courseExist = await this.db.select().from(Courses).where(eq(Courses.id, courseId))
-            if (courseExist.length < 1) {
-                throw new BadRequestError(`course with course id '${courseId}' does not exist`)
-            }
-            await this.db.insert(Subjects).values({
-                name: subjectParams.name,
-                courseId: courseExist[0].id
-            })
-        } catch (error) {
-            throw error
-        }
-    }
 
     async DeleteExam(id: string): Promise<void> {
         try {
             await this.db.delete(Exams).where(eq(Exams.id, id))
-        } catch (error) {
-            throw error
-        }
-    }
-
-    async DeleteQuestion(id: string): Promise<void> {
-        try {
-            await this.db.delete(Questions).where(eq(Questions.id, id))
         } catch (error) {
             throw error
         }
@@ -131,29 +126,21 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         }
     }
 
-    async EditExam(id: string, examParams: EditExamParams): Promise<void> {
+    async DeleteQuestion(id: string): Promise<void> {
         try {
-            await this.db.update(Exams).set(examParams).where(eq(Exams.id, id))
+            await this.db.delete(Questions).where(eq(Questions.id, id))
         } catch (error) {
             throw error
         }
     }
 
-    async EditQuestion(id: string, questionParams: EditQuestionParams): Promise<void> {
+
+    async EditExam(id: string, examParams: EditExamParams): Promise<void> {
         try {
-            await this.db.transaction(async (tx) => {
-                try {
-                    await tx.update(Questions).set(questionParams).where(eq(Questions.id, id))
-                    if (questionParams.options != undefined && questionParams.options.length > 0) {
-                        for await (let option of questionParams.options) {
-                            await tx.update(Options).set(option).where(eq(Options.index, option.index))
-                        }
-                    }
-                    return
-                } catch (error) {
-                    tx.rollback()
-                }
-            })
+            const updatedExam = await this.db.update(Exams).set(examParams).where(eq(Exams.id, id)).returning({id: Exams.id})
+            if (updatedExam.length < 1) {
+                throw new BadRequestError(`exam with id '${id}' does not exist`)
+            }
         } catch (error) {
             throw error
         }
@@ -161,7 +148,10 @@ export class ExamRepositoryDrizzle implements ExamRepository {
 
     async EditCourseName(id: string, name: string): Promise<void> {
         try {
-            await this.db.update(Courses).set({name: name}).where(eq(Courses.id, id))
+            const updatedCourse = await this.db.update(Courses).set({name: name}).where(eq(Courses.id, id)).returning({id: Courses.id})
+            if (updatedCourse.length < 1) {
+                throw new BadRequestError(`course with id '${id}' does not exist`)
+            }
         } catch (error) {
             throw error
         }
@@ -169,17 +159,51 @@ export class ExamRepositoryDrizzle implements ExamRepository {
 
     async EditSubjectName(id: string, name: string): Promise<void> {
         try {
-            await this.db.update(Subjects).set({name: name}).where(eq(Subjects.id, id))
+            const updatedSubject = await this.db.update(Subjects).set({name: name}).where(eq(Subjects.id, id)).returning({id: Subjects.id})
+            if (updatedSubject.length < 1) {
+                throw new BadRequestError(`subject with id '${id}' does not exist`)
+            }
         } catch (error) {
             throw error
         }
     }
 
+    async EditQuestion(questionParams: EditQuestionParams): Promise<void> {
+        try {
+            await this.db.transaction(async (tx) => {
+                try {
+                    const updatedQuestion = await tx.update(Questions).set(questionParams).where(eq(Questions.id, questionParams.id as string)).returning({id: Questions.id})
+                    if (updatedQuestion.length < 1) throw new BadRequestError(`question with id '${questionParams.id}' does not exist`)
+                    if (questionParams.options != undefined && questionParams.options.length > 0) {
+                        for await (let option of questionParams.options) {
+                            await tx.update(Options).set(option).where(and(eq(Options.index, option.index), eq(Options.questionId, questionParams.id as string)))
+                        }
+                    }
+                    return
+                } catch (error) {
+                    try {
+                        tx.rollback()
+                    } catch (e) {
+                        throw error
+                    }
+                }
+            })
+        } catch (error) {
+            throw error
+        }
+    }
+
+
     async GetExams(filter: PaginationFilter): Promise<{ exams: Exam[], metadata: PaginationMetaData }> {
         try {
+            const filters: string | any[] = [];
+            if (filter.name || filter.name != undefined) {
+                filters.push(ilike(Exams.name, `%${filter.name}%`));
+            }
+
             // Get the total count of rows
-            const totalResult = await this.db.select({count: sql`count(*)`}).from(Exams);
-            const total = parseInt(<string>totalResult[0].count || '0', 10);
+            const totalResult = await this.db.select({count: count()}).from(Exams).where(and(...filters));
+            const total = totalResult[0].count;
             if (total <= 0) {
                 return {
                     exams: [], metadata: {
@@ -190,10 +214,6 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 }
             }
 
-            const filters: string | any[] = [];
-            if (filter.name || filter.name != undefined) {
-                filters.push(ilike(Exams.name, `%${filter.name}%`));
-            }
             const query = this.db.select().from(Exams);
 
             if (filters.length > 0) {
@@ -233,78 +253,18 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         }
     }
 
-    async GetQuestions(filter: PaginationFilter): Promise<{ questions: Question[], metadata: PaginationMetaData }> {
-        try {
-            // Get the total count of rows
-            const totalResult = await this.db.select({count: sql`count(*)`}).from(Questions);
-            const total = parseInt(<string>totalResult[0].count || '0', 10);
-            if (total <= 0) {
-                return {
-                    questions: [], metadata: {
-                        total: 0,
-                        perPage: filter.limit,
-                        currentPage: filter.page
-                    }
-                }
-            }
-
-            const query = this.db.select().from(Questions);
-
-            const rows = await query
-                .limit(filter.limit)
-                .offset((filter.page - 1) * filter.limit);
-            if (rows.length > 0) {
-                let questions: Question[] = []
-                for await (let row of rows) {
-                    const options = await this.db.select().from(Options).where(eq(Options.questionId, row.id as string))
-                    const question: Question = {
-                        id: row.id as string,
-                        description: row.description as string,
-                        question: row.question as string,
-                        questionImageUrl: row.questionImageUrl as string,
-                        explanation: row.explanation as string,
-                        explanationImageUrl: row.explanationImageUrl as string,
-                        options: options.map((option): Option => {
-                            return {
-                                index: option.index as number,
-                                value: option.value as string,
-                                selected: option.selected as number,
-                                answer: option.answer as boolean
-                            }
-                        })
-                    }
-                    questions.push(question)
-                }
-                return {
-                    questions, metadata: {
-                        total: total,
-                        perPage: filter.limit,
-                        currentPage: filter.page
-                    }
-                }
-            }
-
-            return {
-                questions: [], metadata: {
-                    total: 0,
-                    perPage: filter.limit,
-                    currentPage: filter.page
-                }
-            };
-        } catch
-            (error) {
-            throw error
-        }
-    }
-
     async GetCourses(filter: PaginationFilter):
         Promise<{ courses: Course[], metadata: PaginationMetaData }> {
         try {
+            const filters: string | any[] = [];
+            if (filter.name || filter.name != undefined) {
+                filters.push(ilike(Courses.name, `%${filter.name}%`));
+            }
+
             // Get the total count of rows
-            const totalResult = await this.db.select({count: sql`count(*)`}).from(Courses);
-            const total = parseInt(<string>totalResult[0].count || '0', 10);
-            if (total <= 0
-            ) {
+            const totalResult = await this.db.select({count: count()}).from(Courses).where(and(...filters));
+            const total = totalResult[0].count;
+            if (total <= 0) {
                 return {
                     courses: [], metadata: {
                         total: 0,
@@ -312,11 +272,6 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                         currentPage: filter.page
                     }
                 }
-            }
-
-            const filters: string | any[] = [];
-            if (filter.name || filter.name != undefined) {
-                filters.push(ilike(Courses.name, `%${filter.name}%`));
             }
             const query = this.db.select().from(Courses);
 
@@ -357,11 +312,15 @@ export class ExamRepositoryDrizzle implements ExamRepository {
     async GetSubjects(filter: PaginationFilter):
         Promise<{ subjects: Subject[], metadata: PaginationMetaData }> {
         try {
+            const filters: string | any[] = [];
+            if (filter.name || filter.name != undefined) {
+                filters.push(ilike(Subjects.name, `%${filter.name}%`));
+            }
+
             // Get the total count of rows
-            const totalResult = await this.db.select({count: sql`count(*)`}).from(Subjects);
-            const total = parseInt(<string>totalResult[0].count || '0', 10);
-            if (total <= 0
-            ) {
+            const totalResult = await this.db.select({count: count()}).from(Subjects).where(and(...filters));
+            const total = totalResult[0].count;
+            if (total <= 0) {
                 return {
                     subjects: [], metadata: {
                         total: 0,
@@ -369,11 +328,6 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                         currentPage: filter.page
                     }
                 }
-            }
-
-            const filters: string | any[] = [];
-            if (filter.name || filter.name != undefined) {
-                filters.push(ilike(Subjects.name, `%${filter.name}%`));
             }
             const query = this.db.select().from(Subjects);
 
@@ -400,6 +354,78 @@ export class ExamRepositoryDrizzle implements ExamRepository {
 
             return {
                 subjects: [], metadata: {
+                    total: 0,
+                    perPage: filter.limit,
+                    currentPage: filter.page
+                }
+            };
+        } catch
+            (error) {
+            throw error
+        }
+    }
+
+    async GetQuestions(filter: PaginationFilter): Promise<{ questions: Question[], metadata: PaginationMetaData }> {
+        try {
+            const filters: string | any[] = [];
+
+            if (filter.subjectId || filter.subjectId != undefined) {
+                filters.push(eq(Questions.subjectId, filter.subjectId as string));
+
+            }
+
+            // Get the total count of rows
+            const totalResult = await this.db.select({count: count()}).from(Questions).where(and(...filters));
+            const total = totalResult[0].count;
+            if (total <= 0) {
+                return {
+                    questions: [], metadata: {
+                        total: 0,
+                        perPage: filter.limit,
+                        currentPage: filter.page
+                    }
+                }
+            }
+
+            const questions = await this.db.query.Questions.findMany({
+                where: and(...filters),
+                with: {
+                    options: true
+                },
+                limit: filter.limit,
+                offset: (filter.page - 1) * filter.limit,
+            })
+            if (questions.length > 0) {
+                return {
+                    questions: questions.map((question: any): Question => {
+                        return {
+                            id: question.id as string,
+                            description: question.description as string,
+                            explanation: question.explanation as string,
+                            question: question.question as string,
+                            questionImageUrl: question.questionImageUrl as string,
+                            explanationImageUrl: question.explanationImageUrl as string,
+                            options: question.options?.map((option: any): Option => {
+                                return {
+                                    index: option.index,
+                                    value: option.value,
+                                    selected: option.selected,
+                                    answer: option.answer,
+                                    explanation: option.explanation
+                                }
+                            })
+                        }
+                    }), metadata: {
+                        total: total,
+                        perPage: filter.limit,
+                        currentPage: filter.page
+                    }
+                }
+            }
+
+
+            return {
+                questions: [], metadata: {
                     total: 0,
                     perPage: filter.limit,
                     currentPage: filter.page
@@ -460,4 +486,39 @@ export class ExamRepositoryDrizzle implements ExamRepository {
             throw error
         }
     }
+
+    async GetQuestionById(questionId: string): Promise<Question> {
+        try {
+            const questionResult: QuestionT = await this.db.query.Questions.findFirst({
+                where: eq(Questions.id, questionId),
+                with: {
+                    options: true
+                }
+            })
+            if (!questionResult) {
+                throw new BadRequestError("question does not exist")
+            }
+            return {
+                id: questionResult.id as string,
+                description: questionResult.description as string,
+                explanation: questionResult.explanation as string,
+                question: questionResult.question as string,
+                questionImageUrl: questionResult.questionImageUrl as string,
+                explanationImageUrl: questionResult.explanationImageUrl as string,
+                options: questionResult.options?.map((option: any): Option => {
+                    return {
+                        index: option.index,
+                        value: option.value,
+                        selected: option.selected,
+                        answer: option.answer,
+                        explanation: option.explanation
+                    }
+                })
+            }
+
+        } catch (error) {
+            throw error
+        }
+    }
 }
+

@@ -32,13 +32,15 @@ export type Question = {
     id?: string;
     description: string;
     question: string;
-    questionImageUrl: string;
+    questionImageUrl?: string;
     explanation: string;
-    explanationImageUrl: string;
+    explanationImageUrl?: string;
+    subjectId?: string;
     options?: Option[]
 }
 
 export type EditQuestionParams = {
+    id? : string;
     description?: string;
     question?: string;
     questionImageUrl?: string;
@@ -48,14 +50,17 @@ export type EditQuestionParams = {
 }
 
 export type Option = {
+    id?: string;
     index?: number;
     value: string;
     selected?: number;
     answer?: boolean;
+    explanation? : string;
 }
 
 export type EditOptionParams = {
     index: number,
     value?: string,
-    answer?: boolean
+    answer?: boolean,
+    explanation? : string
 }

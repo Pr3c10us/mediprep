@@ -14,7 +14,7 @@ export class AddSubjectCommandC implements AddSubjectCommand {
 
     async Handle(subject: Subject): Promise<void> {
         try {
-            await this.examRepository.AddSubject(subject.courseId as string,subject)
+            await this.examRepository.AddSubject(subject)
         } catch (error) {
             throw error
         }

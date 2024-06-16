@@ -19,6 +19,7 @@ export const getCommandFilterSchema = z.object({
     limit: z.string().optional(),
     page: z.string().optional(),
     name: z.string().optional(),
+    subjectId: uuidSchema.optional()
 });
 
 
@@ -46,4 +47,37 @@ export const editSubjectSchema = z.object({
 
 export const subjectIdSchema = z.object({
     subjectId: uuidSchema
+})
+
+
+const optionSchema = z.object({
+    value: z.string(),
+    answer: z.boolean(),
+    explanation: z.string()
+})
+
+export const questionSchema = z.object({
+    description: z.string(),
+    question: z.string(),
+    explanation: z.string(),
+    subjectId: uuidSchema,
+    options: z.array(optionSchema).min(1)
+})
+
+const editOptionSchema = z.object({
+    index: z.number(),
+    value: z.string().optional(),
+    answer: z.boolean().optional(),
+    explanation: z.string().optional()
+})
+
+export const editQuestionSchema = z.object({
+    description: z.string().optional(),
+    question: z.string().optional(),
+    explanation: z.string().optional(),
+    options: z.array(editOptionSchema).optional()
+})
+
+export const questionIdSchema = z.object({
+    questionId: uuidSchema
 })

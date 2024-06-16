@@ -58,11 +58,10 @@ const getKafka = async (environmentVariables: Environment): Promise<Kafka> => {
 const main = async () => {
     const environmentVariables = new Environment();
     const dbClient = await getDBClient(environmentVariables).connect();
-    const dbDrizzle = drizzle(getDBClient(environmentVariables))
     const kafka = await getKafka(environmentVariables);
     const azureBlobClient : BlobServiceClient = getBlobClient(environmentVariables)
 
-    const adapter: Adapter = new Adapter(dbClient, dbDrizzle,azureBlobClient,kafka, environmentVariables);
+    const adapter: Adapter = new Adapter(dbClient,azureBlobClient,kafka, environmentVariables);
     const services: Services = new Services(adapter);
     const httpServer: Server = new Server(services, environmentVariables);
     const kafkaQueue: KafkaQueue = new KafkaQueue(
