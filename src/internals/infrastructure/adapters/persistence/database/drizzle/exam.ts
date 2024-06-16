@@ -30,6 +30,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         this.db = drizzle(pool, {schema})
     }
 
+    // Add
     async AddExam(examParam: Exam): Promise<void> {
         try {
             await this.db.insert(Exams).values({
@@ -102,6 +103,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
     }
 
 
+    // Delete
     async DeleteExam(id: string): Promise<void> {
         try {
             await this.db.delete(Exams).where(eq(Exams.id, id))
@@ -135,6 +137,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
     }
 
 
+    // Edit
     async EditExam(id: string, examParams: EditExamParams): Promise<void> {
         try {
             const updatedExam = await this.db.update(Exams).set(examParams).where(eq(Exams.id, id)).returning({id: Exams.id})
@@ -194,6 +197,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
     }
 
 
+    // Get Many
     async GetExams(filter: PaginationFilter): Promise<{ exams: Exam[], metadata: PaginationMetaData }> {
         try {
             const filters: string | any[] = [];
@@ -438,6 +442,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
     }
 
 
+    // Get One
     async GetExamById(id: string): Promise<Exam> {
         try {
             const examResult = await this.db.select().from(Exams).where(eq(Exams.id, id))
