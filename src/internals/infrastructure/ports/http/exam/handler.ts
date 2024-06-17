@@ -135,7 +135,8 @@ export class ExamHandler {
     addExamHandler = async (req: Request, res: Response) => {
         const exam: Exam = {
             name: req.body.name,
-            description: req.body.description
+            description: req.body.description,
+            subscriptionAmount: req.body.subscriptionAmount
         }
 
         await this.examServices.commands.addExam.Handle(exam)
@@ -162,10 +163,11 @@ export class ExamHandler {
     editExamHandler = async (req: Request, res: Response) => {
         const exam: Exam = {
             name: req.body.name,
-            description: req.body.description
+            description: req.body.description,
+            subscriptionAmount: req.body.subscriptionAmount
         }
 
-        if (!exam.name && !exam.description) {
+        if (!exam.name && !exam.description && !exam.subscriptionAmount) {
             throw new BadRequestError("Provide an exam key to update")
         }
 

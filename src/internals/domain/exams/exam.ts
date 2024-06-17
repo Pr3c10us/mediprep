@@ -2,6 +2,7 @@ export type Exam = {
     id?: string;
     name: string;
     description: string;
+    subscriptionAmount: number;
     imageURL?: string;
     courses?: Course[],
     createdAt?: Date;
@@ -12,6 +13,7 @@ export type EditExamParams = {
     name?: string;
     description?: string;
     imageURL?: string;
+    subscriptionAmount?: number;
 };
 
 export type Course = {

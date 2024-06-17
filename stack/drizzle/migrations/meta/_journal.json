@@ -141,6 +141,13 @@
       "when": 1718578889959,
       "tag": "0019_jazzy_roulette",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1718660045626,
+      "tag": "0020_equal_talkback",
+      "breakpoints": true
     }
   ]
 }

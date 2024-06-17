@@ -25,6 +25,7 @@ export const Exams = pgTable('exam', {
     name: varchar('name', {length: 32}).unique(),
     description: text('description').notNull(),
     imageURL: varchar('image_url', {length: 255}),
+    subscriptionAmount: integer('subscription_amount').default(0),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 }, (t) => ({
@@ -82,7 +83,7 @@ export const Questions = pgTable('question', {
     questionImageUrl: varchar('question_image_url', {length: 128}),
     explanationImageUrl: varchar('explanation_image_url', {length: 128}),
     explanation: text('explanation').notNull(),
-    free: boolean('free'),
+    free: boolean('free').default(false),
     subjectId: uuid('subject_id').references(() => Subjects.id, {onDelete: 'cascade', onUpdate: 'cascade'})
 }, (t) => ({
     pk: primaryKey({columns: [t.id]}),

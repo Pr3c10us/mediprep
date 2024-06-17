@@ -4,11 +4,13 @@ import {uuidSchema} from "./admin";
 export const addExamSchema = z.object({
     name: z.string(),
     description: z.string(),
+    subscriptionAmount: z.number()
 });
 
 export const editExamSchema = z.object({
     name: z.string().optional(),
     description: z.string().optional(),
+    subscriptionAmount: z.number().optional()
 });
 
 export const examIdSchema = z.object({

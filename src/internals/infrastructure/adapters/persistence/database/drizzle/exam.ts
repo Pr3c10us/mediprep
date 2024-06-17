@@ -36,6 +36,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
             await this.db.insert(Exams).values({
                 name: examParam.name,
                 description: examParam.description,
+                subscriptionAmount: examParam.subscriptionAmount,
             })
         } catch (error) {
             throw error
@@ -233,6 +234,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                             id: row.id as string,
                             name: row.name as string,
                             description: row.description as string,
+                            subscriptionAmount: row.subscriptionAmount as number,
                             imageURL: row.imageURL as string,
                             createdAt: row.createdAt as Date,
                             updatedAt: row.updatedAt as Date
@@ -453,6 +455,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 id: examResult[0].id as string,
                 name: examResult[0].name as string,
                 description: examResult[0].description as string,
+                subscriptionAmount: examResult[0].subscriptionAmount as number,
                 imageURL: examResult[0].imageURL as string,
                 createdAt: examResult[0].createdAt as Date,
                 updatedAt: examResult[0].updatedAt as Date
