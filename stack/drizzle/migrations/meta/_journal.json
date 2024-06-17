@@ -120,6 +120,27 @@
       "when": 1718485182938,
       "tag": "0016_first_iron_monger",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1718574432886,
+      "tag": "0017_bizarre_king_cobra",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1718574751648,
+      "tag": "0018_motionless_stryfe",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1718578889959,
+      "tag": "0019_jazzy_roulette",
+      "breakpoints": true
     }
   ]
 }

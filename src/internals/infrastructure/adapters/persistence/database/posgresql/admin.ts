@@ -5,7 +5,7 @@ import {
     GetAdminByIDQuery,
     GetAdminsWithFilterQuery,
 } from "../../../../../../pkg/sqlQueries/admin";
-import { PaginationFilter } from "../../../../../../pkg/types/pagination";
+import {PaginationFilter, PaginationMetaData} from "../../../../../../pkg/types/pagination";
 import { Admin, newAdmin } from "../../../../../domain/admins/admin";
 import { AdminRepository } from "../../../../../domain/admins/repository";
 import { PoolClient } from "pg";
@@ -85,35 +85,36 @@ export class AdminRepositoryPG implements AdminRepository {
         }
     };
 
-    GetAdmins = async (filter: PaginationFilter): Promise<Admin[]> => {
+    GetAdmins = async (filter: PaginationFilter): Promise<{ admins : Admin[] ,metadata : PaginationMetaData}> => {
         try {
-            console.log(filter);
-            const values = [
-                filter.limit,
-                filter.page - 1,
-                filter.name,
-                filter.email,
-            ];
-            const { rows } = await this.dbClient.query(
-                GetAdminsWithFilterQuery,
-                values
-            );
-            if (rows.length > 0) {
-                const results: Admin[] = rows.map((row) => {
-                    const admin: Admin = newAdmin(
-                        row.name,
-                        row.email,
-                        row.roles,
-                        row.id,
-                        row.password,
-                        row.created_at,
-                        row.updated_at,
-                    );
-                    return admin;
-                });
-                return results;
-            }
-            return rows;
+            // console.log(filter);
+            // const values = [
+            //     filter.limit,
+            //     filter.page - 1,
+            //     filter.name,
+            //     filter.email,
+            // ];
+            // const { rows } = await this.dbClient.query(
+            //     GetAdminsWithFilterQuery,
+            //     values
+            // );
+            // if (rows.length > 0) {
+            //     const results: Admin[] = rows.map((row) => {
+            //         const admin: Admin = newAdmin(
+            //             row.name,
+            //             row.email,
+            //             row.roles,
+            //             row.id,
+            //             row.password,
+            //             row.created_at,
+            //             row.updated_at,
+            //         );
+            //         return admin;
+            //     });
+            //     return results;
+            // }
+            // return rows;
+            throw new Error("implement me!!")
         } catch (error) {
             throw error;
         }

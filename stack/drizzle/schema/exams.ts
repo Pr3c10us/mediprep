@@ -26,7 +26,7 @@ export const Exams = pgTable('exam', {
     description: text('description').notNull(),
     imageURL: varchar('image_url', {length: 255}),
     createdAt: timestamp('created_at').defaultNow(),
-    updatedAt: timestamp('updated_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 }, (t) => ({
     pk: primaryKey({columns: [t.id]}),
 }),)

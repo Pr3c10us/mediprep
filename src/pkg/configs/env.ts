@@ -17,6 +17,7 @@ export class Environment {
     nodeENV: string;
     port: number;
     url: string;
+    apiVersion: string
 
     clientOrigin: string[];
 
@@ -54,6 +55,7 @@ export class Environment {
         this.nodeENV = this.getEnvAsString("NODE_ENV", "development");
         this.port = this.getEnvAsInt("PORT", 5000);
         this.url = this.getEnvAsString("URL", "http://localhost:5000");
+        this.apiVersion = this.getEnvAsString("API_VERSION", "v1");
 
         this.clientOrigin = [this.getEnvORError("CLIENT_ORIGIN_1")];
 

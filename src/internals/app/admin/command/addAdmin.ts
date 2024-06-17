@@ -49,7 +49,7 @@ export class AddAdminCommandC implements AddAdminCommand {
                 `,
             };
             const emailQueueRecord: Record = newEmailQueueRecord(email);
-            this.emailQueueRepository.Produce(emailQueueRecord);
+            await this.emailQueueRepository.Produce(emailQueueRecord);
 
             return generatedPassword;
         } catch (error) {

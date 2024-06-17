@@ -8,6 +8,7 @@ import {AdminRepositoryDrizzle} from "./persistence/database/drizzle/admin";
 import {ExamRepositoryDrizzle} from "./persistence/database/drizzle/exam";
 import {AzureStorageRepository} from "./persistence/storage/azure";
 import {BlobServiceClient} from "@azure/storage-blob";
+import {UserRepositoryDrizzle} from "./persistence/database/drizzle/user";
 
 export class Adapter {
     EnvironmentVariables
@@ -19,6 +20,8 @@ export class Adapter {
     AdminRepository
 
     ExamRepository
+
+    UserRepository
 
     EmailRepository
 
@@ -34,6 +37,7 @@ export class Adapter {
         // this.AdminRepository = new AdminRepositoryPG(dbClient);
         this.AdminRepository = new AdminRepositoryDrizzle(dbClient)
         this.ExamRepository = new ExamRepositoryDrizzle(dbClient)
+        this.UserRepository = new UserRepositoryDrizzle(dbClient)
         this.EmailRepository = new EmailRepositoryAzure(environmentVariables);
     }
 }

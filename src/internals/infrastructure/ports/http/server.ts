@@ -12,20 +12,21 @@ import ErrorHandlerMiddleware from "../../../../pkg/middleware/errorHandler";
 import Route404 from "../../../../pkg/middleware/route404";
 import {ExamHandler} from "./exam/handler";
 import AuthorizeAdmin from "../../../../pkg/middleware/authorization";
+import {UserHandler} from "./user/handle";
 
 export class Server {
     services: Services;
     environmentVariables: Environment;
     port: number;
     server: Express;
-    apiV1Router: Router;
+    apiRouter: Router;
 
     constructor(services: Services, environmentVariables: Environment) {
         this.services = services;
         this.environmentVariables = environmentVariables;
         this.port = environmentVariables.port;
         this.server = express();
-        this.apiV1Router = express.Router();
+        this.apiRouter = express.Router();
 
         this.server.use(express.json());
         this.server.use(express.urlencoded({extended: false}));
@@ -41,9 +42,10 @@ export class Server {
 
         this.health();
         this.admin();
+        this.user();
         this.exam();
 
-        this.server.use("/api/v1", this.apiV1Router);
+        this.server.use(`/api/${environmentVariables.apiVersion}`, this.apiRouter);
 
         this.server.use(Route404);
         this.server.use(ErrorHandlerMiddleware);
@@ -57,12 +59,17 @@ export class Server {
 
     admin = () => {
         const router = new AdminHandler(this.services.AdminServices);
-        this.apiV1Router.use("/admin", router.router);
+        this.apiRouter.use("/admin", router.router);
+    };
+
+    user = () => {
+        const router = new UserHandler(this.services.UserServices);
+        this.apiRouter.use("/user", router.router);
     };
 
     exam = () => {
         const router = new ExamHandler(this.services.ExamServices, this.services.AdminServices);
-        this.apiV1Router.use("/exam", AuthorizeAdmin(this.services.AdminServices.adminRepository), router.router);
+        this.apiRouter.use("/exam", AuthorizeAdmin(this.services.AdminServices.adminRepository), router.router);
     };
 
     listen = () => {

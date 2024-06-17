@@ -1,10 +1,9 @@
-import { ErrorRequestHandler, NextFunction, Request, Response } from "express";
-import { CustomError } from "../errors/customError";
-import Logger from "../utils/logger";
-import { ErrorResponse } from "../responses/error";
-import { ZodError } from "zod";
-import { StatusCodes } from "http-status-codes";
-import { PostgresError } from "pg-error-enum";
+import {ErrorRequestHandler, NextFunction, Request, Response} from "express";
+import {CustomError} from "../errors/customError";
+import {ErrorResponse} from "../responses/error";
+import {ZodError} from "zod";
+import {StatusCodes} from "http-status-codes";
+import {JsonWebTokenError} from "jsonwebtoken";
 
 const ErrorHandlerMiddleware: ErrorRequestHandler = async (
     err: any,
@@ -23,6 +22,15 @@ const ErrorHandlerMiddleware: ErrorRequestHandler = async (
         return new ErrorResponse(res, "Invalid data", StatusCodes.BAD_REQUEST, {
             details: errorMessages,
         }).send();
+    }
+
+    if (err instanceof JsonWebTokenError) {
+        // Customize the message based on the specific error type
+        if (err.name === 'TokenExpiredError') {
+            return new ErrorResponse(res, "Token has expired", StatusCodes.BAD_REQUEST).send();
+        }
+        return new ErrorResponse(res, "Invalid token", StatusCodes.BAD_REQUEST).send();
+
     }
 
     if (err.code) {
