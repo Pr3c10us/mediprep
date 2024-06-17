@@ -3,8 +3,10 @@ import { AdminRepository } from "../../internals/domain/admins/repository";
 import { UnAuthorizedError } from "../errors/customError";
 import { Admin } from "../../internals/domain/admins/admin";
 import { verifyToken } from "../utils/encryption";
+import {UserRepository} from "../../internals/domain/users/repository";
+import {User} from "../../internals/domain/users/user";
 
-const AuthorizeAdmin = (repository: AdminRepository) => {
+export const AuthorizeAdmin = (repository: AdminRepository) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         let { adminToken: token } = req.signedCookies;
         if (!token) {
@@ -27,4 +29,29 @@ const AuthorizeAdmin = (repository: AdminRepository) => {
     };
 };
 
-export default AuthorizeAdmin;
+export const AuthorizeUser = (repository: UserRepository) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        let { userToken: token } = req.signedCookies;
+        if (!token) {
+            token = req.headers.authorization?.split(" ")[1];
+        }
+        if (!token) throw new UnAuthorizedError("missing token");
+
+        try {
+            const payload = verifyToken(token);
+            const id = (payload as { id: string }).id;
+
+            try {
+                const user: User  = await repository.getUserDetails(id);
+                if (!user) throw new UnAuthorizedError("invalid token");
+                req.user = user;
+                next();
+            } catch (error) {
+                throw new UnAuthorizedError("invalid token");
+            }
+        } catch (error) {
+            throw error;
+        }
+    };
+};
+

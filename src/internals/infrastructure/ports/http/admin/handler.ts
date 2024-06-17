@@ -12,8 +12,7 @@ import {
 } from "../../../../../pkg/validations/admin";
 import { Admin } from "../../../../domain/admins/admin";
 import CheckPermission from "../../../../../pkg/middleware/checkPermission";
-import AuthorizeAdmin from "../../../../../pkg/middleware/authorization";
-import { date } from "zod";
+import {AuthorizeAdmin} from "../../../../../pkg/middleware/authorization";
 import { PaginationFilter } from "../../../../../pkg/types/pagination";
 
 export class AdminHandler {

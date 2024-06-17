@@ -11,7 +11,7 @@ import {AdminHandler} from "./admin/handler";
 import ErrorHandlerMiddleware from "../../../../pkg/middleware/errorHandler";
 import Route404 from "../../../../pkg/middleware/route404";
 import {ExamHandler} from "./exam/handler";
-import AuthorizeAdmin from "../../../../pkg/middleware/authorization";
+import {AuthorizeAdmin} from "../../../../pkg/middleware/authorization";
 import {UserHandler} from "./user/handle";
 
 export class Server {

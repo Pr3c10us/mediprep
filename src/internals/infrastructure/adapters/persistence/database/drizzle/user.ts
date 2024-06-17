@@ -89,6 +89,32 @@ export class UserRepositoryDrizzle implements UserRepository {
         }
     }
 
+    getUserByEmail = async (email: string): Promise<User> => {
+        try {
+            const user = await this.db.query.Users.findFirst({
+                where: (eq(Users.email, email))
+            })
+            if (!user) {
+                throw new BadRequestError(`user with email '${email}' does not exist`)
+            }
+
+            return {
+                id: user.id as string,
+                firstName: user.firstName as string,
+                lastName: user.lastName as string,
+                email: user.email as string,
+                password: user.password as string,
+                country: user.country as string,
+                verified: user.verified as boolean,
+                profession: user.profession as string,
+                createdAt: user.createdAt as Date,
+                updatedAt: user.updatedAt as Date
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
     getUsers = async (filter: PaginationFilter): Promise<{ users: User[]; metadata: PaginationMetaData }> => {
         try {
             let filters = []

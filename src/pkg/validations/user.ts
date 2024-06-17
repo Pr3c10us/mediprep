@@ -22,3 +22,8 @@ export const userSchema = z.object({
     profession: z.string(),
     country: z.string(),
 })
+
+export const authenticateUserSchema = z.object({
+    email: z.string().email(),
+    password: z.string(),
+});

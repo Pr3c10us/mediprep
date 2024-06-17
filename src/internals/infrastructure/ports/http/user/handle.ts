@@ -1,13 +1,9 @@
 import {Request, Response, Router} from "express";
-import {userIdSchema, userSchema, verifyJwtSchema} from "../../../../../pkg/validations/user";
+import {authenticateUserSchema, userSchema, verifyJwtSchema} from "../../../../../pkg/validations/user";
 import {UserServices} from "../../../../app/user/user";
 import ValidationMiddleware from "../../../../../pkg/middleware/validation";
 import {verifyToken} from "../../../../../pkg/utils/encryption";
-import {SuccessResponse} from "../../../../../pkg/responses/success";
-import AuthorizeAdmin from "../../../../../pkg/middleware/authorization";
-import CheckPermission from "../../../../../pkg/middleware/checkPermission";
-import {addAdminSchema} from "../../../../../pkg/validations/admin";
-import {Admin} from "../../../../domain/admins/admin";
+import {SuccessResponse, SuccessResponseWithCookies} from "../../../../../pkg/responses/success";
 import {User} from "../../../../domain/users/user";
 
 export class UserHandler {
@@ -31,6 +27,13 @@ export class UserHandler {
                 this.addUserHandler
             );
 
+        this.router
+            .route("/login")
+            .post(
+                ValidationMiddleware(authenticateUserSchema, "body"),
+                this.authenticateUser
+            );
+
     }
 
     addUserHandler = async (req: Request, res: Response) => {
@@ -48,6 +51,21 @@ export class UserHandler {
 
         new SuccessResponse(res, { msg: "Account verified" }).send();
     }
+
+    authenticateUser = async (req: Request, res: Response) => {
+        const { email, password } = req.body;
+
+        const token = await this.userServices.commands.authenticateUser.Handle(
+            email,
+            password
+        );
+
+        const cookie: Cookie = {
+            key: "userToken",
+            value: token,
+        };
+        new SuccessResponseWithCookies(res, cookie, { jwt: token }).send();
+    };
 
 
 
