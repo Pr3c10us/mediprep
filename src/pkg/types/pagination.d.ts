@@ -10,6 +10,8 @@ export type PaginationFilter = {
     subjectId?: string;
     courseId? : string;
     examId?: string;
+    startDate? : Date;
+    endDate? : Date;
 
 };
 

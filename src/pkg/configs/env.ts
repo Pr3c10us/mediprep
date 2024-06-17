@@ -36,6 +36,8 @@ export class Environment {
     kafkaBroker: string[];
     kafkaEmailGroupID: string;
     kafkaEmailTopic: string;
+
+    resetPasswordURL: string;
     constructor() {
         this.pgDBUsername = this.getEnvAsString("PG_DB_USERNAME", "postgres");
         this.pgDBPassword = this.getEnvAsString("PG_DB_PASSWORD", "password");
@@ -82,6 +84,8 @@ export class Environment {
         this.kafkaBroker = [this.getEnvORError("KAFKA_BROKER")];
         this.kafkaEmailGroupID = this.getEnvORError("KAFKA_EMAIL_GROUP_ID");
         this.kafkaEmailTopic = this.getEnvORError("KAFKA_EMAIL_TOPIC");
+
+        this.resetPasswordURL = this.getEnvORError("RESET_PASSWORD_URL");
     }
 
     getEnvORError = (key: string): string => {

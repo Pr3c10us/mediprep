@@ -13,6 +13,7 @@ import Route404 from "../../../../pkg/middleware/route404";
 import {ExamHandler} from "./exam/handler";
 import {AuthorizeAdmin} from "../../../../pkg/middleware/authorization";
 import {UserHandler} from "./user/handle";
+import {AdminServices} from "../../../app/admin/admin";
 
 export class Server {
     services: Services;
@@ -63,7 +64,7 @@ export class Server {
     };
 
     user = () => {
-        const router = new UserHandler(this.services.UserServices);
+        const router = new UserHandler(this.services.UserServices,this.services.AdminServices);
         this.apiRouter.use("/user", router.router);
     };
 

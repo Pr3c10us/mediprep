@@ -27,3 +27,17 @@ export const authenticateUserSchema = z.object({
     email: z.string().email(),
     password: z.string(),
 });
+
+export const forgotPasswordSchema = z.object({
+    email: z.string().email(),
+});
+
+export const resetPasswordSchema = z.object({
+    newPassword: z
+        .string()
+        .regex(
+            passwordRegex,
+            "Password must be at least 8 characters long, contain at least one lowercase letter, one uppercase letter, one digit, and one special character (!@#$%^&*)."
+        ),
+    oldPassword: z.string().optional()
+});

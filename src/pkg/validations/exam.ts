@@ -19,7 +19,14 @@ export const getCommandFilterSchema = z.object({
     limit: z.string().optional(),
     page: z.string().optional(),
     name: z.string().optional(),
-    subjectId: uuidSchema.optional()
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    email: z.string().optional(),
+    profession : z.string().optional(),
+    country : z.string().optional(),
+    subjectId: uuidSchema.optional(),
+    startDate: z.date().optional(),
+    endDate: z.date().optional()
 });
 
 

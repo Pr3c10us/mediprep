@@ -1,7 +1,6 @@
 import {AdminServices} from "../../../../app/admin/admin";
 import {Request, Response, Router} from "express";
 import {ExamServices} from "../../../../app/exam/exam";
-import AuthorizeAdmin from "../../../../../pkg/middleware/authorization";
 import CheckPermission from "../../../../../pkg/middleware/checkPermission";
 import ValidationMiddleware from "../../../../../pkg/middleware/validation";
 import {Multer} from 'multer';

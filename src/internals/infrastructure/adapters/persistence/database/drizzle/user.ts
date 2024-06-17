@@ -5,7 +5,7 @@ import {drizzle} from "drizzle-orm/node-postgres";
 import {PoolClient} from "pg";
 import * as schema from "../../../../../../../stack/drizzle/schema/users"
 import {Users} from "../../../../../../../stack/drizzle/schema/users"
-import {and, count, eq, ilike} from "drizzle-orm";
+import {and, count, eq, gte, ilike, lte} from "drizzle-orm";
 import {BadRequestError} from "../../../../../../pkg/errors/customError";
 
 
@@ -134,6 +134,16 @@ export class UserRepositoryDrizzle implements UserRepository {
                 filters.push(ilike(Users.country, `%${filter.country}%`))
             }
 
+            if (filter.profession || filter.profession != undefined) {
+                filters.push(ilike(Users.profession, `%${filter.profession}%`))
+            }
+            if (filter.startDate || filter.startDate != undefined) {
+                filters.push(gte(Users.createdAt, filter.startDate as Date))
+            }
+            if (filter.endDate || filter.endDate != undefined) {
+                filters.push(lte(Users.createdAt, filter.endDate as Date))
+            }
+
             // Get the total count of rows
             const totalResult = await this.db.select({count: count()}).from(Users).where(and(...filters));
             const total = totalResult[0].count;
@@ -149,7 +159,7 @@ export class UserRepositoryDrizzle implements UserRepository {
             const query = this.db.select().from(Users);
 
             if (filters.length > 0) {
-                query.where(and(...filters));
+                query.where(and(...filters)).orderBy(Users.createdAt);
             }
             const users = await query
                 .limit(filter.limit)
