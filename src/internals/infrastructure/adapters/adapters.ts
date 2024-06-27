@@ -9,11 +9,15 @@ import {ExamRepositoryDrizzle} from "./persistence/database/drizzle/exam";
 import {AzureStorageRepository} from "./persistence/storage/azure";
 import {BlobServiceClient} from "@azure/storage-blob";
 import {UserRepositoryDrizzle} from "./persistence/database/drizzle/user";
+import {SalesRepositoryDrizzle} from "./persistence/database/drizzle/sale";
 
 export class Adapter {
     EnvironmentVariables
 
     EmailQueueRepository
+
+    EmailRepository
+
 
     StorageRepository
 
@@ -23,7 +27,8 @@ export class Adapter {
 
     UserRepository
 
-    EmailRepository
+    salesRepository
+
 
     constructor(
         dbClient: PoolClient,
@@ -33,11 +38,12 @@ export class Adapter {
     ) {
         this.EnvironmentVariables = environmentVariables;
         this.EmailQueueRepository = new EmailQueueRepositoryKafka(kafka);
+        this.EmailRepository = new EmailRepositoryAzure(environmentVariables);
         this.StorageRepository = new AzureStorageRepository(azureBlobClient,environmentVariables)
         // this.AdminRepository = new AdminRepositoryPG(dbClient);
         this.AdminRepository = new AdminRepositoryDrizzle(dbClient)
         this.ExamRepository = new ExamRepositoryDrizzle(dbClient)
         this.UserRepository = new UserRepositoryDrizzle(dbClient)
-        this.EmailRepository = new EmailRepositoryAzure(environmentVariables);
+        this.salesRepository = new SalesRepositoryDrizzle(dbClient)
     }
 }

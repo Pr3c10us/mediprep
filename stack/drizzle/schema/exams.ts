@@ -1,6 +1,8 @@
 import {boolean, integer, pgTable, primaryKey, text, timestamp, uuid, varchar} from 'drizzle-orm/pg-core';
 import {InferSelectModel, relations} from "drizzle-orm";
 import {Admins} from "./admins";
+import {UserExamAccess} from "./users";
+import {Sales} from "./sales";
 
 export const ExamAccess = pgTable('exam_access', {
     adminId: uuid('admin_id').notNull().references(() => Admins.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
@@ -34,7 +36,9 @@ export const Exams = pgTable('exam', {
 
 export const examRelations = relations(Exams, ({many}) => ({
     examsAccess: many(ExamAccess),
-    courses: many(Courses)
+    userExamAccess: many(UserExamAccess),
+    courses: many(Courses),
+    sales: many(Sales)
 }));
 
 export const Courses = pgTable('courses', {

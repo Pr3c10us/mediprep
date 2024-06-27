@@ -79,6 +79,8 @@ export class UserHandler {
             email,
             profession,
             country,
+            startDate,
+            endDate
         } = req.query;
         const filter: PaginationFilter = {
             limit: Number(limit) || 10,
@@ -88,6 +90,8 @@ export class UserHandler {
             email: email as string | undefined,
             profession: profession as string | undefined,
             country: country as string | undefined,
+            startDate: startDate ? new Date(startDate as string) : undefined,
+            endDate: endDate ? new Date(endDate as string) : undefined,
         };
 
         const {users, metadata} = await this.userServices.queries.getUsers.handle(filter);

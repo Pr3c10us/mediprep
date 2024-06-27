@@ -13,7 +13,7 @@ import Route404 from "../../../../pkg/middleware/route404";
 import {ExamHandler} from "./exam/handler";
 import {AuthorizeAdmin} from "../../../../pkg/middleware/authorization";
 import {UserHandler} from "./user/handle";
-import {AdminServices} from "../../../app/admin/admin";
+import {WebhookHandler} from "./sales/handler";
 
 export class Server {
     services: Services;
@@ -42,6 +42,7 @@ export class Server {
         );
 
         this.health();
+        this.webhook();
         this.admin();
         this.user();
         this.exam();
@@ -58,13 +59,18 @@ export class Server {
         });
     };
 
+    webhook = () => {
+        const router = new WebhookHandler(this.services.SalesServices,this.environmentVariables);
+        this.apiRouter.use("/webhook", router.router);
+    };
+
     admin = () => {
         const router = new AdminHandler(this.services.AdminServices);
         this.apiRouter.use("/admin", router.router);
     };
 
     user = () => {
-        const router = new UserHandler(this.services.UserServices,this.services.AdminServices);
+        const router = new UserHandler(this.services.UserServices, this.services.AdminServices);
         this.apiRouter.use("/user", router.router);
     };
 

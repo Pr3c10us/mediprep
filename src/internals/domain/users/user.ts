@@ -20,3 +20,9 @@ export type EditUser = {
     verified? : boolean;
     password?: string;
 }
+
+export type UserExamAccess = {
+    userId:string;
+    examId: string;
+    expiryDate: Date;
+}

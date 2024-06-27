@@ -1,10 +1,10 @@
 import {UserRepository} from "../../../../../domain/users/repository";
-import {EditUser, User} from "../../../../../domain/users/user";
+import {EditUser, User, UserExamAccess as UEA} from "../../../../../domain/users/user";
 import {PaginationFilter, PaginationMetaData} from "../../../../../../pkg/types/pagination";
 import {drizzle} from "drizzle-orm/node-postgres";
 import {PoolClient} from "pg";
 import * as schema from "../../../../../../../stack/drizzle/schema/users"
-import {Users} from "../../../../../../../stack/drizzle/schema/users"
+import {UserExamAccess, Users} from "../../../../../../../stack/drizzle/schema/users"
 import {and, count, eq, gte, ilike, lte} from "drizzle-orm";
 import {BadRequestError} from "../../../../../../pkg/errors/customError";
 
@@ -192,4 +192,44 @@ export class UserRepositoryDrizzle implements UserRepository {
         }
     }
 
+    addUserExamAccess = async (examToUser: UEA): Promise<void> => {
+        try {
+            await this.db.insert(UserExamAccess).values({
+                userId: examToUser.userId,
+                examId: examToUser.examId,
+                expiryDate: examToUser.expiryDate
+            })
+        } catch (error) {
+            throw error
+        }
+    }
+
+    updateExamAccess = async (examToUser: UEA): Promise<void> => {
+        try {
+            await this.db.update(UserExamAccess).set({
+                expiryDate: examToUser.expiryDate
+            }).where((and(eq(UserExamAccess.userId, examToUser.userId), eq(UserExamAccess.examId, examToUser.examId))))
+        } catch (error) {
+            throw error
+        }
+    }
+
+    getUserExamAccess = async (examId: string, userId: string): Promise<UEA> => {
+        try {
+            const userExamAccess = await this.db.query.UserExamAccess.findFirst({
+                where: (and(eq(UserExamAccess.userId, userId), eq(UserExamAccess.examId, examId))),
+            })
+            if (!userExamAccess) {
+                throw new BadRequestError(`user does with id ${userId} does not have access to exam ${examId}`)
+            }
+            return {
+                userId: userExamAccess.userId,
+                examId: userExamAccess.examId,
+                expiryDate: userExamAccess.expiryDate
+            }
+
+        } catch (error) {
+            throw error
+        }
+    }
 }

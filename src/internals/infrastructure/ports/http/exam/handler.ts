@@ -76,8 +76,8 @@ export class ExamHandler {
         )
         this.router.route('/course/:courseId').patch(
             CheckPermission("edit_exam"),
-            ValidationMiddleware(editCourseSchema, "body"),
             ValidationMiddleware(courseIdSchema, "params"),
+            ValidationMiddleware(editCourseSchema, "body"),
             this.editCourseHandler
         ).delete(
             CheckPermission("edit_exam"),

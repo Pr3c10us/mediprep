@@ -27,8 +27,8 @@ export const getCommandFilterSchema = z.object({
     profession : z.string().optional(),
     country : z.string().optional(),
     subjectId: uuidSchema.optional(),
-    startDate: z.date().optional(),
-    endDate: z.date().optional()
+    startDate: z.string().optional(),
+    endDate: z.string().optional()
 });
 
 

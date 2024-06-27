@@ -9,10 +9,10 @@ export type PaginationFilter = {
     country? : string;
     subjectId?: string;
     courseId? : string;
+    userId?: string;
     examId?: string;
     startDate? : Date;
     endDate? : Date;
-
 };
 
 export type PaginationMetaData = {

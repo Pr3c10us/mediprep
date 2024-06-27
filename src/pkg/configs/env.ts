@@ -38,6 +38,8 @@ export class Environment {
     kafkaEmailTopic: string;
 
     resetPasswordURL: string;
+
+    paystackSecret: string;
     constructor() {
         this.pgDBUsername = this.getEnvAsString("PG_DB_USERNAME", "postgres");
         this.pgDBPassword = this.getEnvAsString("PG_DB_PASSWORD", "password");
@@ -86,6 +88,8 @@ export class Environment {
         this.kafkaEmailTopic = this.getEnvORError("KAFKA_EMAIL_TOPIC");
 
         this.resetPasswordURL = this.getEnvORError("RESET_PASSWORD_URL");
+
+        this.paystackSecret = this.getEnvORError("PAYSTACK_SECRET")
     }
 
     getEnvORError = (key: string): string => {
