@@ -1,8 +1,8 @@
 import { Record } from "../../../../domain/queue/producer";
-import { EmailQueueRepository } from "../../../../domain/queue/repository";
+import { QueueRepository } from "../../../../domain/queue/repository";
 import { Kafka, Producer, ProducerRecord } from "kafkajs";
 
-export class EmailQueueRepositoryKafka implements EmailQueueRepository {
+export class QueueRepositoryKafka implements QueueRepository {
     producer: Producer;
     constructor(kafka: Kafka) {
         this.producer = kafka.producer();

@@ -1,3 +1,4 @@
 export interface StorageRepository {
-    uploadExamImage : (blobName: string, file: Express.Multer.File) => Promise<string>
+    upload : ( file: Express.Multer.File, containerName:string,blobName?: string) => Promise<{fileURL: string,blobName:string}>
+    // downloadStream: (blobName)
 }

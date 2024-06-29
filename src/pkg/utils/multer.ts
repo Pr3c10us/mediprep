@@ -6,7 +6,7 @@ export class MulterConfig {
     size: number
     multer: Multer
 
-    constructor( size: number = 10 * 1024 * 1024, fileType: "image" | "tabularDocument" = "image") {
+    constructor(fileType: "image" | "tabularDocument" = "image", size: number = 10 * 1024 * 1024,) {
         this.size = size;
 
         this.multer = multer({

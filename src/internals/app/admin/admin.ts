@@ -1,5 +1,5 @@
 import { AdminRepository } from "../../domain/admins/repository";
-import { EmailQueueRepository } from "../../domain/queue/repository";
+import { QueueRepository } from "../../domain/queue/repository";
 import { AddAdminCommand, AddAdminCommandC } from "./command/addAdmin";
 import {
     AuthenticateAdmin,
@@ -13,7 +13,7 @@ export class Commands {
 
     constructor(
         adminRepository: AdminRepository,
-        emailQueueRepository: EmailQueueRepository
+        emailQueueRepository: QueueRepository
     ) {
         this.addAdmin = new AddAdminCommandC(
             adminRepository,
@@ -37,7 +37,7 @@ export class AdminServices {
 
     constructor(
         adminRepository: AdminRepository,
-        emailQueueRepository: EmailQueueRepository
+        emailQueueRepository: QueueRepository
     ) {
         this.adminRepository = adminRepository;
         this.commands = new Commands(adminRepository, emailQueueRepository);

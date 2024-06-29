@@ -7,6 +7,8 @@ import {
     Exam,
     Option,
     Question,
+    QuestionBatch as QB,
+    QuestionBatchStatus,
     Subject
 } from "../../../../../domain/exams/exam";
 import * as schema from "../../../../../../../stack/drizzle/schema/exams"
@@ -15,6 +17,7 @@ import {
     Exams,
     Options,
     Question as QuestionT,
+    QuestionBatch,
     Questions,
     Subjects
 } from "../../../../../../../stack/drizzle/schema/exams"
@@ -43,23 +46,35 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         }
     }
 
-    async AddCourse(courseParams: Course): Promise<void> {
+    async AddCourse(courseParams: Course): Promise<Course> {
         try {
-            await this.db.insert(Courses).values({
+            const course = await this.db.insert(Courses).values({
                 name: courseParams.name,
                 examId: courseParams.examId
-            })
+            }).returning()
+
+            return {
+                id: course[0].id as string,
+                name: course[0].name,
+                examId: course[0].examId as string
+            }
         } catch (error) {
             throw error
         }
     }
 
-    async AddSubject(subjectParams: Subject): Promise<void> {
+    async AddSubject(subjectParams: Subject): Promise<Subject> {
         try {
-            await this.db.insert(Subjects).values({
+            const subject = await this.db.insert(Subjects).values({
                 name: subjectParams.name,
                 courseId: subjectParams.courseId
-            })
+            }).returning()
+
+            return {
+                id: subject[0].id as string, name: subject[0].name, courseId: subject[0].courseId as string
+            }
+
+
         } catch (error) {
             throw error
         }
@@ -98,6 +113,25 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                     }
                 }
             })
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async AddQuestionBatch(examId: string): Promise<QB> {
+        try {
+            const qb = await this.db.insert(QuestionBatch).values({
+                examId: examId,
+            }).returning()
+
+            const questionBatch = qb[0]
+            return {
+                id: questionBatch.id as string,
+                status: questionBatch.status as QuestionBatchStatus,
+                examId: questionBatch.examId as string,
+                createdAt: questionBatch.createdAt as Date,
+                updatedAt: questionBatch.updatedAt as Date
+            }
         } catch (error) {
             throw error
         }
@@ -197,6 +231,17 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         }
     }
 
+    async UpdateQuestionBatchStatus(id: string, status: QuestionBatchStatus): Promise<void> {
+        try {
+            const updatedQuestionBatch = await this.db.update(QuestionBatch).set({status: status}).where(eq(QuestionBatch.id, id)).returning({id: QuestionBatch.id})
+            if (updatedQuestionBatch.length < 1) {
+                throw new BadRequestError(`question batch with id '${id}' does not exist`)
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
 
     // Get Many
     async GetExams(filter: PaginationFilter): Promise<{ exams: Exam[], metadata: PaginationMetaData }> {
@@ -280,7 +325,6 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 }
             }
             const query = this.db.select().from(Courses);
-
             if (filters.length > 0) {
                 query.where(and(...filters));
             }
@@ -443,6 +487,66 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         }
     }
 
+    async GetQuestionBatches(filter: PaginationFilter): Promise<{
+        questionBatches: QB[],
+        metadata: PaginationMetaData
+    }> {
+        try {
+            const filters: string | any[] = [];
+            if (filter.status || filter.status != undefined) {
+                filters.push(ilike(QuestionBatch.status, `%${filter.status}%`));
+            }
+
+            // Get the total count of rows
+            const totalResult = await this.db.select({count: count()}).from(QuestionBatch).where(and(...filters));
+            const total = totalResult[0].count;
+            if (total <= 0) {
+                return {
+                    questionBatches: [], metadata: {
+                        total: 0,
+                        perPage: filter.limit,
+                        currentPage: filter.page
+                    }
+                }
+            }
+
+            const query = this.db.select().from(QuestionBatch);
+
+            if (filters.length > 0) {
+                query.where(and(...filters));
+            }
+            const rows = await query
+                .limit(filter.limit)
+                .offset((filter.page - 1) * filter.limit);
+            if (rows.length > 0) {
+                return {
+                    questionBatches: rows.map((row): QB => {
+                        return {
+                            id: row.id as string,
+                            examId: row.examId as string,
+                            status: row.status as QuestionBatchStatus,
+                            createdAt: row.createdAt as Date,
+                            updatedAt: row.updatedAt as Date
+                        }
+                    }),
+                    metadata: {
+                        total: total,
+                        perPage: filter.limit,
+                        currentPage: filter.page
+                    }
+                }
+            }
+            return {
+                questionBatches: [], metadata: {
+                    total: 0,
+                    perPage: filter.limit,
+                    currentPage: filter.page
+                }
+            };
+        } catch (error) {
+            throw error
+        }
+    }
 
     // Get One
     async GetExamById(id: string): Promise<Exam> {
@@ -524,6 +628,24 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 })
             }
 
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async GetQuestionBatchByID(id: string): Promise<QB> {
+        try {
+            const questionBatchResult = await this.db.select().from(QuestionBatch).where(eq(QuestionBatch.id, id))
+            if (questionBatchResult.length < 1) {
+                throw new BadRequestError(`question batch with id '${id}' does not exist`)
+            }
+            return {
+                id: questionBatchResult[0].id as string,
+                status: questionBatchResult[0].status as QuestionBatchStatus,
+                examId: questionBatchResult[0].examId as string,
+                createdAt: questionBatchResult[0].createdAt as Date,
+                updatedAt: questionBatchResult[0].updatedAt as Date
+            }
         } catch (error) {
             throw error
         }

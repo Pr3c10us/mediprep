@@ -17,6 +17,8 @@ import {AddQuestionCommand, AddQuestionCommandC} from "./commands/addQuestion";
 import {EditQuestionCommand, EditQuestionCommandC} from "./commands/editQuestion";
 import {DeleteQuestionCommand, DeleteQuestionCommandC} from "./commands/deleteQuestion";
 import {GetQuestionsQuery, GetQuestionsQueryC} from "./query/getQuestions";
+import {QueueRepository} from "../../domain/queue/repository";
+import {AddQuestionFileCommand, AddQuestionFileCommandC} from "./commands/addQuestionFile";
 
 export class Commands {
     addExam: AddExamCommand;
@@ -33,24 +35,26 @@ export class Commands {
     editSubject: EditSubjectCommand
 
     addQuestion: AddQuestionCommand
+    addQuestionFile: AddQuestionFileCommand
     deleteQuestion: DeleteQuestionCommand
     editQuestion: EditQuestionCommand
 
-    constructor(examRepository: ExamRepository, storageRepository: StorageRepository) {
+    constructor(examRepository: ExamRepository, storageRepository: StorageRepository, queueRepository: QueueRepository) {
         this.addExam = new AddExamCommandC(examRepository)
         this.deleteExam = new DeleteExamCommandC(examRepository)
         this.editExam = new EditExamCommandC(examRepository)
         this.uploadExamImage = new UploadExamImageCommandC(examRepository, storageRepository)
 
-        this.addCourse = new  AddCourseCommandC(examRepository)
+        this.addCourse = new AddCourseCommandC(examRepository)
         this.deleteCourse = new DeleteCourseCommandC(examRepository)
         this.editCourse = new EditCourseCommandC(examRepository)
 
-        this.addSubject = new  AddSubjectCommandC(examRepository)
+        this.addSubject = new AddSubjectCommandC(examRepository)
         this.deleteSubject = new DeleteSubjectCommandC(examRepository)
         this.editSubject = new EditSubjectCommandC(examRepository)
 
-        this.addQuestion = new  AddQuestionCommandC(examRepository)
+        this.addQuestion = new AddQuestionCommandC(examRepository)
+        this.addQuestionFile = new AddQuestionFileCommandC(examRepository,storageRepository, queueRepository)
         this.deleteQuestion = new DeleteQuestionCommandC(examRepository)
         this.editQuestion = new EditQuestionCommandC(examRepository)
     }
@@ -76,10 +80,11 @@ export class ExamServices {
     commands: Commands
     queries: Queries
 
-    constructor(examRepository: ExamRepository, storageRepository: StorageRepository) {
+    constructor(examRepository: ExamRepository, storageRepository: StorageRepository, queueRepository: QueueRepository
+    ) {
         this.examRepository = examRepository;
         this.storageRepository = storageRepository;
-        this.commands = new Commands(examRepository, storageRepository)
+        this.commands = new Commands(examRepository, storageRepository, queueRepository)
         this.queries = new Queries(examRepository)
     }
 }

@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+
 dotenv.config();
 
 export class Environment {
@@ -21,7 +22,7 @@ export class Environment {
 
     clientOrigin: string[];
 
-    azSessionId : string;
+    azSessionId: string;
     azClientId: string;
     azClientSecret: string;
     azTenantId: string;
@@ -30,16 +31,22 @@ export class Environment {
     azCommunicationMailFrom: string;
 
     azAccountStorageName: string;
-    azExamContainerName: string;
+    azExamImageContainerName: string;
+    azQuestionImageContainerName: string;
+    azExplanationImageContainerName: string;
+    azExamQuestionFileContainer: string;
 
     kafkaClientId: string;
     kafkaBroker: string[];
     kafkaEmailGroupID: string;
     kafkaEmailTopic: string;
+    kafkaExamQuestionFileGroupID: string;
+    kafkaExamQuestionFileTopic: string;
 
     resetPasswordURL: string;
 
     paystackSecret: string;
+
     constructor() {
         this.pgDBUsername = this.getEnvAsString("PG_DB_USERNAME", "postgres");
         this.pgDBPassword = this.getEnvAsString("PG_DB_PASSWORD", "password");
@@ -63,10 +70,10 @@ export class Environment {
 
         this.clientOrigin = [this.getEnvORError("CLIENT_ORIGIN_1")];
 
-        this.azSessionId= this.getEnvORError("AZURE_SESSION_ID");
-        this.azClientId= this.getEnvORError("AZURE_CLIENT_ID")
-        this.azClientSecret= this.getEnvORError("AZURE_CLIENT_SECRET")
-        this.azTenantId= this.getEnvORError("AZURE_TENANT_ID")
+        this.azSessionId = this.getEnvORError("AZURE_SESSION_ID");
+        this.azClientId = this.getEnvORError("AZURE_CLIENT_ID")
+        this.azClientSecret = this.getEnvORError("AZURE_CLIENT_SECRET")
+        this.azTenantId = this.getEnvORError("AZURE_TENANT_ID")
 
         this.azCommunicationConnectionString = this.getEnvORError(
             "AZURE_COMMUNICATION_SERVICE_CONNECTION_STRING"
@@ -78,14 +85,21 @@ export class Environment {
         this.azAccountStorageName = this.getEnvORError(
             "AZURE_STORAGE_ACCOUNT_NAME"
         );
-        this.azExamContainerName = this.getEnvORError(
-            "AZURE_EXAM_CONTAINER_NAME"
+        this.azExamImageContainerName = this.getEnvORError(
+            "AZURE_EXAM_IMAGE_CONTAINER_NAME"
+        );
+        this.azQuestionImageContainerName = this.getEnvORError("AZURE_QUESTION_IMAGE_CONTAINER_NAME")
+        this.azExplanationImageContainerName = this.getEnvORError("AZURE_EXPLANATION_IMAGE_CONTAINER_NAME")
+        this.azExamQuestionFileContainer = this.getEnvORError(
+            "AZURE_EXAM_QUESTION_FILE_CONTAINER_NAME"
         );
 
         this.kafkaClientId = this.getEnvORError("KAFKA_CLIENT_ID");
         this.kafkaBroker = [this.getEnvORError("KAFKA_BROKER")];
         this.kafkaEmailGroupID = this.getEnvORError("KAFKA_EMAIL_GROUP_ID");
         this.kafkaEmailTopic = this.getEnvORError("KAFKA_EMAIL_TOPIC");
+        this.kafkaExamQuestionFileGroupID = this.getEnvORError("KAFKA_EXAM_QUESTION_FILE_GROUP_ID");
+        this.kafkaExamQuestionFileTopic = this.getEnvORError("KAFKA_EXAM_QUESTION_FILE_TOPIC");
 
         this.resetPasswordURL = this.getEnvORError("RESET_PASSWORD_URL");
 

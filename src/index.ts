@@ -67,6 +67,7 @@ const main = async () => {
     const kafkaQueue: KafkaQueue = new KafkaQueue(
         kafka,
         services,
+        azureBlobClient,
         environmentVariables
     );
 

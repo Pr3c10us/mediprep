@@ -169,6 +169,41 @@
       "when": 1719451062005,
       "tag": "0023_unique_shinobi_shaw",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1719521670037,
+      "tag": "0024_yellow_saracen",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1719521691265,
+      "tag": "0025_useful_post",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1719561384171,
+      "tag": "0026_loose_mercury",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1719561395727,
+      "tag": "0027_even_shocker",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1719670319462,
+      "tag": "0028_nostalgic_dark_beast",
+      "breakpoints": true
     }
   ]
 }

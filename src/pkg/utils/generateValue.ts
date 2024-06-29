@@ -19,7 +19,7 @@ export const generateRandomPassword = (): string => {
         getRandomChar(specialCharacters),
     ];
 
-    // Fill the rest of the password length (min length 8) with random characters from all sets
+    // Fill the rest with the password length (min length 8) with random characters from all sets
     for (let i = 4; i < 8; i++) {
         password.push(getRandomChar(allCharacters));
     }

@@ -13,7 +13,9 @@ import Route404 from "../../../../pkg/middleware/route404";
 import {ExamHandler} from "./exam/handler";
 import {AuthorizeAdmin} from "../../../../pkg/middleware/authorization";
 import {UserHandler} from "./user/handle";
-import {WebhookHandler} from "./sales/handler";
+import {WebhookHandler} from "./webhook/handler";
+import {SalesHandler} from "./sales/handler";
+import {ExamRouter} from "./exam/router";
 
 export class Server {
     services: Services;
@@ -46,6 +48,7 @@ export class Server {
         this.admin();
         this.user();
         this.exam();
+        this.sales();
 
         this.server.use(`/api/${environmentVariables.apiVersion}`, this.apiRouter);
 
@@ -75,8 +78,13 @@ export class Server {
     };
 
     exam = () => {
-        const router = new ExamHandler(this.services.ExamServices, this.services.AdminServices);
+        const router = new ExamRouter(this.services.ExamServices, this.services.AdminServices);
         this.apiRouter.use("/exam", AuthorizeAdmin(this.services.AdminServices.adminRepository), router.router);
+    };
+
+    sales = () => {
+        const router = new SalesHandler(this.services.SalesServices);
+        this.apiRouter.use("/sales", AuthorizeAdmin(this.services.AdminServices.adminRepository), router.router);
     };
 
     listen = () => {

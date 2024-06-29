@@ -32,9 +32,9 @@ export const userToExamRelations = relations(UserExamAccess, ({one}) => ({
         fields: [UserExamAccess.examId],
         references: [Exams.id],
     }),
-    user: one(Admins, {
+    user: one(Users, {
         fields: [UserExamAccess.userId],
-        references: [Admins.id],
+        references: [Users.id],
     }),
 }));
 

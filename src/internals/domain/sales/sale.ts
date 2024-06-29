@@ -9,4 +9,7 @@ export type Sale = {
     expiryDate?: Date;
     createdAt?: Date;
     updatedAt?: Date;
+    firstName?: string,
+    lastName?: string,
+    examName? : string
 }

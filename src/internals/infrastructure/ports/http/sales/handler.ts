@@ -1,47 +1,52 @@
 import {SalesServices} from "../../../../app/sale/sale";
 import {Request, Response, Router} from "express";
+import CheckPermission from "../../../../../pkg/middleware/checkPermission";
+import ValidationMiddleware from "../../../../../pkg/middleware/validation";
+import {getSalesFilterSchema, saleIdSchema} from "../../../../../pkg/validations/sales";
+import {PaginationFilter} from "../../../../../pkg/types/pagination";
 import {SuccessResponse} from "../../../../../pkg/responses/success";
-import {Environment} from "../../../../../pkg/configs/env";
-import * as crypto from "node:crypto";
-import {Sale} from "../../../../domain/sales/sale";
 
-export class WebhookHandler {
+export class SalesHandler {
     services;
     router;
-    environmentVariable: Environment
 
-    constructor(services: SalesServices, environmentVariable: Environment) {
+    constructor(services: SalesServices) {
         this.services = services;
         this.router = Router();
-        this.environmentVariable = environmentVariable
 
         this.router
-            .route("/paystack").post(this.paystack)
+            .route("/").get(
+            CheckPermission("read_sales"),
+            ValidationMiddleware(getSalesFilterSchema, "query"),
+            this.getSales
+        )
+
+        this.router
+            .route("/:id").get(
+            CheckPermission("read_sales"),
+            ValidationMiddleware(saleIdSchema, "params"),
+            this.getSaleByID
+        )
     }
 
-    paystack = async (req: Request, res: Response) => {
-        const hash = crypto.createHmac('sha512', this.environmentVariable.paystackSecret).update(JSON.stringify(req.body)).digest('hex');
-        if (hash != req.headers['x-paystack-signature']) {
-            return new SuccessResponse(res, {message: "nice one thief"}).send()
-        }
-        if (req.body.event != "charge.success") {
-            return new SuccessResponse(res).send();
-        }
-        const {amount, reference, customer,status, metadata} = req.body.data
-        const sale: Sale = {
-            userId: metadata.userId,
-            examId:metadata.examId,
-            reference: reference,
-            amount: amount/100,
-            email: customer.email,
-            status,
-        }
-        try {
-            await this.services.commands.subscribe.Handle(sale)
-            new SuccessResponse(res).send();
-        } catch (error) {
-            console.log(error)
-            new SuccessResponse(res).send();
-        }
+    getSales = async (req: Request, res: Response) => {
+        const {limit,page,reference} = req.query
+        const filter: PaginationFilter = {
+            limit: Number(limit) || 10,
+            page: Number(page) || 1,
+            reference: reference as string | undefined,
+        };
+
+        const {sales,metadata} = await this.services.queries.getSales.handle(filter)
+
+        new SuccessResponse(res, {sales}, metadata).send();
+    };
+
+    getSaleByID = async (req: Request, res: Response) => {
+        const {id}  = req.params
+
+        const sale = await this.services.queries.getSaleByID.handle(id)
+
+        new SuccessResponse(res, {...sale}).send();
     };
 }

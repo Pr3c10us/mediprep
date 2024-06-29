@@ -2,7 +2,7 @@ import {Course} from "../../../domain/exams/exam";
 import {ExamRepository} from "../../../domain/exams/repository";
 
 export interface AddCourseCommand {
-    Handle: (course: Course) => Promise<void>
+    Handle: (course: Course) => Promise<Course>
 }
 
 export class AddCourseCommandC implements AddCourseCommand {
@@ -12,9 +12,9 @@ export class AddCourseCommandC implements AddCourseCommand {
         this.examRepository = examRepository
     }
 
-    async Handle(course: Course): Promise<void> {
+    async Handle(course: Course): Promise<Course> {
         try {
-            await this.examRepository.AddCourse(course)
+            return await this.examRepository.AddCourse(course)
         } catch (error) {
             throw error
         }

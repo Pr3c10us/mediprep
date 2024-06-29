@@ -1,7 +1,7 @@
 import {PoolClient} from "pg";
 import {Environment} from "../../../pkg/configs/env";
 import {EmailRepositoryAzure} from "./notifications/azure/email";
-import {EmailQueueRepositoryKafka} from "./queue/kafka/email";
+import {QueueRepositoryKafka} from "./queue/kafka/email";
 import {Kafka} from "kafkajs";
 import {NodePgDatabase} from "drizzle-orm/node-postgres";
 import {AdminRepositoryDrizzle} from "./persistence/database/drizzle/admin";
@@ -14,7 +14,7 @@ import {SalesRepositoryDrizzle} from "./persistence/database/drizzle/sale";
 export class Adapter {
     EnvironmentVariables
 
-    EmailQueueRepository
+    QueueRepository
 
     EmailRepository
 
@@ -37,7 +37,7 @@ export class Adapter {
         environmentVariables: Environment
     ) {
         this.EnvironmentVariables = environmentVariables;
-        this.EmailQueueRepository = new EmailQueueRepositoryKafka(kafka);
+        this.QueueRepository = new QueueRepositoryKafka(kafka);
         this.EmailRepository = new EmailRepositoryAzure(environmentVariables);
         this.StorageRepository = new AzureStorageRepository(azureBlobClient,environmentVariables)
         // this.AdminRepository = new AdminRepositoryPG(dbClient);

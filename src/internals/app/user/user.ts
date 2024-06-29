@@ -1,7 +1,7 @@
 import {UserRepository} from "../../domain/users/repository";
 import {VerifyAccount, VerifyAccountC} from "./query/verifyAccount";
 import {AddUserCommand, AddUserCommandC} from "./command/signup";
-import {EmailQueueRepository} from "../../domain/queue/repository";
+import {QueueRepository} from "../../domain/queue/repository";
 import {AuthenticateUser, AuthenticateUserC} from "./command/authenticateUser";
 import {SendJWTQuery, SendJWTQueryC} from "./query/sendJWTQuery";
 import {ResetPassword, ResetPasswordC} from "./command/resetPassword";
@@ -14,9 +14,9 @@ export class Commands {
 
     constructor(
         userRepository: UserRepository,
-        emailQueueRepository: EmailQueueRepository
+        queueRepository: QueueRepository
     ) {
-        this.addUser = new AddUserCommandC(userRepository, emailQueueRepository)
+        this.addUser = new AddUserCommandC(userRepository, queueRepository)
         this.authenticateUser = new AuthenticateUserC(userRepository)
         this.resetPassword = new ResetPasswordC(userRepository)
     }
@@ -27,7 +27,7 @@ export class Queries {
     sendJWT: SendJWTQuery
     getUsers: GetUsersQuery
 
-    constructor(userRepository: UserRepository, emailQueueRepository: EmailQueueRepository
+    constructor(userRepository: UserRepository, emailQueueRepository: QueueRepository
     ) {
         this.verifyAccount = new VerifyAccountC(userRepository)
         this.sendJWT = new SendJWTQueryC(userRepository, emailQueueRepository)
@@ -42,10 +42,10 @@ export class UserServices {
 
     constructor(
         userRepository: UserRepository,
-        emailQueueRepository: EmailQueueRepository
+        queueRepository: QueueRepository
     ) {
         this.userRepository = userRepository;
-        this.commands = new Commands(userRepository, emailQueueRepository);
-        this.queries = new Queries(userRepository, emailQueueRepository);
+        this.commands = new Commands(userRepository, queueRepository);
+        this.queries = new Queries(userRepository, queueRepository);
     }
 }

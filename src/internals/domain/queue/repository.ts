@@ -1,5 +1,5 @@
 import { Record } from "./producer";
 
-export interface EmailQueueRepository {
+export interface QueueRepository {
     Produce: (record: Record) => Promise<void>;
 }

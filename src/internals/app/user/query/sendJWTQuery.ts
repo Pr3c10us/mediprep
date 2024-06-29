@@ -1,7 +1,7 @@
 import {encrypt, signToken} from "../../../../pkg/utils/encryption";
 import {Email} from "../../../domain/notification/email";
 import {newEmailQueueRecord, Record} from "../../../domain/queue/producer";
-import {EmailQueueRepository} from "../../../domain/queue/repository";
+import {QueueRepository} from "../../../domain/queue/repository";
 import {UserRepository} from "../../../domain/users/repository";
 import {Environment} from "../../../../pkg/configs/env";
 import {BadRequestError} from "../../../../pkg/errors/customError";
@@ -12,11 +12,11 @@ export interface SendJWTQuery {
 
 export class SendJWTQueryC implements SendJWTQuery {
     repository: UserRepository;
-    emailQueueRepository: EmailQueueRepository;
+    emailQueueRepository: QueueRepository;
     environmentVariables: Environment
 
 
-    constructor(repository: UserRepository, emailQueueRepository: EmailQueueRepository) {
+    constructor(repository: UserRepository, emailQueueRepository: QueueRepository) {
         this.repository = repository;
         this.emailQueueRepository = emailQueueRepository;
         this.environmentVariables = new Environment()

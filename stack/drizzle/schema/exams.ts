@@ -38,7 +38,8 @@ export const examRelations = relations(Exams, ({many}) => ({
     examsAccess: many(ExamAccess),
     userExamAccess: many(UserExamAccess),
     courses: many(Courses),
-    sales: many(Sales)
+    sales: many(Sales),
+    questionBatches: many(QuestionBatch)
 }));
 
 export const Courses = pgTable('courses', {
@@ -88,7 +89,11 @@ export const Questions = pgTable('question', {
     explanationImageUrl: varchar('explanation_image_url', {length: 128}),
     explanation: text('explanation').notNull(),
     free: boolean('free').default(false),
-    subjectId: uuid('subject_id').references(() => Subjects.id, {onDelete: 'cascade', onUpdate: 'cascade'})
+    subjectId: uuid('subject_id').references(() => Subjects.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
+    questionBatchId: uuid('question_batch_id').references(() => QuestionBatch.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+    })
 }, (t) => ({
     pk: primaryKey({columns: [t.id]}),
 }))
@@ -97,6 +102,10 @@ export const questionSubjectRelation = relations(Questions, ({one}) => ({
     subject: one(Subjects, {
         fields: [Questions.subjectId],
         references: [Subjects.id]
+    }),
+    questionBatch: one(QuestionBatch, {
+        fields: [Questions.questionBatchId],
+        references: [QuestionBatch.id]
     })
 }))
 export const questionRelation = relations(Questions, ({many}) => ({
@@ -127,4 +136,20 @@ export const optionRelation = relations(Options, ({one}) => ({
     })
 }))
 
+export const QuestionBatch = pgTable('question_batch', {
+    id: uuid('id').defaultRandom(),
+    status: varchar('status', {length: 128}).default('processing'),
+    examId: uuid('exam_id').references(() => Exams.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
+}, (t) => ({
+    pk: primaryKey({columns: [t.id]}),
+}))
 
+export const questionBatchRelation = relations(QuestionBatch, ({one, many}) => ({
+    questions: many(Questions),
+    exam: one(Exams, {
+        fields: [QuestionBatch.examId],
+        references: [Exams.id]
+    })
+}))

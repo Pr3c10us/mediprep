@@ -1,134 +1,18 @@
 import {AdminServices} from "../../../../app/admin/admin";
-import {Request, Response, Router} from "express";
+import {Request, Response} from "express";
 import {ExamServices} from "../../../../app/exam/exam";
-import CheckPermission from "../../../../../pkg/middleware/checkPermission";
-import ValidationMiddleware from "../../../../../pkg/middleware/validation";
-import {Multer} from 'multer';
-import {
-    addExamSchema,
-    courseIdSchema,
-    courseSchema,
-    editCourseSchema,
-    editExamSchema,
-    editQuestionSchema,
-    editSubjectSchema,
-    examIdSchema,
-    getCommandFilterSchema, questionIdSchema,
-    questionSchema,
-    subjectIdSchema,
-    subjectSchema
-} from "../../../../../pkg/validations/exam";
 import {Course, EditQuestionParams, Exam, Option, Question, Subject} from "../../../../domain/exams/exam";
 import {SuccessResponse} from "../../../../../pkg/responses/success";
 import {BadRequestError} from "../../../../../pkg/errors/customError";
-import {MulterConfig} from "../../../../../pkg/utils/multer";
 import {PaginationFilter} from "../../../../../pkg/types/pagination";
 
 export class ExamHandler {
     examServices: ExamServices;
     adminServices: AdminServices
-    router: Router;
-    upload: Multer
 
     constructor(examServices: ExamServices, adminServices: AdminServices) {
         this.examServices = examServices;
         this.adminServices = adminServices
-        this.router = Router();
-        this.upload = new MulterConfig().multer
-
-        // Exams Route
-        this.router.route('/').post(
-            CheckPermission("create_exam"),
-            ValidationMiddleware(addExamSchema, "body"),
-            this.addExamHandler
-        ).get(
-            CheckPermission("read_exam"),
-            ValidationMiddleware(getCommandFilterSchema, "query"),
-            this.getExamsHandler
-        )
-        this.router.route('/:id').patch(
-            CheckPermission("edit_exam"),
-            ValidationMiddleware(editExamSchema, "body"),
-            ValidationMiddleware(examIdSchema, "params"),
-            this.editExamHandler
-        ).delete(
-            CheckPermission("delete_exam"),
-            ValidationMiddleware(examIdSchema, "params"),
-            this.deleteExamHandler
-        )
-        this.router.route('/:id/image').patch(
-            CheckPermission("edit_exam"),
-            ValidationMiddleware(examIdSchema, "params"),
-            this.upload.single("image"),
-            this.uploadExamImageHandler
-        )
-
-
-        // Courses Route
-        this.router.route('/course').post(
-            CheckPermission("edit_exam"),
-            ValidationMiddleware(courseSchema, "body"),
-            this.addCourseHandler
-        ).get(
-            CheckPermission("read_exam"),
-            ValidationMiddleware(getCommandFilterSchema, "query"),
-            this.getCoursesHandler
-        )
-        this.router.route('/course/:courseId').patch(
-            CheckPermission("edit_exam"),
-            ValidationMiddleware(courseIdSchema, "params"),
-            ValidationMiddleware(editCourseSchema, "body"),
-            this.editCourseHandler
-        ).delete(
-            CheckPermission("edit_exam"),
-            ValidationMiddleware(courseIdSchema, "params"),
-            this.deleteCourseHandler
-        )
-
-
-        // Subject Route
-        this.router.route('/subject').post(
-            CheckPermission("edit_exam"),
-            ValidationMiddleware(subjectSchema, "body"),
-            this.addSubjectHandler
-        ).get(
-            CheckPermission("read_exam"),
-            ValidationMiddleware(getCommandFilterSchema, "query"),
-            this.getSubjectsHandler
-        )
-        this.router.route('/subject/:subjectId').patch(
-            CheckPermission("edit_exam"),
-            ValidationMiddleware(editSubjectSchema, "body"),
-            ValidationMiddleware(subjectIdSchema, "params"),
-            this.editSubjectHandler
-        ).delete(
-            CheckPermission("edit_exam"),
-            ValidationMiddleware(subjectIdSchema, "params"),
-            this.deleteSubjectHandler
-        )
-
-
-        // Subject Route
-        this.router.route('/question').post(
-            CheckPermission("edit_exam"),
-            ValidationMiddleware(questionSchema, "body"),
-            this.addQuestionHandler
-        ).get(
-            CheckPermission("read_exam"),
-            ValidationMiddleware(getCommandFilterSchema, "query"),
-            this.getQuestionsHandler
-        )
-
-        this.router.route('/question/:questionId').patch(
-            CheckPermission("edit_exam"),
-            ValidationMiddleware(editQuestionSchema, "body"),
-            ValidationMiddleware(questionIdSchema, "params"),
-            this.editQuestionHandler
-        ).delete(
-            CheckPermission("edit_exam"),
-            ValidationMiddleware(questionIdSchema, "params"),
-            this.deleteQuestionHandler
-        )
     }
 
     // Exams Handlers
@@ -281,6 +165,13 @@ export class ExamHandler {
         await this.examServices.commands.addQuestion.Handle(question)
 
         new SuccessResponse(res, {message: `question added to subject`}).send()
+    }
+    addQuestionFileHandler = async (req: Request, res: Response) => {
+        const file = req.file
+        if (!file) throw new BadRequestError("issue uploading file")
+
+        await this.examServices.commands.addQuestionFile.Handle(req.params.id,file)
+        new SuccessResponse(res, {message: `questions added by file upload processing`}).send()
     }
     getQuestionsHandler = async (req: Request, res: Response) => {
         const {limit, page, subjectId} = req.query;

@@ -17,11 +17,11 @@ export class Services {
     constructor(adapter: Adapter) {
         this.AdminServices = new AdminServices(
             adapter.AdminRepository,
-            adapter.EmailQueueRepository
+            adapter.QueueRepository
         );
         this.EmailServices = new EmailServices(adapter.EmailRepository);
-        this.ExamServices = new ExamServices(adapter.ExamRepository,adapter.StorageRepository)
-        this.UserServices = new UserServices(adapter.UserRepository,adapter.EmailQueueRepository)
+        this.ExamServices = new ExamServices(adapter.ExamRepository,adapter.StorageRepository,adapter.QueueRepository)
+        this.UserServices = new UserServices(adapter.UserRepository,adapter.QueueRepository)
         this.SalesServices = new SalesServices(adapter.salesRepository,adapter.UserRepository, adapter.ExamRepository)
     }
 }

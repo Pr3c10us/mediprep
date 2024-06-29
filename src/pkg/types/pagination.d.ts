@@ -13,6 +13,8 @@ export type PaginationFilter = {
     examId?: string;
     startDate? : Date;
     endDate? : Date;
+    reference?: string;
+    status? : string;
 };
 
 export type PaginationMetaData = {

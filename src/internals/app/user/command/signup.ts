@@ -2,7 +2,7 @@ import {encrypt, signToken} from "../../../../pkg/utils/encryption";
 import {User} from "../../../domain/users/user";
 import {Email} from "../../../domain/notification/email";
 import {newEmailQueueRecord, Record} from "../../../domain/queue/producer";
-import {EmailQueueRepository} from "../../../domain/queue/repository";
+import {QueueRepository} from "../../../domain/queue/repository";
 import {UserRepository} from "../../../domain/users/repository";
 import {Environment} from "../../../../pkg/configs/env";
 
@@ -12,15 +12,15 @@ export interface AddUserCommand {
 
 export class AddUserCommandC implements AddUserCommand {
     userRepository: UserRepository;
-    emailQueueRepository: EmailQueueRepository;
+    queueRepository: QueueRepository;
     environmentVariables: Environment
 
     constructor(
         userRepository: UserRepository,
-        emailQueueRepository: EmailQueueRepository
+        queueRepository: QueueRepository
     ) {
         this.userRepository = userRepository;
-        this.emailQueueRepository = emailQueueRepository;
+        this.queueRepository = queueRepository;
         this.environmentVariables = new Environment()
 
     }
@@ -44,7 +44,7 @@ export class AddUserCommandC implements AddUserCommand {
                 `,
             };
             const emailQueueRecord: Record = newEmailQueueRecord(email);
-            await this.emailQueueRepository.Produce(emailQueueRecord);
+            await this.queueRepository.Produce(emailQueueRecord);
         } catch (error) {
             throw error;
         }

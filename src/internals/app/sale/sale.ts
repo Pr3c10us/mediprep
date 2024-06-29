@@ -2,6 +2,8 @@ import {SalesRepository} from "../../domain/sales/repository";
 import {UserRepository} from "../../domain/users/repository";
 import {ExamRepository} from "../../domain/exams/repository";
 import {Subscribe, SubscribeC} from "./comand/subscribe";
+import {GetSalesQuery, GetSalesQueryC} from "./query/getSales";
+import {GetSaleByIDQuery, GetSaleByIDQueryC} from "./query/getSaleById";
 
 export class Commands {
     subscribe: Subscribe
@@ -14,9 +16,12 @@ export class Commands {
 }
 
 export class Queries {
-
+    getSales : GetSalesQuery
+    getSaleByID :GetSaleByIDQuery
     constructor(salesRepository: SalesRepository
     ) {
+        this.getSales = new GetSalesQueryC(salesRepository)
+        this.getSaleByID = new GetSaleByIDQueryC(salesRepository)
     }
 }
 

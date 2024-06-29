@@ -3,16 +3,22 @@ import {PoolClient} from "pg";
 import {drizzle} from "drizzle-orm/node-postgres";
 import * as schema from '../../../../../../../stack/drizzle/schema/sales'
 import {Sales} from '../../../../../../../stack/drizzle/schema/sales'
+import * as schema2 from "../../../../../../../stack/drizzle/schema/exams"
+import * as schema3 from "../../../../../../../stack/drizzle/schema/users"
 import {Sale} from "../../../../../domain/sales/sale";
 import {PaginationFilter, PaginationMetaData} from "../../../../../../pkg/types/pagination";
 import {and, count, eq, gte, lte} from "drizzle-orm";
-import {Users} from "../../../../../../../stack/drizzle/schema/users";
+import {BadRequestError} from "../../../../../../pkg/errors/customError";
 
 export class SalesRepositoryDrizzle implements SalesRepository {
     db
 
     constructor(client: PoolClient) {
-        this.db = drizzle(client, {schema})
+        this.db = drizzle(client, {
+            schema: {
+                ...schema, ...schema2, ...schema3
+            }
+        })
     }
 
     AddSale = async (sale: Sale): Promise<void> => {
@@ -41,19 +47,19 @@ export class SalesRepositoryDrizzle implements SalesRepository {
                     user: {
                         columns: {
                             firstName: true,
-                            lastName: true,
-                            email: true
+                            lastName: true
                         }
                     },
                     exam: {
                         columns: {
-                            name: true,
+                            name: true
                         }
                     }
                 }
             })
+
             if (!sale) {
-                throw new Error(`sale with ${id} does not exist`)
+                throw new BadRequestError(`sale with ${id} does not exist`)
             }
             return {
                 id: sale.id as string,
@@ -65,7 +71,10 @@ export class SalesRepositoryDrizzle implements SalesRepository {
                 email: sale.email as string,
                 status: sale.status as string,
                 createdAt: sale.createdAt as Date,
-                updatedAt: sale.updatedAt as Date
+                updatedAt: sale.updatedAt as Date,
+                firstName: sale.user?.firstName,
+                lastName: sale.user?.lastName,
+                examName: sale.exam?.name as string | undefined
             }
         } catch (error) {
             throw error
@@ -76,12 +85,14 @@ export class SalesRepositoryDrizzle implements SalesRepository {
         try {
             let filters = []
             if (filter.startDate || filter.startDate != undefined) {
-                filters.push(gte(Users.createdAt, filter.startDate as Date))
+                filters.push(gte(Sales.createdAt, filter.startDate as Date))
             }
             if (filter.endDate || filter.endDate != undefined) {
-                filters.push(lte(Users.createdAt, filter.endDate as Date))
+                filters.push(lte(Sales.createdAt, filter.endDate as Date))
             }
-
+            if (filter.reference || filter.reference != undefined) {
+                filters.push(eq(Sales.reference, filter.reference as string))
+            }
             // Get the total count of rows
             const totalResult = await this.db.select({count: count()}).from(Sales).where(and(...filters));
             const total = totalResult[0].count;
@@ -94,14 +105,26 @@ export class SalesRepositoryDrizzle implements SalesRepository {
                     }
                 }
             }
-            const query = this.db.select().from(Sales);
-
-            if (filters.length > 0) {
-                query.where(and(...filters)).orderBy(Sales.createdAt);
-            }
-            const sales = await query
-                .limit(filter.limit)
-                .offset((filter.page - 1) * filter.limit);
+            // const query = this.db.select().from(Sales);
+            const sales = await this.db.query.Sales.findMany({
+                where: and(...filters),
+                with: {
+                    user: {
+                        columns: {
+                            firstName: true,
+                            lastName: true
+                        }
+                    },
+                    exam: {
+                        columns: {
+                            name: true
+                        }
+                    }
+                },
+                limit: filter.limit,
+                offset: (filter.page - 1) * filter.limit,
+                orderBy: Sales.createdAt
+            });
 
             if (sales.length > 0) {
                 return {
@@ -116,7 +139,10 @@ export class SalesRepositoryDrizzle implements SalesRepository {
                             email: sale.email as string,
                             status: sale.status as string,
                             createdAt: sale.createdAt as Date,
-                            updatedAt: sale.updatedAt as Date
+                            updatedAt: sale.updatedAt as Date,
+                            firstName: sale.user?.firstName,
+                            lastName: sale.user?.lastName,
+                            examName: sale.exam?.name as string | undefined
                         }
                     }), metadata: {
                         total: total,

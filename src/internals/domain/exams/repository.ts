@@ -1,4 +1,13 @@
-import {Course, EditExamParams, EditQuestionParams, Exam, Question, Subject} from "./exam";
+import {
+    Course,
+    EditExamParams,
+    EditQuestionParams,
+    Exam,
+    Question,
+    QuestionBatch,
+    QuestionBatchStatus,
+    Subject
+} from "./exam";
 import {PaginationFilter, PaginationMetaData} from "../../../pkg/types/pagination";
 
 export interface ExamRepository {
@@ -9,13 +18,13 @@ export interface ExamRepository {
     GetExamById: (id: string) => Promise<Exam>
     GetExams: (filter: PaginationFilter) => Promise<{ exams: Exam[], metadata: PaginationMetaData }>
 
-    AddCourse: (course: Course) => Promise<void>
+    AddCourse: (course: Course) => Promise<Course>
     EditCourseName: (id: string, name: string) => Promise<void>
     DeleteCourse: (id: string) => Promise<void>
     GetCourseById: (courseId : string) => Promise<Course>
     GetCourses: (filter: PaginationFilter) => Promise<{ courses: Course[], metadata: PaginationMetaData }>
 
-    AddSubject: (subject: Subject) => Promise<void>
+    AddSubject: (subject: Subject) => Promise<Course>
     EditSubjectName: (id: string, name: string) => Promise<void>
     DeleteSubject: (id: string) => Promise<void>
     GetSubjectById: (subjectId : string) => Promise<Subject>
@@ -26,4 +35,9 @@ export interface ExamRepository {
     DeleteQuestion: (id: string) => Promise<void>
     GetQuestionById: (questionId: string) => Promise<Question>
     GetQuestions: (filter: PaginationFilter) => Promise<{ questions: Question[], metadata: PaginationMetaData }> // filer to include subjectId
+
+    AddQuestionBatch: (examId: string) => Promise<QuestionBatch>
+    UpdateQuestionBatchStatus: (id: string,status: QuestionBatchStatus) => Promise<void>
+    GetQuestionBatches: (filter: PaginationFilter) => Promise<{questionBatches: QuestionBatch[], metadata: PaginationMetaData}>
+    GetQuestionBatchByID: (id: string) =>Promise<QuestionBatch>
 }

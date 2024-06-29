@@ -5,7 +5,7 @@ import { Admin } from "../../../domain/admins/admin";
 import { AdminRepository } from "../../../domain/admins/repository";
 import { Email } from "../../../domain/notification/email";
 import { Record, newEmailQueueRecord } from "../../../domain/queue/producer";
-import { EmailQueueRepository } from "../../../domain/queue/repository";
+import { QueueRepository } from "../../../domain/queue/repository";
 
 export interface AddAdminCommand {
     Handle: (admin: Admin) => Promise<string | void>;
@@ -13,11 +13,11 @@ export interface AddAdminCommand {
 
 export class AddAdminCommandC implements AddAdminCommand {
     adminRepository: AdminRepository;
-    emailQueueRepository: EmailQueueRepository;
+    emailQueueRepository: QueueRepository;
 
     constructor(
         adminRepository: AdminRepository,
-        emailQueueRepository: EmailQueueRepository
+        emailQueueRepository: QueueRepository
     ) {
         this.adminRepository = adminRepository;
         this.emailQueueRepository = emailQueueRepository;
