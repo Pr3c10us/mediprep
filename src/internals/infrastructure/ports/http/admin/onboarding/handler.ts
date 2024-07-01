@@ -1,21 +1,21 @@
 import { Request, Response, Router } from "express";
-import { AdminServices } from "../../../../app/admin/admin";
+import { AdminServices } from "../../../../../app/admin/admin";
 import {
     SuccessResponse,
     SuccessResponseWithCookies,
-} from "../../../../../pkg/responses/success";
-import ValidationMiddleware from "../../../../../pkg/middleware/validation";
+} from "../../../../../../pkg/responses/success";
+import ValidationMiddleware from "../../../../../../pkg/middleware/validation";
 import {
     addAdminSchema,
     authenticateAdminSchema,
     getAdminsFilterSchema,
-} from "../../../../../pkg/validations/admin";
-import { Admin } from "../../../../domain/admins/admin";
-import CheckPermission from "../../../../../pkg/middleware/checkPermission";
-import {AuthorizeAdmin} from "../../../../../pkg/middleware/authorization";
-import { PaginationFilter } from "../../../../../pkg/types/pagination";
+} from "../../../../../../pkg/validations/admin";
+import { Admin } from "../../../../../domain/admins/admin";
+import CheckPermission from "../../../../../../pkg/middleware/checkPermission";
+import {AuthorizeAdmin} from "../../../../../../pkg/middleware/authorization";
+import { PaginationFilter } from "../../../../../../pkg/types/pagination";
 
-export class AdminHandler {
+export class AdminOnboardingHandler {
     services;
     router;
 

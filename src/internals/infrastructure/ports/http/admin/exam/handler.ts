@@ -1,10 +1,10 @@
-import {AdminServices} from "../../../../app/admin/admin";
+import {AdminServices} from "../../../../../app/admin/admin";
 import {Request, Response} from "express";
-import {ExamServices} from "../../../../app/exam/exam";
-import {Course, EditQuestionParams, Exam, Option, Question, Subject} from "../../../../domain/exams/exam";
-import {SuccessResponse} from "../../../../../pkg/responses/success";
-import {BadRequestError} from "../../../../../pkg/errors/customError";
-import {PaginationFilter} from "../../../../../pkg/types/pagination";
+import {ExamServices} from "../../../../../app/exam/exam";
+import {Course, EditQuestionParams, Exam, Option, Question, Subject} from "../../../../../domain/exams/exam";
+import {SuccessResponse} from "../../../../../../pkg/responses/success";
+import {BadRequestError} from "../../../../../../pkg/errors/customError";
+import {PaginationFilter} from "../../../../../../pkg/types/pagination";
 
 export class ExamHandler {
     examServices: ExamServices;
@@ -20,7 +20,8 @@ export class ExamHandler {
         const exam: Exam = {
             name: req.body.name,
             description: req.body.description,
-            subscriptionAmount: req.body.subscriptionAmount
+            subscriptionAmount: req.body.subscriptionAmount,
+            mockQuestions: req.body.mockQuestions
         }
 
         await this.examServices.commands.addExam.Handle(exam)
@@ -48,16 +49,17 @@ export class ExamHandler {
         const exam: Exam = {
             name: req.body.name,
             description: req.body.description,
-            subscriptionAmount: req.body.subscriptionAmount
+            subscriptionAmount: req.body.subscriptionAmount,
+            mockQuestions: req.body.mockQuestions
         }
 
-        if (!exam.name && !exam.description && !exam.subscriptionAmount) {
+        if (!exam.name && !exam.description && !exam.subscriptionAmount && !exam.mockQuestions) {
             throw new BadRequestError("Provide an exam key to update")
         }
 
         await this.examServices.commands.editExam.Handle(req.params.id, exam)
 
-        new SuccessResponse(res, {message: `exam ${req.body.name} updated`}).send()
+        new SuccessResponse(res, {message: `exam updated`}).send()
     }
     uploadExamImageHandler = async (req: Request, res: Response) => {
         const file = req.file

@@ -7,6 +7,7 @@ export type Exam = {
     description: string;
     subscriptionAmount: number;
     imageURL?: string;
+    mockQuestions?: number;
     courses?: Course[],
     createdAt?: Date;
     updatedAt?: Date;
@@ -17,6 +18,7 @@ export type EditExamParams = {
     description?: string;
     imageURL?: string;
     subscriptionAmount?: number;
+    mockQuestions?: number;
 };
 
 export type Course = {
@@ -41,6 +43,7 @@ export type Question = {
     explanation: string;
     explanationImageUrl?: string;
     subjectId?: string;
+    questionBatchId?: string;
     options?: Option[]
 }
 

@@ -1,0 +1,1 @@
+ALTER TABLE "exam" ADD COLUMN "mock_questions" integer DEFAULT 100;

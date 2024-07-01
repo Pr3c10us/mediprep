@@ -1,4 +1,4 @@
-import {SalesRepository} from "../../domain/sales/repository";
+import {UserExamAccessRepository} from "../../domain/sales/repository";
 import {UserRepository} from "../../domain/users/repository";
 import {ExamRepository} from "../../domain/exams/repository";
 import {Subscribe, SubscribeC} from "./comand/subscribe";
@@ -9,7 +9,7 @@ export class Commands {
     subscribe: Subscribe
 
     constructor(
-        salesRepository: SalesRepository, userRepository: UserRepository, examRepository: ExamRepository
+        salesRepository: UserExamAccessRepository, userRepository: UserRepository, examRepository: ExamRepository
     ) {
         this.subscribe = new SubscribeC(salesRepository,userRepository,examRepository)
     }
@@ -18,7 +18,7 @@ export class Commands {
 export class Queries {
     getSales : GetSalesQuery
     getSaleByID :GetSaleByIDQuery
-    constructor(salesRepository: SalesRepository
+    constructor(salesRepository: UserExamAccessRepository
     ) {
         this.getSales = new GetSalesQueryC(salesRepository)
         this.getSaleByID = new GetSaleByIDQueryC(salesRepository)
@@ -28,10 +28,10 @@ export class Queries {
 export class SalesServices {
     commands: Commands;
     queries: Queries;
-    salesRepository: SalesRepository;
+    salesRepository: UserExamAccessRepository;
 
     constructor(
-        salesRepository: SalesRepository, userRepository: UserRepository, examRepository: ExamRepository
+        salesRepository: UserExamAccessRepository, userRepository: UserRepository, examRepository: ExamRepository
     ) {
         this.salesRepository = salesRepository;
         this.commands = new Commands(salesRepository, userRepository, examRepository);

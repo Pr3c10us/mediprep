@@ -1,15 +1,15 @@
 import {PaginationFilter, PaginationMetaData} from "../../../../pkg/types/pagination";
 import {Sale} from "../../../domain/sales/sale";
-import {SalesRepository} from "../../../domain/sales/repository";
+import {UserExamAccessRepository} from "../../../domain/sales/repository";
 
 export interface GetSaleByIDQuery {
     handle: (id: string) => Promise<Sale>
 }
 
 export class GetSaleByIDQueryC implements GetSaleByIDQuery{
-    saleRepository: SalesRepository;
+    saleRepository: UserExamAccessRepository;
 
-    constructor(saleRepository: SalesRepository) {
+    constructor(saleRepository: UserExamAccessRepository) {
         this.saleRepository = saleRepository;
     }
 

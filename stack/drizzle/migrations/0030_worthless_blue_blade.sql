@@ -1,0 +1,1 @@
+ALTER TABLE "question" ALTER COLUMN "explanation" DROP NOT NULL;

@@ -1,10 +1,10 @@
-import {ExamServices} from "../../../../app/exam/exam";
-import {AdminServices} from "../../../../app/admin/admin";
+import {ExamServices} from "../../../../../app/exam/exam";
+import {AdminServices} from "../../../../../app/admin/admin";
 import {Router} from "express";
-import {MulterConfig} from "../../../../../pkg/utils/multer";
+import {MulterConfig} from "../../../../../../pkg/utils/multer";
 import {ExamHandler} from "./handler";
-import CheckPermission from "../../../../../pkg/middleware/checkPermission";
-import ValidationMiddleware from "../../../../../pkg/middleware/validation";
+import CheckPermission from "../../../../../../pkg/middleware/checkPermission";
+import ValidationMiddleware from "../../../../../../pkg/middleware/validation";
 import {Multer} from 'multer';
 import {
     addExamSchema,
@@ -20,7 +20,7 @@ import {
     questionSchema,
     subjectIdSchema,
     subjectSchema
-} from "../../../../../pkg/validations/exam";
+} from "../../../../../../pkg/validations/exam";
 
 export class ExamRouter {
     router: Router;

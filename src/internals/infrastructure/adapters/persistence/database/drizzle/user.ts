@@ -197,7 +197,7 @@ export class UserRepositoryDrizzle implements UserRepository {
             await this.db.insert(UserExamAccess).values({
                 userId: examToUser.userId,
                 examId: examToUser.examId,
-                expiryDate: examToUser.expiryDate
+                expiryDate: examToUser.expiryDate as Date
             })
         } catch (error) {
             throw error

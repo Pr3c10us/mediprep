@@ -1,3 +1,5 @@
+import {Exam} from "../exams/exam";
+
 export type User = {
     id?: string;
     firstName: string;
@@ -22,7 +24,8 @@ export type EditUser = {
 }
 
 export type UserExamAccess = {
-    userId:string;
     examId: string;
-    expiryDate: Date;
+    userId: string;
+    expiryDate?: Date;
+    exam?: Exam
 }

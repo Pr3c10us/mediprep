@@ -1,15 +1,15 @@
 import {PaginationFilter, PaginationMetaData} from "../../../../pkg/types/pagination";
 import {Sale} from "../../../domain/sales/sale";
-import {SalesRepository} from "../../../domain/sales/repository";
+import {UserExamAccessRepository} from "../../../domain/sales/repository";
 
 export interface GetSalesQuery {
     handle: (filter: PaginationFilter) => Promise<{ sales: Sale[], metadata: PaginationMetaData }>
 }
 
 export class GetSalesQueryC implements GetSalesQuery{
-    saleRepository: SalesRepository;
+    saleRepository: UserExamAccessRepository;
 
-    constructor(saleRepository: SalesRepository) {
+    constructor(saleRepository: UserExamAccessRepository) {
         this.saleRepository = saleRepository;
     }
 

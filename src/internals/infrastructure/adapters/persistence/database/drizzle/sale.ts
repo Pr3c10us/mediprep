@@ -1,4 +1,4 @@
-import {SalesRepository} from "../../../../../domain/sales/repository";
+import {UserExamAccessRepository} from "../../../../../domain/sales/repository";
 import {PoolClient} from "pg";
 import {drizzle} from "drizzle-orm/node-postgres";
 import * as schema from '../../../../../../../stack/drizzle/schema/sales'
@@ -10,7 +10,7 @@ import {PaginationFilter, PaginationMetaData} from "../../../../../../pkg/types/
 import {and, count, eq, gte, lte} from "drizzle-orm";
 import {BadRequestError} from "../../../../../../pkg/errors/customError";
 
-export class SalesRepositoryDrizzle implements SalesRepository {
+export class SalesRepositoryDrizzle implements UserExamAccessRepository {
     db
 
     constructor(client: PoolClient) {

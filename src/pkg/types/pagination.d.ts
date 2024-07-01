@@ -15,12 +15,16 @@ export type PaginationFilter = {
     endDate? : Date;
     reference?: string;
     status? : string;
+    free? : boolean;
+    random? : boolean;
 };
 
 export type PaginationMetaData = {
-    total: number;
-    perPage: number;
-    currentPage: number;
+    total?: number;
+    perPage?: number;
+    currentPage?: number;
+    expiryDate?: Date,
+    totalQuestions?: number
 };
 
 

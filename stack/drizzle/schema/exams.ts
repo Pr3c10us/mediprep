@@ -28,17 +28,19 @@ export const Exams = pgTable('exam', {
     description: text('description').notNull(),
     imageURL: varchar('image_url', {length: 255}),
     subscriptionAmount: integer('subscription_amount').default(0),
+    mockQuestions: integer("mock_questions").default(100),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 }, (t) => ({
     pk: primaryKey({columns: [t.id]}),
-}),)
+}))
 
 export const examRelations = relations(Exams, ({many}) => ({
     examsAccess: many(ExamAccess),
     userExamAccess: many(UserExamAccess),
     courses: many(Courses),
     sales: many(Sales),
+    questions: many(Questions),
     questionBatches: many(QuestionBatch)
 }));
 
@@ -49,6 +51,10 @@ export const Courses = pgTable('courses', {
 }, (t) => ({
     pk: primaryKey({columns: [t.id]}),
 }))
+
+export type Course = (InferSelectModel<typeof Courses> & {
+    exam?: typeof Exams,
+}) | undefined
 
 export const courseExamRelation = relations(Courses, ({one}) => ({
     exam: one(Exams, {
@@ -70,6 +76,10 @@ export const Subjects = pgTable('subject', {
     pk: primaryKey({columns: [t.id]}),
 }))
 
+export type Subject = (InferSelectModel<typeof Subjects> & {
+    course?: Course,
+}) | undefined
+
 export const subjectCourseRelation = relations(Subjects, ({one}) => ({
     course: one(Courses, {
         fields: [Subjects.courseId],
@@ -87,9 +97,11 @@ export const Questions = pgTable('question', {
     question: text('question').notNull(),
     questionImageUrl: varchar('question_image_url', {length: 128}),
     explanationImageUrl: varchar('explanation_image_url', {length: 128}),
-    explanation: text('explanation').notNull(),
+    explanation: text('explanation'),
     free: boolean('free').default(false),
     subjectId: uuid('subject_id').references(() => Subjects.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
+    courseId: uuid('course_id').references(() => Courses.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
+    examId: uuid('exam_id').references(() => Exams.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
     questionBatchId: uuid('question_batch_id').references(() => QuestionBatch.id, {
         onDelete: 'cascade',
         onUpdate: 'cascade'
@@ -120,7 +132,7 @@ export type Question = (InferSelectModel<typeof Questions> & {
 export const Options = pgTable('option', {
     id: uuid('id').defaultRandom(),
     index: integer('index').notNull(),
-    value: text('value').notNull().unique(),
+    value: text('value').notNull(),
     selected: integer('selected').default(0),
     answer: boolean('answer').default(false),
     explanation: text('explanation'),

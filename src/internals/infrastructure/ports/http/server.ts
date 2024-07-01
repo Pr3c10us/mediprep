@@ -7,15 +7,11 @@ import {SuccessResponse} from "../../../../pkg/responses/success";
 import Logger from "../../../../pkg/utils/logger";
 import morganMiddleware from "../../../../pkg/middleware/morgan";
 import {Environment} from "../../../../pkg/configs/env";
-import {AdminHandler} from "./admin/handler";
 import ErrorHandlerMiddleware from "../../../../pkg/middleware/errorHandler";
 import Route404 from "../../../../pkg/middleware/route404";
-import {ExamHandler} from "./exam/handler";
-import {AuthorizeAdmin} from "../../../../pkg/middleware/authorization";
-import {UserHandler} from "./user/handle";
 import {WebhookHandler} from "./webhook/handler";
-import {SalesHandler} from "./sales/handler";
-import {ExamRouter} from "./exam/router";
+import AdminRouter from "./admin/router";
+import UserRouter from "./user/router";
 
 export class Server {
     services: Services;
@@ -45,10 +41,8 @@ export class Server {
 
         this.health();
         this.webhook();
-        this.admin();
         this.user();
-        this.exam();
-        this.sales();
+        this.admin();
 
         this.server.use(`/api/${environmentVariables.apiVersion}`, this.apiRouter);
 
@@ -57,34 +51,24 @@ export class Server {
     }
 
     health = () => {
-        this.server.get("/health", (req: Request, res: Response) => {
+        this.server.get("/health", (_: Request, res: Response) => {
             new SuccessResponse(res).send();
         });
     };
 
     webhook = () => {
-        const router = new WebhookHandler(this.services.SalesServices,this.environmentVariables);
+        const router = new WebhookHandler(this.services.SalesServices, this.environmentVariables);
         this.apiRouter.use("/webhook", router.router);
     };
 
-    admin = () => {
-        const router = new AdminHandler(this.services.AdminServices);
-        this.apiRouter.use("/admin", router.router);
-    };
-
     user = () => {
-        const router = new UserHandler(this.services.UserServices, this.services.AdminServices);
+        const router = new UserRouter(this.services);
         this.apiRouter.use("/user", router.router);
     };
 
-    exam = () => {
-        const router = new ExamRouter(this.services.ExamServices, this.services.AdminServices);
-        this.apiRouter.use("/exam", AuthorizeAdmin(this.services.AdminServices.adminRepository), router.router);
-    };
-
-    sales = () => {
-        const router = new SalesHandler(this.services.SalesServices);
-        this.apiRouter.use("/sales", AuthorizeAdmin(this.services.AdminServices.adminRepository), router.router);
+    admin = () => {
+        const router = new AdminRouter(this.services);
+        this.apiRouter.use("/admin", router.router);
     };
 
     listen = () => {

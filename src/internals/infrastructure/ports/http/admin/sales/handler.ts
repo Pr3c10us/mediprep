@@ -1,10 +1,10 @@
-import {SalesServices} from "../../../../app/sale/sale";
+import {SalesServices} from "../../../../../app/sale/sale";
 import {Request, Response, Router} from "express";
-import CheckPermission from "../../../../../pkg/middleware/checkPermission";
-import ValidationMiddleware from "../../../../../pkg/middleware/validation";
-import {getSalesFilterSchema, saleIdSchema} from "../../../../../pkg/validations/sales";
-import {PaginationFilter} from "../../../../../pkg/types/pagination";
-import {SuccessResponse} from "../../../../../pkg/responses/success";
+import CheckPermission from "../../../../../../pkg/middleware/checkPermission";
+import ValidationMiddleware from "../../../../../../pkg/middleware/validation";
+import {getSalesFilterSchema, saleIdSchema} from "../../../../../../pkg/validations/sales";
+import {PaginationFilter} from "../../../../../../pkg/types/pagination";
+import {SuccessResponse} from "../../../../../../pkg/responses/success";
 
 export class SalesHandler {
     services;
