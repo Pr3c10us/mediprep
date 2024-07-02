@@ -83,11 +83,12 @@ export class ExamHandler {
         new SuccessResponse(res, {message: `course ${req.body.name} added`}).send()
     }
     getCoursesHandler = async (req: Request, res: Response) => {
-        const {limit, page, name} = req.query;
+        const {limit, page, name,examId} = req.query;
         const filter: PaginationFilter = {
             limit: Number(limit) || 10,
             page: Number(page) || 1,
             name: name as string | undefined,
+            examId: examId as string | undefined
         };
 
         const {courses, metadata} = await this.examServices.queries.getCourses.handle(filter);
@@ -123,11 +124,13 @@ export class ExamHandler {
         new SuccessResponse(res, {message: `subject ${req.body.name} added`}).send()
     }
     getSubjectsHandler = async (req: Request, res: Response) => {
-        const {limit, page, name} = req.query;
+        const {limit, page, name,courseId,examId} = req.query;
         const filter: PaginationFilter = {
             limit: Number(limit) || 10,
             page: Number(page) || 1,
             name: name as string | undefined,
+            courseId: courseId as string | undefined,
+            examId: examId as string | undefined
         };
 
         const {subjects, metadata} = await this.examServices.queries.getSubjects.handle(filter);

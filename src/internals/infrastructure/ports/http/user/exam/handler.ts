@@ -19,7 +19,7 @@ export class ExamHandler {
             page: 1,
             free: true,
             random: true,
-            examId: req.params.id
+            examId: req.params.examId
         };
 
         const {questions, metadata} = await this.examServices.queries.getQuestions.handle(filter);
@@ -42,8 +42,7 @@ export class ExamHandler {
     }
 
     getUserExamDetails = async (req: Request, res: Response) => {
-        const {exam,metadata} = await this.userExamAccessService.queries.getUseExamDetails.handle(req.user?.id as string,req.params.id)
-        new SuccessResponse(res, {exam: exam}, metadata).send();
+        new SuccessResponse(res, {exam: req.userExamAccess?.exam}, req.userExamAccess?.metadata).send();
     }
 
 

@@ -46,7 +46,7 @@ export const examRelations = relations(Exams, ({many}) => ({
 
 export const Courses = pgTable('courses', {
     id: uuid('id').defaultRandom(),
-    name: varchar('name', {length: 128}).unique().notNull(),
+    name: varchar('name', {length: 128}).notNull(),
     examId: uuid('exam_id').references(() => Exams.id, {onDelete: 'cascade', onUpdate: 'cascade'})
 }, (t) => ({
     pk: primaryKey({columns: [t.id]}),
@@ -70,15 +70,12 @@ export const courseSubjectRelation = relations(Courses, ({many}) => ({
 
 export const Subjects = pgTable('subject', {
     id: uuid('id').defaultRandom(),
-    name: varchar('name', {length: 128}).unique().notNull(),
-    courseId: uuid('course_id').references(() => Courses.id, {onDelete: 'cascade', onUpdate: 'cascade'})
+    name: varchar('name', {length: 128}).notNull(),
+    courseId: uuid('course_id').references(() => Courses.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
+    examId: uuid('exam_id').references(() => Exams.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
 }, (t) => ({
     pk: primaryKey({columns: [t.id]}),
 }))
-
-export type Subject = (InferSelectModel<typeof Subjects> & {
-    course?: Course,
-}) | undefined
 
 export const subjectCourseRelation = relations(Subjects, ({one}) => ({
     course: one(Courses, {
@@ -90,6 +87,11 @@ export const subjectCourseRelation = relations(Subjects, ({one}) => ({
 export const subjectQuestionRelation = relations(Subjects, ({many}) => ({
     questions: many(Questions)
 }))
+
+
+export type Subject = (InferSelectModel<typeof Subjects> & {
+    course?: Course,
+}) | undefined
 
 export const Questions = pgTable('question', {
     id: uuid('id').defaultRandom(),

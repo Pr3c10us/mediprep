@@ -28,14 +28,19 @@ export class UserExamAccessRepositoryDrizzle implements UserExamAccessRepository
                     exam: true
                 }
             })
-            if (!result) {
+
+            if (!result ) {
                 throw new UnAuthorizedError("User does not have access to exam")
+            }
+            if (new Date(result.expiryDate) < new Date()) {
+                throw new UnAuthorizedError("User access to exam has lapsed")
             }
             const totalQuestions = await this.db.select({count: count()}).from(Questions).where(eq(Questions.examId, result.exam.id as string));
             //     Mock Analytics
 
             return {
                 exam: {
+                    id: result.exam.id as string,
                     name: result.exam.name as string,
                     description: result.exam.description as string,
                     subscriptionAmount: result.exam.subscriptionAmount as number,

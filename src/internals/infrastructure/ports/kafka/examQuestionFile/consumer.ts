@@ -144,7 +144,8 @@ export class ExamQuestionFileConsumer {
         const course = await this.examServices.queries.getCourses.handle({
             limit: 1,
             page: 1,
-            name: courseName
+            name: courseName,
+            examId: examId
         })
         if (course.courses.length < 1) {
             const newCourse = await this.examServices.commands.addCourse.Handle({
@@ -163,7 +164,8 @@ export class ExamQuestionFileConsumer {
         const subject = await this.examServices.queries.getSubjects.handle({
             limit: 1,
             page: 1,
-            name: subjectName
+            name: subjectName,
+            courseId
         })
         if (subject.subjects.length < 1) {
             const newSubject = await this.examServices.commands.addSubject.Handle({

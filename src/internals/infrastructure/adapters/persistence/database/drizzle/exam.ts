@@ -17,10 +17,9 @@ import {
     Exams,
     Options,
     Question as QuestionT,
-    Course as CourseT,
-    Subject as SubjectT,
     QuestionBatch,
     Questions,
+    Subject as SubjectT,
     Subjects
 } from "../../../../../../../stack/drizzle/schema/exams"
 import {PaginationFilter, PaginationMetaData} from "../../../../../../pkg/types/pagination";
@@ -68,9 +67,14 @@ export class ExamRepositoryDrizzle implements ExamRepository {
 
     async AddSubject(subjectParams: Subject): Promise<Subject> {
         try {
+            const course = await this.db.select().from(Courses).where(eq(Courses.id,subjectParams.courseId as string))
+            if (!course[0]) {
+                throw new BadRequestError(`course with id ${subjectParams.courseId} does not exist`)
+            }
             const subject = await this.db.insert(Subjects).values({
                 name: subjectParams.name,
-                courseId: subjectParams.courseId
+                courseId: course[0].id,
+                examId: course[0].examId
             }).returning()
 
             return {
@@ -87,7 +91,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         try {
             await this.db.transaction(async (tx) => {
                 try {
-                    const subject : SubjectT = await this.db.query.Subjects.findFirst({
+                    const subject: SubjectT = await this.db.query.Subjects.findFirst({
                         where: eq(Subjects.id, questionParams.subjectId as string),
                         with: {
                             course: {
@@ -100,7 +104,6 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                     if (!subject) {
                         throw new BadRequestError(`subject with id ${questionParams.subjectId} does not exist`)
                     }
-                    console.log(subject)
                     const newQuestionResults = await tx.insert(Questions).values({
                         description: questionParams.description,
                         question: questionParams.question,
@@ -334,6 +337,9 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 filters.push(ilike(Courses.name, `%${filter.name}%`));
             }
 
+            if (filter.examId || filter.examId != undefined) {
+                filters.push(eq(Courses.examId, filter.examId));
+            }
             // Get the total count of rows
             const totalResult = await this.db.select({count: count()}).from(Courses).where(and(...filters));
             const total = totalResult[0].count;
@@ -389,6 +395,14 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 filters.push(ilike(Subjects.name, `%${filter.name}%`));
             }
 
+            if (filter.courseId || filter.courseId != undefined) {
+                filters.push(eq(Subjects.courseId, filter.courseId));
+            }
+
+            if (filter.examId || filter.examId != undefined) {
+                filters.push(eq(Subjects.examId, filter.examId));
+            }
+
             // Get the total count of rows
             const totalResult = await this.db.select({count: count()}).from(Subjects).where(and(...filters));
             const total = totalResult[0].count;
@@ -401,6 +415,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                     }
                 }
             }
+
             const query = this.db.select().from(Subjects);
 
             if (filters.length > 0) {

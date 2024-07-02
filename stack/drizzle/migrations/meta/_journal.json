@@ -232,6 +232,20 @@
       "when": 1719789875806,
       "tag": "0032_bright_magik",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1719830062483,
+      "tag": "0033_spicy_ezekiel_stane",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1719837769462,
+      "tag": "0034_open_starfox",
+      "breakpoints": true
     }
   ]
 }

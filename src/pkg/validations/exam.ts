@@ -19,10 +19,16 @@ export const examIdSchema = z.object({
     id: uuidSchema
 })
 
+export const userExamIdSchema = z.object({
+    examId: uuidSchema
+})
+
 export const getCommandFilterSchema = z.object({
     limit: z.string().optional(),
     page: z.string().optional(),
     name: z.string().optional(),
+    examId: uuidSchema.optional(),
+    courseId: uuidSchema.optional(),
     firstName: z.string().optional(),
     lastName: z.string().optional(),
     email: z.string().optional(),
