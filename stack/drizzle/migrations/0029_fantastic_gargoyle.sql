@@ -1,1 +1,0 @@
-ALTER TABLE "option" DROP CONSTRAINT "option_value_unique";

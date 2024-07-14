@@ -1,7 +1,7 @@
 import {boolean, integer, pgTable, primaryKey, text, timestamp, uuid, varchar} from 'drizzle-orm/pg-core';
 import {InferSelectModel, relations} from "drizzle-orm";
 import {Admins} from "./admins";
-import {UserExamAccess} from "./users";
+import {UserExamAccess, Users} from "./users";
 import {Sales} from "./sales";
 
 export const ExamAccess = pgTable('exam_access', {
@@ -95,7 +95,7 @@ export type Subject = (InferSelectModel<typeof Subjects> & {
 
 export const Questions = pgTable('question', {
     id: uuid('id').defaultRandom(),
-    description: text('description').notNull(),
+    type: varchar('type', {length: 32}).notNull(),
     question: text('question').notNull(),
     questionImageUrl: varchar('question_image_url', {length: 128}),
     explanationImageUrl: varchar('explanation_image_url', {length: 128}),
@@ -116,6 +116,14 @@ export const questionSubjectRelation = relations(Questions, ({one}) => ({
     subject: one(Subjects, {
         fields: [Questions.subjectId],
         references: [Subjects.id]
+    }),
+    course: one(Courses, {
+        fields: [Questions.courseId],
+        references: [Courses.id]
+    }),
+    exam: one(Exams, {
+        fields: [Questions.examId],
+        references: [Exams.id]
     }),
     questionBatch: one(QuestionBatch, {
         fields: [Questions.questionBatchId],
@@ -166,4 +174,41 @@ export const questionBatchRelation = relations(QuestionBatch, ({one, many}) => (
         fields: [QuestionBatch.examId],
         references: [Exams.id]
     })
+}))
+
+export const UserQuestionRecords = pgTable("user_question_records", {
+    id: uuid('id').defaultRandom(),
+    userId: uuid('user_id').references(() => Users.id).notNull(),
+    questionId: uuid('question_id').references(() => Questions.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+    }).notNull(),
+    subjectId: uuid('subject_id').references(() => Subjects.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
+    courseId: uuid('course_id').references(() => Courses.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
+    examId: uuid('exam_id').references(() => Exams.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
+}, (t) => ({
+    pk: primaryKey({columns: [t.id]}),
+}))
+
+export const userQuestionRecordsRelation = relations(UserQuestionRecords, ({one}) => ({
+    user: one(Users, {
+        fields: [UserQuestionRecords.userId],
+        references: [Users.id]
+    }),
+    question: one(Questions, {
+        fields: [UserQuestionRecords.questionId],
+        references: [Questions.id],
+    }),
+    subject: one(Subjects, {
+        fields: [UserQuestionRecords.subjectId],
+        references: [Subjects.id]
+    }),
+    course: one(Courses, {
+        fields: [UserQuestionRecords.courseId],
+        references: [Courses.id]
+    }),
+    exam: one(Exams, {
+        fields: [UserQuestionRecords.examId],
+        references: [Exams.id]
+    }),
 }))

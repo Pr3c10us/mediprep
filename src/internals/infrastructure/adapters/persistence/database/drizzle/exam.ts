@@ -8,7 +8,7 @@ import {
     Option,
     Question,
     QuestionBatch as QB,
-    QuestionBatchStatus,
+    QuestionBatchStatus, QuestionType,
     Subject
 } from "../../../../../domain/exams/exam";
 import * as schema from "../../../../../../../stack/drizzle/schema/exams"
@@ -67,7 +67,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
 
     async AddSubject(subjectParams: Subject): Promise<Subject> {
         try {
-            const course = await this.db.select().from(Courses).where(eq(Courses.id,subjectParams.courseId as string))
+            const course = await this.db.select().from(Courses).where(eq(Courses.id, subjectParams.courseId as string))
             if (!course[0]) {
                 throw new BadRequestError(`course with id ${subjectParams.courseId} does not exist`)
             }
@@ -105,7 +105,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                         throw new BadRequestError(`subject with id ${questionParams.subjectId} does not exist`)
                     }
                     const newQuestionResults = await tx.insert(Questions).values({
-                        description: questionParams.description,
+                        type: questionParams.type,
                         question: questionParams.question,
                         explanation: questionParams.explanation,
                         subjectId: questionParams.subjectId,
@@ -501,7 +501,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                     questions: questions.map((question: any): Question => {
                         return {
                             id: question.id as string,
-                            description: question.description as string,
+                            type: question.type as QuestionType,
                             explanation: question.explanation as string,
                             question: question.question as string,
                             questionImageUrl: question.questionImageUrl as string,
@@ -663,7 +663,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
             }
             return {
                 id: questionResult.id as string,
-                description: questionResult.description as string,
+                type: questionResult.type as QuestionType,
                 explanation: questionResult.explanation as string,
                 question: questionResult.question as string,
                 questionImageUrl: questionResult.questionImageUrl as string,

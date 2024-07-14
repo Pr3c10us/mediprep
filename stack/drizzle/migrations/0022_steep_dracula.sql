@@ -1,1 +1,0 @@
-ALTER TABLE "user_exam_access" ADD COLUMN "expires" timestamp NOT NULL;

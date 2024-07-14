@@ -65,7 +65,7 @@ export class ExamQuestionFileConsumer {
                     const subjectId = await this.getSubjectId(question.subject, courseId)
 
                     await this.examServices.commands.addQuestion.Handle({
-                        description: question.description,
+                        type: question.type,
                         question: question.question,
                         questionImageUrl: question.questionImageName && `https://${this.environmentVariable.azAccountStorageName}.blob.core.windows.net/${this.environmentVariable.azQuestionImageContainerName}/${question.questionImageName}`,
                         explanation: question.explanation,

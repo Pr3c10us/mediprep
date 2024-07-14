@@ -35,9 +35,11 @@ export type Subject = {
     questions?: Question[]
 }
 
+export type QuestionType = "singleChoice" | "multiChoice" | "fillInTheGap"
+export type QuestionStatus = "correct" | "unanswered" | "wrong";
 export type Question = {
     id?: string;
-    description: string;
+    type: QuestionType;
     question: string;
     questionImageUrl?: string;
     explanation: string;
@@ -49,7 +51,7 @@ export type Question = {
 
 export type EditQuestionParams = {
     id?: string;
-    description?: string;
+    type?: QuestionType;
     question?: string;
     questionImageUrl?: string;
     explanation?: string;

@@ -114,7 +114,7 @@ export class ExamRouter {
         )
 
 
-        // Subject Route
+        // Question Route
         this.router.route('/question').post(
             CheckPermission("edit_exam"),
             ValidationMiddleware(questionSchema, "body"),

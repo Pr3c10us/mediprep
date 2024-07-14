@@ -36,7 +36,8 @@ export const getCommandFilterSchema = z.object({
     country : z.string().optional(),
     subjectId: uuidSchema.optional(),
     startDate: z.string().optional(),
-    endDate: z.string().optional()
+    endDate: z.string().optional(),
+    testType: z.enum(["subjectBased", "courseBased", "mock"]).optional()
 });
 
 
@@ -74,7 +75,7 @@ const optionSchema = z.object({
 })
 
 export const questionSchema = z.object({
-    description: z.string(),
+    type: z.enum(["singleChoice" , "multiChoice" , "fillInTheGap"]),
     question: z.string(),
     explanation: z.string(),
     subjectId: uuidSchema,
@@ -89,7 +90,7 @@ const editOptionSchema = z.object({
 })
 
 export const editQuestionSchema = z.object({
-    description: z.string().optional(),
+    type: z.enum(["singleChoice" , "multiChoice" , "fillInTheGap"]).optional(),
     question: z.string().optional(),
     explanation: z.string().optional(),
     options: z.array(editOptionSchema).optional()

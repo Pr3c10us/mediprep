@@ -1,8 +1,8 @@
 import {boolean, pgTable, primaryKey, timestamp, uuid, varchar} from "drizzle-orm/pg-core";
-import {ExamAccess, Exams} from "./exams";
+import { Exams, UserQuestionRecords} from "./exams";
 import {relations} from "drizzle-orm";
-import {Admins} from "./admins";
 import {Sales} from "./sales";
+import {Tests} from "./test";
 
 export const Users = pgTable("user", {
     id: uuid('id').defaultRandom(),
@@ -41,5 +41,7 @@ export const userToExamRelations = relations(UserExamAccess, ({one}) => ({
 
 export const userExamRelations = relations(Users, ({many}) => ({
     userExamAccess: many(UserExamAccess),
-    sales : many(Sales)
+    sales : many(Sales),
+    questionRecords: many(UserQuestionRecords),
+    tests: many(Tests)
 }));

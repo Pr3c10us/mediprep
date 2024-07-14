@@ -160,7 +160,7 @@ export class ExamHandler {
             return option
         })
         const question: Question = {
-            description: req.body.description,
+            type: req.body.type,
             question: req.body.question,
             explanation: req.body.explanation,
             options,
@@ -197,7 +197,7 @@ export class ExamHandler {
     editQuestionHandler = async (req: Request, res: Response) => {
         const question: EditQuestionParams = {
             id: req.params.questionId,
-            description: req.body.description,
+            type: req.body.type,
             question: req.body.question,
             explanation: req.body.explanation,
             options: (req.body.options && req.body.options.length > 0) ? req.body.options.map((option: any) => {
@@ -210,7 +210,7 @@ export class ExamHandler {
             }) : undefined,
         }
 
-        if (!question.question && !question.description && !question.explanation && !question.options) {
+        if (!question.question && !question.type && !question.explanation && !question.options) {
             throw new BadRequestError("Provide a question key to update")
         }
 

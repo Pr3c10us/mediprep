@@ -5,246 +5,50 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1718234126049,
-      "tag": "0000_moaning_next_avengers",
+      "when": 1720746989193,
+      "tag": "0000_abandoned_dragon_man",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1718246004893,
-      "tag": "0001_overconfident_yellow_claw",
+      "when": 1720882504445,
+      "tag": "0001_shallow_redwing",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1718246123561,
-      "tag": "0002_giant_silver_fox",
+      "when": 1720886273583,
+      "tag": "0002_far_thena",
       "breakpoints": true
     },
     {
       "idx": 3,
       "version": "7",
-      "when": 1718246760825,
-      "tag": "0003_loving_prodigy",
+      "when": 1720886324168,
+      "tag": "0003_new_the_anarchist",
       "breakpoints": true
     },
     {
       "idx": 4,
       "version": "7",
-      "when": 1718247277021,
-      "tag": "0004_bouncy_the_executioner",
+      "when": 1720892741072,
+      "tag": "0004_tough_excalibur",
       "breakpoints": true
     },
     {
       "idx": 5,
       "version": "7",
-      "when": 1718266331911,
-      "tag": "0005_lumpy_karnak",
+      "when": 1720917899504,
+      "tag": "0005_black_liz_osborn",
       "breakpoints": true
     },
     {
       "idx": 6,
       "version": "7",
-      "when": 1718354768016,
-      "tag": "0006_pink_leper_queen",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1718355946655,
-      "tag": "0007_gifted_metal_master",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1718409583419,
-      "tag": "0008_clever_skullbuster",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1718417369540,
-      "tag": "0009_purple_power_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "7",
-      "when": 1718446303792,
-      "tag": "0010_medical_marvel_boy",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "7",
-      "when": 1718446918347,
-      "tag": "0011_small_blonde_phantom",
-      "breakpoints": true
-    },
-    {
-      "idx": 12,
-      "version": "7",
-      "when": 1718447611663,
-      "tag": "0012_lovely_thunderbolts",
-      "breakpoints": true
-    },
-    {
-      "idx": 13,
-      "version": "7",
-      "when": 1718447641651,
-      "tag": "0013_colorful_nick_fury",
-      "breakpoints": true
-    },
-    {
-      "idx": 14,
-      "version": "7",
-      "when": 1718482766124,
-      "tag": "0014_smooth_korvac",
-      "breakpoints": true
-    },
-    {
-      "idx": 15,
-      "version": "7",
-      "when": 1718484906519,
-      "tag": "0015_overconfident_james_howlett",
-      "breakpoints": true
-    },
-    {
-      "idx": 16,
-      "version": "7",
-      "when": 1718485182938,
-      "tag": "0016_first_iron_monger",
-      "breakpoints": true
-    },
-    {
-      "idx": 17,
-      "version": "7",
-      "when": 1718574432886,
-      "tag": "0017_bizarre_king_cobra",
-      "breakpoints": true
-    },
-    {
-      "idx": 18,
-      "version": "7",
-      "when": 1718574751648,
-      "tag": "0018_motionless_stryfe",
-      "breakpoints": true
-    },
-    {
-      "idx": 19,
-      "version": "7",
-      "when": 1718578889959,
-      "tag": "0019_jazzy_roulette",
-      "breakpoints": true
-    },
-    {
-      "idx": 20,
-      "version": "7",
-      "when": 1718660045626,
-      "tag": "0020_equal_talkback",
-      "breakpoints": true
-    },
-    {
-      "idx": 21,
-      "version": "7",
-      "when": 1718668720223,
-      "tag": "0021_shocking_cerise",
-      "breakpoints": true
-    },
-    {
-      "idx": 22,
-      "version": "7",
-      "when": 1719450998985,
-      "tag": "0022_steep_dracula",
-      "breakpoints": true
-    },
-    {
-      "idx": 23,
-      "version": "7",
-      "when": 1719451062005,
-      "tag": "0023_unique_shinobi_shaw",
-      "breakpoints": true
-    },
-    {
-      "idx": 24,
-      "version": "7",
-      "when": 1719521670037,
-      "tag": "0024_yellow_saracen",
-      "breakpoints": true
-    },
-    {
-      "idx": 25,
-      "version": "7",
-      "when": 1719521691265,
-      "tag": "0025_useful_post",
-      "breakpoints": true
-    },
-    {
-      "idx": 26,
-      "version": "7",
-      "when": 1719561384171,
-      "tag": "0026_loose_mercury",
-      "breakpoints": true
-    },
-    {
-      "idx": 27,
-      "version": "7",
-      "when": 1719561395727,
-      "tag": "0027_even_shocker",
-      "breakpoints": true
-    },
-    {
-      "idx": 28,
-      "version": "7",
-      "when": 1719670319462,
-      "tag": "0028_nostalgic_dark_beast",
-      "breakpoints": true
-    },
-    {
-      "idx": 29,
-      "version": "7",
-      "when": 1719779220609,
-      "tag": "0029_fantastic_gargoyle",
-      "breakpoints": true
-    },
-    {
-      "idx": 30,
-      "version": "7",
-      "when": 1719779304861,
-      "tag": "0030_worthless_blue_blade",
-      "breakpoints": true
-    },
-    {
-      "idx": 31,
-      "version": "7",
-      "when": 1719785841699,
-      "tag": "0031_magical_justice",
-      "breakpoints": true
-    },
-    {
-      "idx": 32,
-      "version": "7",
-      "when": 1719789875806,
-      "tag": "0032_bright_magik",
-      "breakpoints": true
-    },
-    {
-      "idx": 33,
-      "version": "7",
-      "when": 1719830062483,
-      "tag": "0033_spicy_ezekiel_stane",
-      "breakpoints": true
-    },
-    {
-      "idx": 34,
-      "version": "7",
-      "when": 1719837769462,
-      "tag": "0034_open_starfox",
+      "when": 1720919250926,
+      "tag": "0006_tired_wither",
       "breakpoints": true
     }
   ]

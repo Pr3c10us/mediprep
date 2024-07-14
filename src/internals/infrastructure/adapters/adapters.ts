@@ -11,6 +11,8 @@ import {UserRepositoryDrizzle} from "./persistence/database/drizzle/user";
 import {SalesRepositoryDrizzle} from "./persistence/database/drizzle/sale";
 import {UserExamAccessRepository} from "../../domain/examAccess/repository";
 import {UserExamAccessRepositoryDrizzle} from "./persistence/database/drizzle/examAccess";
+import {TestRepository} from "../../domain/tests/repository";
+import {TestRepositoryDrizzle} from "./persistence/database/drizzle/test";
 
 export class Adapter {
     EnvironmentVariables
@@ -32,6 +34,8 @@ export class Adapter {
 
     userExamAccessRepository: UserExamAccessRepository
 
+    testRepositories: TestRepository
+
 
     constructor(
         dbClient: PoolClient,
@@ -48,5 +52,6 @@ export class Adapter {
         this.UserRepository = new UserRepositoryDrizzle(dbClient)
         this.salesRepository = new SalesRepositoryDrizzle(dbClient)
         this.userExamAccessRepository = new UserExamAccessRepositoryDrizzle(dbClient)
+        this.testRepositories = new TestRepositoryDrizzle(dbClient)
     }
 }

@@ -1,3 +1,5 @@
+import {TestType} from "../../internals/domain/tests/test";
+
 export type PaginationFilter = {
     limit: number;
     page: number;
@@ -5,18 +7,19 @@ export type PaginationFilter = {
     firstName?: string;
     lastName?: string;
     email?: string;
-    profession? : string;
-    country? : string;
+    profession?: string;
+    country?: string;
     subjectId?: string;
-    courseId? : string;
+    courseId?: string;
     userId?: string;
     examId?: string;
-    startDate? : Date;
-    endDate? : Date;
+    startDate?: Date;
+    endDate?: Date;
     reference?: string;
-    status? : string;
-    free? : boolean;
-    random? : boolean;
+    status?: string;
+    free?: boolean;
+    random?: boolean;
+    testType?: TestType;
 };
 
 export type PaginationMetaData = {
