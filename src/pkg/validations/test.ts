@@ -6,6 +6,8 @@ export const createTestSchema = z.object({
     questionMode: z.enum(["used", "unused"]).default("unused"),
     endTime: z.date(),
     type: z.enum(["subjectBased", "courseBased", "mock"]).default("mock"),
+    subjectId: z.string().optional(),
+    courseId: z.string().optional()
 });
 
 const answerSchema = z.object({

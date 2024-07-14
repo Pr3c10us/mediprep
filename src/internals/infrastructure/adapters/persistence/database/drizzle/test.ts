@@ -111,13 +111,13 @@ export class TestRepositoryDrizzle implements TestRepository {
                         }
                     } else if (test.type == "courseBased") {
                         if (test.courseId) {
-                            filters.push(eq(Questions.subjectId, test.courseId))
+                            filters.push(eq(Questions.courseId, test.courseId))
                         } else {
                             throw new BadRequestError(("pass valid course id"))
                         }
                     } else {
                         if (test.examId) {
-                            filters.push(eq(Questions.subjectId, test.examId))
+                            filters.push(eq(Questions.examId, test.examId))
                         } else {
                             throw new BadRequestError(("pass valid course id"))
                         }
