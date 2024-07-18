@@ -28,7 +28,7 @@ export const Exams = pgTable('exam', {
     description: text('description').notNull(),
     imageURL: varchar('image_url', {length: 255}),
     subscriptionAmount: integer('subscription_amount').default(0),
-    mockQuestions: integer("mock_questions").default(100),
+    mockQuestions: integer("mock_questions").notNull().default(100),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 }, (t) => ({

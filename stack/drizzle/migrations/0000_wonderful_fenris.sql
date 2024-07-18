@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS "question_batch" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "question" (
 	"id" uuid DEFAULT gen_random_uuid(),
-	"type" text NOT NULL,
+	"type" varchar(32) NOT NULL,
 	"question" text NOT NULL,
 	"question_image_url" varchar(128),
 	"explanation_image_url" varchar(128),
@@ -82,8 +82,8 @@ CREATE TABLE IF NOT EXISTS "subject" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user_question_records" (
 	"id" uuid DEFAULT gen_random_uuid(),
-	"user_id" uuid,
-	"question_id" uuid,
+	"user_id" uuid NOT NULL,
+	"question_id" uuid NOT NULL,
 	"subject_id" uuid,
 	"course_id" uuid,
 	"exam_id" uuid,
@@ -107,13 +107,16 @@ CREATE TABLE IF NOT EXISTS "sale" (
 CREATE TABLE IF NOT EXISTS "test_question_records" (
 	"id" uuid DEFAULT gen_random_uuid(),
 	"question_status" varchar(32) DEFAULT 'unanswered',
-	"test_id" uuid,
-	"user_id" uuid,
+	"type" varchar(32) NOT NULL,
+	"test_id" uuid NOT NULL,
+	"user_id" uuid NOT NULL,
 	"option_id" uuid,
-	"question_id" uuid,
+	"options" text[] DEFAULT '{}'::text[],
+	"answer" text,
+	"question_id" uuid NOT NULL,
 	"subject_id" uuid,
 	"course_id" uuid,
-	"exam_id" uuid,
+	"exam_id" uuid NOT NULL,
 	CONSTRAINT "test_question_records_id_pk" PRIMARY KEY("id")
 );
 --> statement-breakpoint
@@ -124,13 +127,13 @@ CREATE TABLE IF NOT EXISTS "tests" (
 	"correct_answers" integer DEFAULT 0,
 	"incorrect_answers" integer DEFAULT 0,
 	"unanswered_questions" integer DEFAULT 0,
-	"type" varchar(32) DEFAULT 'subjectBased',
-	"question_mode" varchar(32) DEFAULT 'used',
-	"user_id" uuid,
+	"type" varchar(32) DEFAULT 'mock',
+	"question_mode" varchar(32) DEFAULT 'unused',
+	"user_id" uuid NOT NULL,
 	"subject_id" uuid,
 	"course_id" uuid,
-	"exam_id" uuid,
-	"end_Time" timestamp DEFAULT '2024-07-12 02:16:29.173',
+	"exam_id" uuid NOT NULL,
+	"end_Time" timestamp DEFAULT '2024-07-18 00:23:52.236',
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
 	CONSTRAINT "tests_id_pk" PRIMARY KEY("id")

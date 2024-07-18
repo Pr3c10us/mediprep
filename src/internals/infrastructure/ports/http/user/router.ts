@@ -15,6 +15,7 @@ export default class UserRouter {
 
         this.onboarding();
         this.exam();
+        this.test()
     }
 
     onboarding = () => {

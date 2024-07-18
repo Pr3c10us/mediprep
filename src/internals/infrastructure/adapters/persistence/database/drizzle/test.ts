@@ -14,7 +14,7 @@ import {
 import * as schema2 from "../../../../../../../stack/drizzle/schema/test";
 import {TestQuestionRecords, Tests} from "../../../../../../../stack/drizzle/schema/test";
 import {and, count, eq, gte, inArray, lte, notInArray, sql} from "drizzle-orm";
-import {BadRequestError} from "../../../../../../pkg/errors/customError";
+import {BadRequestError, NotFoundError} from "../../../../../../pkg/errors/customError";
 import {PaginationFilter, PaginationMetaData} from "../../../../../../pkg/types/pagination";
 
 export class TestRepositoryDrizzle implements TestRepository {
@@ -65,6 +65,7 @@ export class TestRepositoryDrizzle implements TestRepository {
                 tests: tests.map((test): Test => {
                     return {
                         id: test.id as string,
+                        status: test.status,
                         userId: test.userId as string,
                         examId: test.examId as string,
                         type: test.type as TestType,
@@ -75,7 +76,7 @@ export class TestRepositoryDrizzle implements TestRepository {
                         correctAnswers: test.correctAnswers as number,
                         incorrectAnswers: test.incorrectAnswers as number,
                         unansweredQuestions: test.unansweredQuestions as number,
-                        questionMode: test.examId as TestMode,
+                        questionMode: test.questionMode as TestMode,
                         subjectId: test.subjectId as string,
                         courseId: test.courseId as string,
                         endTime: test.endTime as Date,
@@ -113,13 +114,13 @@ export class TestRepositoryDrizzle implements TestRepository {
                         if (test.courseId) {
                             filters.push(eq(Questions.courseId, test.courseId))
                         } else {
-                            throw new BadRequestError(("pass valid course id"))
+                            throw new BadRequestError("pass valid course id")
                         }
                     } else {
                         if (test.examId) {
                             filters.push(eq(Questions.examId, test.examId))
                         } else {
-                            throw new BadRequestError(("pass valid course id"))
+                            throw new BadRequestError("pass valid course id")
                         }
                     }
                     // fetch all user questions record
@@ -130,10 +131,12 @@ export class TestRepositoryDrizzle implements TestRepository {
                         }
                     })
                     const userQuestions: string[] = userQuestionsRes.map((question) => question.questionId)
-                    if (test.questionMode == "used") {
-                        filters.push(inArray(Questions.id, userQuestions))
-                    } else {
-                        filters.push(notInArray(Questions.id, userQuestions))
+                    if (userQuestions.length > 0 && test.questionMode !== "all") {
+                        if (test.questionMode == "used") {
+                            filters.push(inArray(Questions.id, userQuestions))
+                        } else {
+                            filters.push(notInArray(Questions.id, userQuestions))
+                        }
                     }
 
                     const questionsRes = await tx.query.Questions.findMany({
@@ -145,11 +148,14 @@ export class TestRepositoryDrizzle implements TestRepository {
                             courseId: true,
                             examId: true,
                         },
-                        limit: test.questions,
+                        limit: test.questions < exam.mockQuestions ? test.questions : exam.mockQuestions,
                         orderBy: sql`RANDOM
                         ()`
                     })
-
+                    if (questionsRes.length <= 0) {
+                        throw new NotFoundError(`no more ${test.questionMode} questions`)
+                    }
+                    test.questions = questionsRes.length
                     const testRes = await tx.insert(Tests).values(test).returning({id: Tests.id})
                     if (testRes.length <= 0) throw new BadRequestError("Test failed to creat")
                     const testId = testRes[0].id as string
@@ -166,12 +172,21 @@ export class TestRepositoryDrizzle implements TestRepository {
                         }
                     })
 
+                    const newUsedQuestion = questions.filter((question) => !userQuestions.includes(question.questionId))
+                    if (newUsedQuestion.length > 0) {
+                        await tx.insert(UserQuestionRecords).values(newUsedQuestion)
+                    }
                     await tx.insert(TestQuestionRecords).values(questions)
-                    await tx.insert(UserQuestionRecords).values(questions)
+
                     return testId
                 } catch (error) {
-                    tx.rollback()
-                    throw error
+                    console.log(error)
+                    try {
+                        tx.rollback()
+                        throw error
+                    } catch (e) {
+                        throw error
+                    }
                 }
             })
         } catch (error) {
@@ -188,6 +203,9 @@ export class TestRepositoryDrizzle implements TestRepository {
                     questionId: true
                 }
             })
+            if (testQuestionsRes.length <= 0) {
+                throw new NotFoundError("No questions for this test")
+            }
             let filters = []
             const userQuestions: string[] = testQuestionsRes.map((question) => question.questionId)
             filters.push(inArray(Questions.id, userQuestions))
@@ -227,13 +245,27 @@ export class TestRepositoryDrizzle implements TestRepository {
 
     scoreTest = async (testId: string, userId: string, answers: UserAnswer[]): Promise<string> => {
         try {
+            // fetch test
+            const test = await this.db.query.Tests.findFirst({
+                where: eq(Tests.id, testId)
+            })
+            if (!test) {
+                throw new BadRequestError("test does not exist")
+            }
+            if (test.status !== "inProgress") {
+                throw new BadRequestError("test scored")
+            }
             // fetch all user questions record
             const testQuestionsRes = await this.db.query.TestQuestionRecords.findMany({
                 where: and(eq(TestQuestionRecords.userId, userId), eq(TestQuestionRecords.testId, testId)),
                 columns: {
-                    questionId: true
+                    questionId: true,
+                    questionStatus: true
                 }
             })
+            if (testQuestionsRes.length <= 0) {
+                throw new NotFoundError("No questions for this test")
+            }
             let filters = []
             const userQuestions: string[] = testQuestionsRes.map((question) => question.questionId)
             filters.push(inArray(Questions.id, userQuestions))
@@ -249,9 +281,18 @@ export class TestRepositoryDrizzle implements TestRepository {
             let incorrectAnswers: number = 0
             let unansweredQuestions: number = 0
 
+            let answeredQuestions: string[] = []
+
             for await (const answer of answers) {
                 let status: QuestionStatus = "unanswered"
                 const question = questionsRes.find((question) => question?.id === answer.questionId)
+                if (!question) {
+                    continue
+                }
+                const questionExist = answeredQuestions.find((questionId) => questionId === answer.questionId)
+                if (questionExist) {
+                    continue
+                }
                 const options = question?.options?.map((option: any): Option => {
                     return {
                         id: option.id,
@@ -314,13 +355,15 @@ export class TestRepositoryDrizzle implements TestRepository {
                     }).where(eq(TestQuestionRecords.questionId, answer.questionId))
                 }
                 if (status == "unanswered") unansweredQuestions += 1
+                answeredQuestions.push(answer.questionId)
             }
 
             const testUpdate = {
                 correctAnswers,
+                status: "complete",
                 incorrectAnswers,
-                unansweredQuestions,
-                score: (correctAnswers / (incorrectAnswers + unansweredQuestions + correctAnswers)) * 100
+                unansweredQuestions: questionsRes.length - (correctAnswers + incorrectAnswers),
+                score: (correctAnswers / questionsRes.length) * 100
             }
             await this.db.update(Tests).set(testUpdate).where(eq(Tests.id, testId))
             return testId

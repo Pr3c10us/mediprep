@@ -1,6 +1,6 @@
 {
-  "id": "8185248f-74f4-4cb1-94b1-8d7a46d920d4",
-  "prevId": "e710417f-dc18-4ce1-8ed1-ab081b664611",
+  "id": "84b0c2f1-7319-425c-b5e8-505d44cfb9a3",
+  "prevId": "3d61a1db-a801-4990-8936-bdb15a9102e3",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -222,7 +222,7 @@
           "name": "mock_questions",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": 100
         },
         "created_at": {
@@ -414,7 +414,7 @@
         },
         "type": {
           "name": "type",
-          "type": "text",
+          "type": "varchar(32)",
           "primaryKey": false,
           "notNull": true
         },
@@ -855,6 +855,12 @@
           "notNull": false,
           "default": "'unanswered'"
         },
+        "type": {
+          "name": "type",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "test_id": {
           "name": "test_id",
           "type": "uuid",
@@ -870,6 +876,19 @@
         "option_id": {
           "name": "option_id",
           "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "options": {
+          "name": "options",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'{}'::text[]"
+        },
+        "answer": {
+          "name": "answer",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -1013,9 +1032,16 @@
           "notNull": false,
           "default": "gen_random_uuid()"
         },
+        "status": {
+          "name": "status",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'inProgress'"
+        },
         "score": {
           "name": "score",
-          "type": "integer",
+          "type": "double precision",
           "primaryKey": false,
           "notNull": false,
           "default": 0
@@ -1091,7 +1117,7 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
-          "default": "'2024-07-13 16:58:44.135'"
+          "default": "'2024-07-18 01:08:43.448'"
         },
         "created_at": {
           "name": "created_at",

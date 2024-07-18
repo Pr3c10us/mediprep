@@ -1,6 +1,6 @@
 {
-  "id": "78674237-39c8-4bb4-ad49-335f828ba86e",
-  "prevId": "d63548dc-e16d-463f-b995-d9738995625d",
+  "id": "da47adc1-7713-4e8d-a133-a4102771f836",
+  "prevId": "6a5ce088-e456-4cc9-a71d-20e608114403",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -222,7 +222,7 @@
           "name": "mock_questions",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": 100
         },
         "created_at": {
@@ -414,7 +414,7 @@
         },
         "type": {
           "name": "type",
-          "type": "text",
+          "type": "varchar(32)",
           "primaryKey": false,
           "notNull": true
         },
@@ -623,13 +623,13 @@
           "name": "user_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "question_id": {
           "name": "question_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "subject_id": {
           "name": "subject_id",
@@ -855,6 +855,12 @@
           "notNull": false,
           "default": "'unanswered'"
         },
+        "type": {
+          "name": "type",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "test_id": {
           "name": "test_id",
           "type": "uuid",
@@ -873,11 +879,24 @@
           "primaryKey": false,
           "notNull": false
         },
+        "options": {
+          "name": "options",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'{}'::text[]"
+        },
+        "answer": {
+          "name": "answer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "question_id": {
           "name": "question_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "subject_id": {
           "name": "subject_id",
@@ -895,7 +914,7 @@
           "name": "exam_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         }
       },
       "indexes": {},
@@ -1053,14 +1072,14 @@
           "type": "varchar(32)",
           "primaryKey": false,
           "notNull": false,
-          "default": "'subjectBased'"
+          "default": "'mock'"
         },
         "question_mode": {
           "name": "question_mode",
           "type": "varchar(32)",
           "primaryKey": false,
           "notNull": false,
-          "default": "'used'"
+          "default": "'unused'"
         },
         "user_id": {
           "name": "user_id",
@@ -1084,14 +1103,14 @@
           "name": "exam_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "end_Time": {
           "name": "end_Time",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
-          "default": "'2024-07-13 15:55:04.408'"
+          "default": "'2024-07-18 00:41:07.521'"
         },
         "created_at": {
           "name": "created_at",

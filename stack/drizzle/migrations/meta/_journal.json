@@ -5,50 +5,29 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1720746989193,
-      "tag": "0000_abandoned_dragon_man",
+      "when": 1721258632268,
+      "tag": "0000_wonderful_fenris",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1720882504445,
-      "tag": "0001_shallow_redwing",
+      "when": 1721259667566,
+      "tag": "0001_great_firestar",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1720886273583,
-      "tag": "0002_far_thena",
+      "when": 1721261175475,
+      "tag": "0002_icy_guardian",
       "breakpoints": true
     },
     {
       "idx": 3,
       "version": "7",
-      "when": 1720886324168,
-      "tag": "0003_new_the_anarchist",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1720892741072,
-      "tag": "0004_tough_excalibur",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1720917899504,
-      "tag": "0005_black_liz_osborn",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1720919250926,
-      "tag": "0006_tired_wither",
+      "when": 1721261323482,
+      "tag": "0003_wet_stick",
       "breakpoints": true
     }
   ]

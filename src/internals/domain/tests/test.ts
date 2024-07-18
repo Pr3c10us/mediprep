@@ -1,10 +1,11 @@
 import {QuestionStatus, QuestionType} from "../exams/exam";
 
 export type TestType = "subjectBased" | "courseBased" | "mock"
-export type TestMode = "used" | "unused"
+export type TestMode = "used" | "unused" | "all"
 
 export type Test = {
     id: string;
+    status: string;
     score: number;
     questions: number;
     correctAnswers: number;

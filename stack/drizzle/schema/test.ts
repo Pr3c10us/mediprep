@@ -1,11 +1,12 @@
-import {integer, text, pgTable, primaryKey, timestamp, uuid, varchar} from 'drizzle-orm/pg-core';
+import {doublePrecision, integer, pgTable, primaryKey, text, timestamp, uuid, varchar} from 'drizzle-orm/pg-core';
 import {relations, sql} from "drizzle-orm";
 import {Users} from "./users";
 import {Courses, Exams, Options, Questions, Subjects} from "./exams";
 
 export const Tests = pgTable("tests", {
     id: uuid('id').defaultRandom(),
-    score: integer("score").default(0),
+    status: varchar("status", {length: 32}).notNull().default("inProgress"),
+    score: doublePrecision("score").default(0),
     questions: integer("questions").default(0),
     correctAnswers: integer("correct_answers").default(0),
     incorrectAnswers: integer("incorrect_answers").default(0),
@@ -23,7 +24,7 @@ export const Tests = pgTable("tests", {
     pk: primaryKey({columns: [t.id]}),
 }))
 
-export const testsRelation = relations(Tests, ({one,many}) => ({
+export const testsRelation = relations(Tests, ({one, many}) => ({
     user: one(Users, {
         fields: [Tests.userId],
         references: [Users.id]
@@ -45,14 +46,17 @@ export const testsRelation = relations(Tests, ({one,many}) => ({
 
 export const TestQuestionRecords = pgTable("test_question_records", {
     id: uuid('id').defaultRandom(),
-    questionStatus: varchar("question_status",{length: 32}).default('unanswered'),
-    questionType:  varchar('type', {length: 32}).notNull(),
+    questionStatus: varchar("question_status", {length: 32}).default('unanswered'),
+    questionType: varchar('type', {length: 32}).notNull(),
     testId: uuid('test_id').references(() => Tests.id).notNull(),
     userId: uuid('user_id').references(() => Users.id).notNull(),
     optionId: uuid('option_id').references(() => Options.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
     options: text("options").array().default(sql`'{}'::text[]`),
-    answer: text("options"),
-    questionId: uuid('question_id').references(() => Questions.id, {onDelete: 'cascade', onUpdate: 'cascade'}).notNull(),
+    answer: text("answer"),
+    questionId: uuid('question_id').references(() => Questions.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+    }).notNull(),
     subjectId: uuid('subject_id').references(() => Subjects.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
     courseId: uuid('course_id').references(() => Courses.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
     examId: uuid('exam_id').references(() => Exams.id, {onDelete: 'cascade', onUpdate: 'cascade'}).notNull(),

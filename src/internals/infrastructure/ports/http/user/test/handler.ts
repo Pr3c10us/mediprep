@@ -54,8 +54,10 @@ export class TestsHandler {
             questionMode: req.body.questionMode,
             userId: req.user?.id as string,
             examId: req.params.examId,
-            endTime: req.body.endTime,
-            type: req.body.type
+            endTime: new Date(),
+            type: req.body.type,
+            subjectId: req.body.subjectId || null,
+            courseId: req.body.courseId || null,
         }
         const testId = await this.testServices.commands.createTest.Handle(testParams)
 
