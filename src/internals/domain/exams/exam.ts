@@ -46,7 +46,9 @@ export type Question = {
     explanationImageUrl?: string;
     subjectId?: string;
     questionBatchId?: string;
-    options?: Option[]
+    options?: Option[];
+    questionStatus?: QuestionStatus;
+    selectedAnswer?: string | string[]
 }
 
 export type EditQuestionParams = {

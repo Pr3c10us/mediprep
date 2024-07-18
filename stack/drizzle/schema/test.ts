@@ -6,7 +6,7 @@ import {Courses, Exams, Options, Questions, Subjects} from "./exams";
 export const Tests = pgTable("tests", {
     id: uuid('id').defaultRandom(),
     status: varchar("status", {length: 32}).notNull().default("inProgress"),
-    score: doublePrecision("score").default(0),
+    score: doublePrecision("score").notNull().default(0),
     questions: integer("questions").default(0),
     correctAnswers: integer("correct_answers").default(0),
     incorrectAnswers: integer("incorrect_answers").default(0),
@@ -46,7 +46,7 @@ export const testsRelation = relations(Tests, ({one, many}) => ({
 
 export const TestQuestionRecords = pgTable("test_question_records", {
     id: uuid('id').defaultRandom(),
-    questionStatus: varchar("question_status", {length: 32}).default('unanswered'),
+    questionStatus: varchar("question_status", {length: 32}).notNull().default('unanswered'),
     questionType: varchar('type', {length: 32}).notNull(),
     testId: uuid('test_id').references(() => Tests.id).notNull(),
     userId: uuid('user_id').references(() => Users.id).notNull(),

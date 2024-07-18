@@ -22,7 +22,7 @@ export class Services {
             adapter.QueueRepository
         );
         this.EmailServices = new EmailServices(adapter.EmailRepository);
-        this.ExamServices = new ExamServices(adapter.ExamRepository, adapter.StorageRepository, adapter.QueueRepository)
+        this.ExamServices = new ExamServices(adapter.ExamRepository, adapter.StorageRepository, adapter.QueueRepository,adapter.testRepositories)
         this.UserServices = new UserServices(adapter.UserRepository, adapter.QueueRepository)
         this.SalesServices = new SalesServices(adapter.salesRepository, adapter.UserRepository, adapter.ExamRepository)
         this.userExamAccessService = new UserExamAccessService(adapter.userExamAccessRepository)

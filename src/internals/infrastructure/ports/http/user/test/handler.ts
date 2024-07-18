@@ -46,6 +46,15 @@ export class TestsHandler {
                 CheckExamAccess(userExamAccessService),
                 this.getTestQuestions
             )
+
+        this.router.route("/:examId/:testId/analytics")
+            .get(
+                ValidationMiddleware(userExamIdSchema, "params"),
+                ValidationMiddleware(testIdSchema, "params"),
+                ValidationMiddleware(getCommandFilterSchema, "query"),
+                CheckExamAccess(userExamAccessService),
+                this.getTestAnalytics
+            )
     }
 
     createTest = async (req: Request, res: Response) => {
@@ -77,6 +86,15 @@ export class TestsHandler {
         const {tests, metadata} = await this.testServices.queries.getTests.Handle(filter)
 
         new SuccessResponse(res, {tests}, metadata).send();
+    }
+
+    getTestAnalytics = async (req: Request, res: Response) => {
+        const {
+            test,
+            questions
+        } = await this.testServices.queries.getTestDetails.Handle(req.params.testId, req.user?.id as string)
+
+        new SuccessResponse(res, {test, questions}).send();
     }
 
     scoreTest = async (req: Request, res: Response) => {

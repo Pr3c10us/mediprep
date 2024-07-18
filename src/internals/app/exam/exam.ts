@@ -19,6 +19,8 @@ import {DeleteQuestionCommand, DeleteQuestionCommandC} from "./commands/deleteQu
 import {GetQuestionsQuery, GetQuestionsQueryC} from "./query/getQuestions";
 import {QueueRepository} from "../../domain/queue/repository";
 import {AddQuestionFileCommand, AddQuestionFileCommandC} from "./commands/addQuestionFile";
+import {GetExamsAnalytics, GetExamsAnalyticsC} from "./query/getExamAnalytics";
+import {TestRepository} from "../../domain/tests/repository";
 
 export class Commands {
     addExam: AddExamCommand;
@@ -65,12 +67,14 @@ export class Queries {
     getCourses: GetCoursesQuery
     getSubjects: GetSubjectsQuery
     getQuestions: GetQuestionsQuery
+    getExamAnalytics: GetExamsAnalytics
 
-    constructor(examRepository: ExamRepository) {
+    constructor(examRepository: ExamRepository,testRepository: TestRepository) {
         this.getExams = new GetExamsQueryC(examRepository)
         this.getCourses = new GetCoursesQueryC(examRepository)
         this.getSubjects = new GetSubjectsQueryC(examRepository)
         this.getQuestions = new GetQuestionsQueryC(examRepository)
+        this.getExamAnalytics = new GetExamsAnalyticsC(examRepository,testRepository)
     }
 }
 
@@ -80,11 +84,11 @@ export class ExamServices {
     commands: Commands
     queries: Queries
 
-    constructor(examRepository: ExamRepository, storageRepository: StorageRepository, queueRepository: QueueRepository
+    constructor(examRepository: ExamRepository, storageRepository: StorageRepository, queueRepository: QueueRepository,testRepository: TestRepository
     ) {
         this.examRepository = examRepository;
         this.storageRepository = storageRepository;
         this.commands = new Commands(examRepository, storageRepository, queueRepository)
-        this.queries = new Queries(examRepository)
+        this.queries = new Queries(examRepository,testRepository)
     }
 }

@@ -51,3 +51,18 @@ export type UserAnswer = {
     answer?: string
     options?: string[]
 }
+
+export type TestAnalytics = {
+    totalQuestions: number,
+    usedQuestions: number,
+    totalTest: number,
+    testAveragePercent: number,
+    totalMocks: number,
+    mockAveragePercent: number,
+}
+
+export type SubmittedQuestion = {
+    questionStatus: string,
+    questionType: string,
+    questionId: string
+}

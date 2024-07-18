@@ -1,5 +1,5 @@
 import {TestRepository} from "../../../../../domain/tests/repository";
-import {Test, TestMode, TestType, UserAnswer} from "../../../../../domain/tests/test";
+import {Test, TestAnalytics, TestMode, TestType, UserAnswer} from "../../../../../domain/tests/test";
 import {Option, Question, QuestionStatus, QuestionType} from "../../../../../domain/exams/exam";
 import {PoolClient} from "pg";
 import {drizzle} from "drizzle-orm/node-postgres";
@@ -13,7 +13,7 @@ import {
 } from "../../../../../../../stack/drizzle/schema/exams";
 import * as schema2 from "../../../../../../../stack/drizzle/schema/test";
 import {TestQuestionRecords, Tests} from "../../../../../../../stack/drizzle/schema/test";
-import {and, count, eq, gte, inArray, lte, notInArray, sql} from "drizzle-orm";
+import {and, count, eq, gte, inArray, lte, ne, notInArray, sql} from "drizzle-orm";
 import {BadRequestError, NotFoundError} from "../../../../../../pkg/errors/customError";
 import {PaginationFilter, PaginationMetaData} from "../../../../../../pkg/types/pagination";
 
@@ -26,6 +26,125 @@ export class TestRepositoryDrizzle implements TestRepository {
                 ...schema, ...schema2
             }
         })
+    }
+
+    getTestAnalytics = async (testId: string, userId: string): Promise<{ test: Test, questions: Question[] }> => {
+        try {
+            const testRes = await this.db.query.Tests.findFirst({
+                where: and(eq(Tests.id, testId), eq(Tests.userId, userId)),
+            });
+            if (!testRes) throw new NotFoundError(`no test with id ${testId}`)
+            const test: Test = {
+                id: testRes.id as string,
+                status: testRes.status,
+                userId: testRes.userId as string,
+                examId: testRes.examId as string,
+                type: testRes.type as TestType,
+                createdAt: testRes.createdAt as Date,
+                updatedAt: testRes.updatedAt as Date,
+                score: testRes.score as number,
+                questions: testRes.questions as number,
+                correctAnswers: testRes.correctAnswers as number,
+                incorrectAnswers: testRes.incorrectAnswers as number,
+                unansweredQuestions: testRes.unansweredQuestions as number,
+                questionMode: testRes.questionMode as TestMode,
+                subjectId: testRes.subjectId as string,
+                courseId: testRes.courseId as string,
+                endTime: testRes.endTime as Date,
+            }
+
+            const testQuestionsRes = await this.db.query.TestQuestionRecords.findMany({
+                where: and(eq(TestQuestionRecords.userId, userId), eq(TestQuestionRecords.testId, testId)),
+                columns: {
+                    questionStatus: true,
+                    questionType: true,
+                    questionId: true,
+                    optionId: true,
+                    options: true,
+                    answer: true,
+                }
+            })
+
+            const questionsResult = await this.getTestQuestions(testId, userId)
+
+            const questions = questionsResult.map((questionData) => {
+                const result = testQuestionsRes.find((question) => question.questionId == questionData.id)
+                if (result) {
+                    questionData.questionStatus = result.questionStatus as QuestionStatus
+                    if (questionData.type == "singleChoice") {
+                        questionData.selectedAnswer = result.optionId as string
+                    } else if (questionData.type == "multiChoice") {
+                        questionData.selectedAnswer = result.options as string[]
+                    } else {
+                        questionData.selectedAnswer = result.answer as string
+                    }
+                }
+
+                return questionData
+            })
+
+            return {test, questions}
+        } catch (error) {
+            throw error
+        }
+    }
+
+    getExamTestAnalytics = async (userId: string, examId: string): Promise<TestAnalytics> => {
+        try {
+            const allQuestions = await this.db.query.Questions.findMany({
+                where: eq(Questions.examId, examId),
+                columns: {
+                    id: true
+                }
+            })
+            const allTest = await this.db.query.Tests.findMany({
+                where: and(and(eq(Tests.userId, userId), eq(Tests.examId, examId)), ne(Tests.type, "mock")),
+                columns: {
+                    score: true
+                }
+            })
+
+            let totalTestScore: number = 0
+            let totalTest = allTest.length
+
+            allTest.forEach((test) => {
+                totalTestScore += test.score
+            })
+
+            const allMocks = await this.db.query.Tests.findMany({
+                where: and(and(eq(Tests.userId, userId), eq(Tests.examId, examId)), eq(Tests.type, "mock")),
+                columns: {
+                    score: true
+                }
+            })
+
+            let totalMockScore: number = 0
+            let totalMocks = allMocks.length
+
+            allMocks.forEach((test) => {
+                totalMockScore += test.score
+            })
+
+
+            const usedQuestions = await this.db.query.UserQuestionRecords.findMany({
+                where: and(eq(UserQuestionRecords.userId, userId), eq(UserQuestionRecords.examId, examId)),
+                columns: {
+                    id: true
+                }
+            })
+
+            return {
+                totalQuestions: allQuestions.length,
+                usedQuestions: usedQuestions.length,
+                totalTest,
+                testAveragePercent: totalTestScore / totalTest,
+                totalMocks,
+                mockAveragePercent: totalMockScore / totalMocks,
+            }
+
+        } catch (error) {
+            throw error
+        }
     }
 
     getTests = async (filter: PaginationFilter): Promise<{ tests: Test[]; metadata: PaginationMetaData }> => {

@@ -42,7 +42,11 @@ export class ExamHandler {
     }
 
     getUserExamDetails = async (req: Request, res: Response) => {
-        new SuccessResponse(res, {exam: req.userExamAccess?.exam}, req.userExamAccess?.metadata).send();
+        const {
+            exam,
+            metadata
+        } = await this.examServices.queries.getExamAnalytics.handle(req.user?.id as string, req.params.examId)
+        new SuccessResponse(res, {exam}, metadata).send();
     }
 
 
