@@ -54,6 +54,9 @@ export class ExamRouter {
             CheckPermission("delete_exam"),
             ValidationMiddleware(examIdSchema, "params"),
             this.handler.deleteExamHandler
+        ).get(
+            CheckPermission("read_exam"),
+            this.handler.getExamDetails
         )
         this.router.route('/:id/image').patch(
             CheckPermission("edit_exam"),

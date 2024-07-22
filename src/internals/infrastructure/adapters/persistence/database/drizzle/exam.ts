@@ -8,7 +8,8 @@ import {
     Option,
     Question,
     QuestionBatch as QB,
-    QuestionBatchStatus, QuestionType,
+    QuestionBatchStatus,
+    QuestionType,
     Subject
 } from "../../../../../domain/exams/exam";
 import * as schema from "../../../../../../../stack/drizzle/schema/exams"
@@ -20,12 +21,15 @@ import {
     QuestionBatch,
     Questions,
     Subject as SubjectT,
-    Subjects
+    Subjects, UserReportQuestionRecords,
+    UserTagQuestionRecords
 } from "../../../../../../../stack/drizzle/schema/exams"
 import {PaginationFilter, PaginationMetaData} from "../../../../../../pkg/types/pagination";
 import {and, count, eq, ilike, sql} from "drizzle-orm";
 import {BadRequestError} from "../../../../../../pkg/errors/customError";
 import {PoolClient} from "pg";
+import {UserExamAccess} from "../../../../../../../stack/drizzle/schema/users";
+import {Sales} from "../../../../../../../stack/drizzle/schema/sales";
 
 export class ExamRepositoryDrizzle implements ExamRepository {
     db
@@ -620,6 +624,35 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         }
     }
 
+    async GetExamAnalytics(id: string): Promise<Exam> {
+        try {
+            const examResult = await this.db.select().from(Exams).where(eq(Exams.id, id))
+            if (examResult.length < 1) {
+                throw new BadRequestError(`exam with id '${id}' does not exist`)
+            }
+            let exam = examResult[0]
+            const subjects = await this.db.select().from(Subjects).where(eq(Subjects.examId, id))
+            const courses = await this.db.select().from(Courses).where(eq(Courses.examId, id))
+            const users = await this.db.select().from(UserExamAccess).where(eq(UserExamAccess.examId, id))
+            const sales = await this.db.select().from(Sales).where(eq(Sales.examId, id))
+            return {
+                id: exam.id as string,
+                name: exam.name as string,
+                description: exam.description as string,
+                subscriptionAmount: exam.subscriptionAmount as number,
+                imageURL: exam.imageURL as string,
+                createdAt: exam.createdAt as Date,
+                updatedAt: exam.updatedAt as Date,
+                subjectsNo: subjects.length,
+                coursesNo: courses.length,
+                usersNo: users.length,
+                salesNo: sales.length
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
     async GetCourseById(courseId: string): Promise<Course> {
         try {
             const courseResult = await this.db.select().from(Courses).where(eq(Courses.id, courseId))
@@ -697,6 +730,29 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 createdAt: questionBatchResult[0].createdAt as Date,
                 updatedAt: questionBatchResult[0].updatedAt as Date
             }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async TagQuestion(userId: string, questionId: string): Promise<void> {
+        try {
+            await this.db.insert(UserTagQuestionRecords).values({
+                userId,
+                questionId
+            })
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async ReportQuestion(userId: string, questionId: string,reason:string): Promise<void> {
+        try {
+            await this.db.insert(UserReportQuestionRecords).values({
+                userId,
+                questionId,
+                reason
+            })
         } catch (error) {
             throw error
         }

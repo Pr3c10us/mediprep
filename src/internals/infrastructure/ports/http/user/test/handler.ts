@@ -61,7 +61,7 @@ export class TestsHandler {
         const testParams = {
             questions: req.body.questions,
             questionMode: req.body.questionMode,
-            userId: req.user?.id as string,
+            userId: req.userD?.id as string,
             examId: req.params.examId,
             endTime: new Date(),
             type: req.body.type,
@@ -81,7 +81,7 @@ export class TestsHandler {
             startDate: startDate ? new Date(startDate as string) : undefined,
             endDate: endDate ? new Date(endDate as string) : undefined,
             testType: testType ? testType as TestType : undefined,
-            userId: req.user?.id as string
+            userId: req.userD?.id as string
         };
         const {tests, metadata} = await this.testServices.queries.getTests.Handle(filter)
 
@@ -92,7 +92,7 @@ export class TestsHandler {
         const {
             test,
             questions
-        } = await this.testServices.queries.getTestDetails.Handle(req.params.testId, req.user?.id as string)
+        } = await this.testServices.queries.getTestDetails.Handle(req.params.testId, req.userD?.id as string)
 
         new SuccessResponse(res, {test, questions}).send();
     }
@@ -100,7 +100,7 @@ export class TestsHandler {
     scoreTest = async (req: Request, res: Response) => {
         const {answers} = req.body
         const testId = req.params.testId
-        const userId = req.user?.id as string
+        const userId = req.userD?.id as string
 
         const id = await this.testServices.commands.scoreTest.Handle(testId, userId, answers as UserAnswer[])
 
@@ -109,7 +109,7 @@ export class TestsHandler {
 
     getTestQuestions = async (req: Request, res: Response) => {
         const testId = req.params.testId
-        const userId = req.user?.id as string
+        const userId = req.userD?.id as string
 
         const questions = await this.testServices.queries.getTestQuestions.Handle(testId, userId)
 

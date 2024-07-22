@@ -4,6 +4,7 @@ import {UserOnboardingHandler} from "./onboarding/handle";
 import {ExamRouter} from "./exam/router";
 import {AuthorizeUser} from "../../../../../pkg/middleware/authorization";
 import {TestsHandler} from "./test/handler";
+import {UserProfileHandler} from "./profile/handler";
 
 export default class UserRouter {
     router: Router
@@ -15,7 +16,8 @@ export default class UserRouter {
 
         this.onboarding();
         this.exam();
-        this.test()
+        this.test();
+        this.profile();
     }
 
     onboarding = () => {
@@ -31,5 +33,10 @@ export default class UserRouter {
     test = () => {
         const router = new TestsHandler(this.services.testServices, this.services.userExamAccessService);
         this.router.use("/test", AuthorizeUser(this.services.UserServices.userRepository), router.router);
+    };
+
+    profile = () => {
+        const router = new UserProfileHandler(this.services.UserServices);
+        this.router.use("/profile", AuthorizeUser(this.services.UserServices.userRepository), router.router);
     };
 }

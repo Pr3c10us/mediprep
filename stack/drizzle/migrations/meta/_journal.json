@@ -43,6 +43,41 @@
       "when": 1721270995771,
       "tag": "0005_glamorous_namora",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1721475296687,
+      "tag": "0006_crazy_molecule_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1721481165029,
+      "tag": "0007_spotty_spencer_smythe",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1721482124055,
+      "tag": "0008_lazy_slapstick",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1721655379898,
+      "tag": "0009_quick_spot",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1721655446107,
+      "tag": "0010_wise_captain_cross",
+      "breakpoints": true
     }
   ]
 }

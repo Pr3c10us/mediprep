@@ -33,7 +33,7 @@ export class ExamHandler {
             limit: Number(limit) || 10,
             page: Number(page) || 1,
             name: name as string | undefined,
-            userId: req.user?.id
+            userId: req.userD?.id
         };
 
         const {exams, metadata} = await this.userExamAccessService.queries.getUserExams.handle(filter)
@@ -45,9 +45,18 @@ export class ExamHandler {
         const {
             exam,
             metadata
-        } = await this.examServices.queries.getExamAnalytics.handle(req.user?.id as string, req.params.examId)
+        } = await this.examServices.queries.getExamAnalytics.handle(req.userD?.id as string, req.params.examId)
         new SuccessResponse(res, {exam}, metadata).send();
     }
 
+    tagQuestion = async (req:Request,res:Response)=> {
+        await this.examServices.commands.tagQuestion.Handle(req.userD?.id as string,req.params.questionId)
+        new SuccessResponse(res, {message: "question Tagged"}).send();
+    }
+
+    reportQuestion = async (req:Request,res:Response)=> {
+        await this.examServices.commands.reportQuestion.Handle(req.userD?.id as string,req.params.questionId,req.body.reason)
+        new SuccessResponse(res, {message: "question reported"}).send();
+    }
 
 }

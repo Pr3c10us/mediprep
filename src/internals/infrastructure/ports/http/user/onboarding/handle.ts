@@ -12,18 +12,21 @@ import {verifyToken} from "../../../../../../pkg/utils/encryption";
 import {SuccessResponse, SuccessResponseWithCookies} from "../../../../../../pkg/responses/success";
 import {User} from "../../../../../domain/users/user";
 import {AuthorizeAdmin, AuthorizeUser} from "../../../../../../pkg/middleware/authorization";
-import {AdminServices} from "../../../../../app/admin/admin";
-import CheckPermission from "../../../../../../pkg/middleware/checkPermission";
-import {getCommandFilterSchema} from "../../../../../../pkg/validations/exam";
-import {PaginationFilter} from "../../../../../../pkg/types/pagination";
+import passport from 'passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import {Environment} from "../../../../../../pkg/configs/env";
 
 export class UserOnboardingHandler {
     userServices;
     router;
+    environmentVariable
 
     constructor(userServices: UserServices) {
         this.userServices = userServices;
         this.router = Router();
+        this.environmentVariable = new Environment()
+
+
 
         this.router
             .route("/verify")
@@ -60,8 +63,6 @@ export class UserOnboardingHandler {
             );
 
     }
-
-
 
     addUserHandler = async (req: Request, res: Response) => {
         const user = req.body as User;
@@ -103,8 +104,10 @@ export class UserOnboardingHandler {
 
     resetPassword = async (req: Request, res: Response) => {
         const {newPassword, oldPassword} = req.body
-        await this.userServices.commands.resetPassword.Handle(req.user?.id as string, newPassword, oldPassword)
+        await this.userServices.commands.resetPassword.Handle(req.userD?.id as string, newPassword, oldPassword)
         new SuccessResponse(res, {message: "password reset"}).send()
 
     }
+
+
 }

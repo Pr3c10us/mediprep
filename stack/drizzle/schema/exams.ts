@@ -212,3 +212,48 @@ export const userQuestionRecordsRelation = relations(UserQuestionRecords, ({one}
         references: [Exams.id]
     }),
 }))
+
+export const UserTagQuestionRecords = pgTable("user_tag_question_records", {
+    id: uuid('id').defaultRandom(),
+    userId: uuid('user_id').references(() => Users.id).notNull(),
+    questionId: uuid('question_id').references(() => Questions.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+    }).notNull(),
+}, (t) => ({
+    pk: primaryKey({columns: [t.id]}),
+}))
+
+export const userTagQuestionRecordsRelation = relations(UserTagQuestionRecords, ({one}) => ({
+    user: one(Users, {
+        fields: [UserTagQuestionRecords.userId],
+        references: [Users.id]
+    }),
+    question: one(Questions, {
+        fields: [UserTagQuestionRecords.questionId],
+        references: [Questions.id],
+    }),
+}))
+
+export const UserReportQuestionRecords = pgTable("user_report_question_records", {
+    id: uuid('id').defaultRandom(),
+    userId: uuid('user_id').references(() => Users.id).notNull(),
+    questionId: uuid('question_id').references(() => Questions.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+    }).notNull(),
+    reason: text("reason").notNull()
+}, (t) => ({
+    pk: primaryKey({columns: [t.id]}),
+}))
+
+export const userReportQuestionRecordsRelation = relations(UserReportQuestionRecords, ({one}) => ({
+    user: one(Users, {
+        fields: [UserReportQuestionRecords.userId],
+        references: [Users.id]
+    }),
+    question: one(Questions, {
+        fields: [UserReportQuestionRecords.questionId],
+        references: [Questions.id],
+    }),
+}))

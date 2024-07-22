@@ -1,6 +1,3 @@
-import {timestamp, uuid, varchar} from "drizzle-orm/pg-core";
-import {Exams} from "../../../../stack/drizzle/schema/exams";
-
 export type Exam = {
     id?: string;
     name: string;
@@ -11,6 +8,12 @@ export type Exam = {
     courses?: Course[],
     createdAt?: Date;
     updatedAt?: Date;
+    testAveragePercent?: number,
+    mockAveragePercent?: number,
+    subjectsNo?: number,
+    coursesNo?: number,
+    usersNo?: number,
+    salesNo?: number
 };
 
 export type EditExamParams = {
@@ -77,14 +80,14 @@ export type EditOptionParams = {
     explanation?: string
 }
 
-export type ExamQuestionFile = { blobName: string, examId: string,batchId: string }
+export type ExamQuestionFile = { blobName: string, examId: string, batchId: string }
 
-export type QuestionBatchStatus = "processing"|"failed"|"complete";
+export type QuestionBatchStatus = "processing" | "failed" | "complete";
 
-export type QuestionBatch ={
-    id:  string,
+export type QuestionBatch = {
+    id: string,
     status: QuestionBatchStatus,
-    examId:  string,
+    examId: string,
     createdAt: Date,
     updatedAt: Date,
 }

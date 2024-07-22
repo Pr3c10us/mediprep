@@ -40,6 +40,11 @@ export class ExamHandler {
 
         new SuccessResponse(res, {exams: exams}, metadata).send();
     }
+    getExamDetails = async (req: Request, res: Response) => {
+        const {exam } = await this.examServices.queries.getExamDetails.handle(req.params.id);
+
+        new SuccessResponse(res, {exam}).send();
+    }
     deleteExamHandler = async (req: Request, res: Response) => {
         await this.examServices.commands.deleteExam.Handle(req.params.id)
 

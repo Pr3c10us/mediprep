@@ -23,6 +23,14 @@ export const userSchema = z.object({
     country: z.string(),
 })
 
+export const updateUserSchema = z.object({
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    email: z.string().email().optional(),
+    profession: z.string().optional(),
+    country: z.string().optional(),
+})
+
 export const authenticateUserSchema = z.object({
     email: z.string().email(),
     password: z.string(),

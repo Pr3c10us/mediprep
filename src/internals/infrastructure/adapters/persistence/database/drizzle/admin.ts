@@ -8,6 +8,8 @@ import {BadRequestError} from "../../../../../../pkg/errors/customError";
 import {ExamAccess} from "../../../../../../../stack/drizzle/schema/exams";
 import {PoolClient} from "pg";
 import  * as schema from "../../../../../../../stack/drizzle/schema/admins"
+import {User} from "../../../../../domain/users/user";
+import {Users} from "../../../../../../../stack/drizzle/schema/users";
 
 export class AdminRepositoryDrizzle implements AdminRepository {
 
@@ -55,6 +57,14 @@ export class AdminRepositoryDrizzle implements AdminRepository {
             throw error;
         }
     };
+
+    updateUser = async (admin: Partial<Admin>): Promise<void> => {
+        try {
+            const result = await this.db.update(Admins).set(admin).where(eq(Admins.id, admin.id as string)).returning()
+        } catch (error) {
+            throw error
+        }
+    }
 
     GetAdminByEmail = async (email: string): Promise<Admin | null> => {
         try {

@@ -47,6 +47,12 @@ export class Environment {
 
     paystackSecret: string;
 
+    googleClientId: string
+    googleClientSecret: string
+    googleCallbackUrl: string
+    oauthFailureRedirect: string
+    oauthSuccessRedirect: string
+
     constructor() {
         this.pgDBUsername = this.getEnvAsString("PG_DB_USERNAME", "postgres");
         this.pgDBPassword = this.getEnvAsString("PG_DB_PASSWORD", "password");
@@ -104,6 +110,13 @@ export class Environment {
         this.resetPasswordURL = this.getEnvORError("RESET_PASSWORD_URL");
 
         this.paystackSecret = this.getEnvORError("PAYSTACK_SECRET")
+
+        this.googleClientId = this.getEnvORError("GOOGLE_CLIENT_ID")
+        this.googleClientSecret = this.getEnvORError("GOOGLE_CLIENT_SECRET")
+        this.googleCallbackUrl = this.getEnvORError("GOOGLE_CALLBACK_URL")
+
+        this.oauthFailureRedirect = this.getEnvAsString("OAUTH_FAILURE_REDIRECT","/")
+        this.oauthSuccessRedirect = this.getEnvAsString("OAUTH_SUCCESS_REDIRECT","/dashboard")
     }
 
     getEnvORError = (key: string): string => {

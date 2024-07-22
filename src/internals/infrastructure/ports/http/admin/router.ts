@@ -6,6 +6,7 @@ import {SalesHandler} from "./sales/handler";
 import {Services} from "../../../../app/services";
 import {UserOnboardingHandler} from "../user/onboarding/handle";
 import {UserHandler} from "./user/handle";
+import {TestsHandler} from "./test/handler";
 
 export default class AdminRouter {
     router : Router
@@ -36,6 +37,8 @@ export default class AdminRouter {
 
     user = () => {
         const router = new UserHandler(this.services.UserServices,this.services.AdminServices);
+        const testRouter = new TestsHandler(this.services.testServices,this.services.AdminServices)
         this.router.use("/user", router.router);
+        this.router.use("/user/test", testRouter.router);
     };
 }

@@ -6,11 +6,15 @@ export type User = {
     lastName: string;
     email: string;
     password?: string;
-    profession: string;
-    country: string;
+    profession?: string;
+    country?: string;
     verified? : boolean;
     createdAt?: Date;
     updatedAt?: Date;
+    blacklisted?:boolean;
+    examsBought?: number;
+    testNo?:number;
+    mockNo?: number
 }
 
 export type EditUser = {

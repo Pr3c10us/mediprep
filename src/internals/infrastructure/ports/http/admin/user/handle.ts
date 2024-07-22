@@ -1,21 +1,14 @@
 import {Request, Response, Router} from "express";
-import {
-    authenticateUserSchema,
-    forgotPasswordSchema,
-    resetPasswordSchema,
-    userSchema,
-    verifyJwtSchema
-} from "../../../../../../pkg/validations/user";
 import {UserServices} from "../../../../../app/user/user";
 import ValidationMiddleware from "../../../../../../pkg/middleware/validation";
-import {verifyToken} from "../../../../../../pkg/utils/encryption";
-import {SuccessResponse, SuccessResponseWithCookies} from "../../../../../../pkg/responses/success";
-import {User} from "../../../../../domain/users/user";
-import {AuthorizeAdmin, AuthorizeUser} from "../../../../../../pkg/middleware/authorization";
+import {SuccessResponse} from "../../../../../../pkg/responses/success";
+import {AuthorizeAdmin} from "../../../../../../pkg/middleware/authorization";
 import {AdminServices} from "../../../../../app/admin/admin";
 import CheckPermission from "../../../../../../pkg/middleware/checkPermission";
 import {getCommandFilterSchema} from "../../../../../../pkg/validations/exam";
 import {PaginationFilter} from "../../../../../../pkg/types/pagination";
+import {z} from "zod";
+import {uuidSchema} from "../../../../../../pkg/validations/admin";
 
 export class UserHandler {
     userServices;
@@ -32,6 +25,25 @@ export class UserHandler {
                 CheckPermission("read_user"),
                 ValidationMiddleware(getCommandFilterSchema, "query"),
                 this.getUsersHandler
+            );
+
+        this.router
+            .route("/:userId")
+            .get(
+                AuthorizeAdmin(adminServices.adminRepository),
+                CheckPermission("read_user"),
+                ValidationMiddleware(z.object({userId: uuidSchema}), "params"),
+                this.getUserDetailsHandler
+            );
+
+        this.router
+            .route("/:userId/blacklist")
+            .patch(
+                AuthorizeAdmin(adminServices.adminRepository),
+                CheckPermission("edit_user"),
+                ValidationMiddleware(z.object({userId: uuidSchema}), "params"),
+                ValidationMiddleware(z.object({blacklist: z.boolean()}), "body"),
+                this.blacklistUserHandler
             );
     }
 
@@ -62,5 +74,19 @@ export class UserHandler {
         const {users, metadata} = await this.userServices.queries.getUsers.handle(filter);
 
         new SuccessResponse(res, {users: users}, metadata).send();
+    }
+
+    getUserDetailsHandler = async (req: Request, res: Response) => {
+        const user = await this.userServices.queries.getUserDetails.handle(req.params.userId);
+
+        new SuccessResponse(res, {user}).send();
+    }
+
+    blacklistUserHandler = async (req: Request, res: Response) => {
+        const user = await this.userServices.commands.updateUser.Handle({
+            id: req.params.userId,
+            blacklisted: req.body.blacklist
+        });
+        new SuccessResponse(res, {user}).send();
     }
 }

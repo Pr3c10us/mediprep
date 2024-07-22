@@ -5,8 +5,10 @@ import {drizzle} from "drizzle-orm/node-postgres";
 import {PoolClient} from "pg";
 import * as schema from "../../../../../../../stack/drizzle/schema/users"
 import {UserExamAccess, Users} from "../../../../../../../stack/drizzle/schema/users"
-import {and, count, eq, gte, ilike, lte} from "drizzle-orm";
+import {and, count, eq, gte, ilike, lte, ne} from "drizzle-orm";
 import {BadRequestError} from "../../../../../../pkg/errors/customError";
+import {Sales} from "../../../../../../../stack/drizzle/schema/sales";
+import {Tests} from "../../../../../../../stack/drizzle/schema/test";
 
 
 export class UserRepositoryDrizzle implements UserRepository {
@@ -25,6 +27,8 @@ export class UserRepositoryDrizzle implements UserRepository {
                 password: user.password as string,
                 country: user.country as string,
                 profession: user.profession as string,
+                blacklisted: user.blacklisted,
+                verified: user.verified ? user.verified : false
             }).returning()
 
             return {
@@ -36,6 +40,29 @@ export class UserRepositoryDrizzle implements UserRepository {
                 country: result[0].country as string,
                 verified: result[0].verified as boolean,
                 profession: result[0].profession as string,
+                blacklisted: result[0].blacklisted,
+                createdAt: result[0].createdAt as Date,
+                updatedAt: result[0].updatedAt as Date
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    updateUser = async (user: Partial<User>): Promise<User> => {
+        try {
+            const result = await this.db.update(Users).set(user).where(eq(Users.id, user.id as string)).returning()
+
+            return {
+                id: result[0].id as string,
+                firstName: result[0].firstName as string,
+                lastName: result[0].lastName as string,
+                email: result[0].email as string,
+                password: result[0].password as string,
+                country: result[0].country as string,
+                verified: result[0].verified as boolean,
+                profession: result[0].profession as string,
+                blacklisted: result[0].blacklisted,
                 createdAt: result[0].createdAt as Date,
                 updatedAt: result[0].updatedAt as Date
             }
@@ -81,8 +108,44 @@ export class UserRepositoryDrizzle implements UserRepository {
                 country: user.country as string,
                 verified: user.verified as boolean,
                 profession: user.profession as string,
+                blacklisted: user.blacklisted,
                 createdAt: user.createdAt as Date,
                 updatedAt: user.updatedAt as Date
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    getUserDetailsWithAnalytics = async (id: string): Promise<User> => {
+        try {
+            const user = await this.db.query.Users.findFirst({
+                where: (eq(Users.id, id))
+            })
+            if (!user) {
+                throw new BadRequestError(`user with id '${id}' does not exist`)
+            }
+
+            const sales = await this.db.select().from(Sales).where(eq(Sales.userId, id))
+            const test = await this.db.select().from(Tests).where(and(eq(Tests.userId, id), ne(Tests.type, "mock")))
+            const mock = await this.db.select().from(Tests).where(and(eq(Tests.userId, id), eq(Tests.type, "mock")))
+
+
+            return {
+                id: user.id as string,
+                firstName: user.firstName as string,
+                lastName: user.lastName as string,
+                email: user.email as string,
+                password: user.password as string,
+                country: user.country as string,
+                verified: user.verified as boolean,
+                profession: user.profession as string,
+                blacklisted: user.blacklisted,
+                createdAt: user.createdAt as Date,
+                updatedAt: user.updatedAt as Date,
+                examsBought: sales.length,
+                testNo: test.length,
+                mockNo: mock.length
             }
         } catch (error) {
             throw error
@@ -107,6 +170,7 @@ export class UserRepositoryDrizzle implements UserRepository {
                 country: user.country as string,
                 verified: user.verified as boolean,
                 profession: user.profession as string,
+                blacklisted: user.blacklisted,
                 createdAt: user.createdAt as Date,
                 updatedAt: user.updatedAt as Date
             }
@@ -175,6 +239,7 @@ export class UserRepositoryDrizzle implements UserRepository {
                             password: user.password as string,
                             country: user.country as string,
                             profession: user.profession as string,
+                            blacklisted: user.blacklisted,
                             verified: user.verified as boolean,
                             createdAt: user.createdAt as Date,
                             updatedAt: user.updatedAt as Date

@@ -1,5 +1,5 @@
 import {boolean, pgTable, primaryKey, timestamp, uuid, varchar} from "drizzle-orm/pg-core";
-import { Exams, UserQuestionRecords} from "./exams";
+import {Exams, UserQuestionRecords} from "./exams";
 import {relations} from "drizzle-orm";
 import {Sales} from "./sales";
 import {Tests} from "./test";
@@ -9,10 +9,11 @@ export const Users = pgTable("user", {
     firstName: varchar('first_name', {length: 64}).notNull(),
     lastName: varchar('last_name', {length: 64}).notNull(),
     email: varchar('email', {length: 64}).notNull().unique(),
-    password: varchar('password', {length: 256}).notNull(),
-    profession: varchar('profession', {length: 64}).notNull(),
-    country: varchar('country', {length: 64}).notNull(),
+    password: varchar('password', {length: 256}),
+    profession: varchar('profession', {length: 64}),
+    country: varchar('country', {length: 64}),
     verified: boolean('verified').default(false),
+    blacklisted: boolean('black_listed').default(false).notNull(),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 }, (t) => ({
@@ -41,7 +42,7 @@ export const userToExamRelations = relations(UserExamAccess, ({one}) => ({
 
 export const userExamRelations = relations(Users, ({many}) => ({
     userExamAccess: many(UserExamAccess),
-    sales : many(Sales),
+    sales: many(Sales),
     questionRecords: many(UserQuestionRecords),
     tests: many(Tests)
 }));
