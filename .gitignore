@@ -8,3 +8,4 @@ stack/terraform/azure/.terraform/providers/registry.terraform.io/hashicorp/azure
 stack/terraform/azure/.terraform.lock.hcl
 .terraform
 /view/
+./dist

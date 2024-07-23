@@ -1,4 +1,4 @@
-import { NotFoundError } from "../../../../../../pkg/errors/customError";
+import {BadRequestError, NotFoundError} from "../../../../../../pkg/errors/customError";
 import {
     AddAdminQuery,
     GetAdminByEmailQuery,
@@ -9,6 +9,8 @@ import {PaginationFilter, PaginationMetaData} from "../../../../../../pkg/types/
 import { Admin, newAdmin } from "../../../../../domain/admins/admin";
 import { AdminRepository } from "../../../../../domain/admins/repository";
 import { PoolClient } from "pg";
+import {error} from "winston";
+import {undefined} from "zod";
 
 export class AdminRepositoryPG implements AdminRepository {
     dbClient: PoolClient;
@@ -119,4 +121,8 @@ export class AdminRepositoryPG implements AdminRepository {
             throw error;
         }
     };
+
+    updateUser(admin: Admin): Promise<void> {
+        throw new Error("Implement me!!")
+    }
 }
