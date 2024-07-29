@@ -32,7 +32,7 @@ export class ExamRouter {
         this.router = Router();
         this.handler = new ExamHandler(examServices, adminServices)
         this.uploadImage = new MulterConfig().multer
-        this.uploadCSV = new MulterConfig("tabularDocument", 1024 * 1024).multer
+        this.uploadCSV = new MulterConfig("tabularDocument", 1024 * 1024 * 1024).multer
 
 
         // Exams Route
