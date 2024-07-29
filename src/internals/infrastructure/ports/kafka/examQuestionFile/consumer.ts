@@ -54,7 +54,9 @@ export class ExamQuestionFileConsumer {
 
             for await (const line of rl) {
                 try {
-                    const question = this.extractQuestion(line)
+                    // console.log({a: Object.entries(line), line})
+                    // continue
+                    const question = line
 
                     // skip line if a course or subject is not provided
                     if (!question.course || !question.subject) {
@@ -63,15 +65,26 @@ export class ExamQuestionFileConsumer {
 
                     const courseId = await this.getCourseId(question.course, data.examId)
                     const subjectId = await this.getSubjectId(question.subject, courseId)
+                    const optionsParams = JSON.parse(question.options)
+                    const options: Option[] = optionsParams.map((option: any): Option => {
+                        if (option.explanation) {
+                            question.explanation += "\n"
+                            question.explanation += option.explanation
+                        }
+                        return {
+                            value: option.option,
+                            answer: option.correct,
+                        }
+                    })
 
                     await this.examServices.commands.addQuestion.Handle({
                         type: question.type,
                         question: question.question,
-                        questionImageUrl: question.questionImageName && `https://${this.environmentVariable.azAccountStorageName}.blob.core.windows.net/${this.environmentVariable.azQuestionImageContainerName}/${question.questionImageName}`,
+                        questionImageUrl: question.questionImageName && question.questionImageName,
                         explanation: question.explanation,
-                        explanationImageUrl: question.explanationImageName && `https://${this.environmentVariable.azAccountStorageName}.blob.core.windows.net/${this.environmentVariable.azExplanationImageContainerName}/${question.explanationImageName}`,
+                        explanationImageUrl: question.explanationImageName && question.explanationImageName,
                         subjectId: subjectId,
-                        options: question.options,
+                        options,
                         questionBatchId: data.batchId
                     })
                 } catch (error) {
@@ -82,17 +95,17 @@ export class ExamQuestionFileConsumer {
 
             await this.examServices.examRepository.UpdateQuestionBatchStatus(data.batchId, 'complete')
             console.log("Questions addition completed")
-            const options: BlobDeleteOptions = {
-                deleteSnapshots: 'include'
-            }
-            await blobClient.deleteIfExists(options)
-            console.log("blob deleted")
+            // const options: BlobDeleteOptions = {
+            //     deleteSnapshots: 'include'
+            // }
+            // await blobClient.deleteIfExists(options)
+            // console.log("blob deleted")
         } catch (error) {
             await this.examServices.examRepository.UpdateQuestionBatchStatus(data.batchId, 'failed')
-            const options: BlobDeleteOptions = {
-                deleteSnapshots: 'include'
-            }
-            await blobClient.deleteIfExists(options)
+            // const options: BlobDeleteOptions = {
+            //     deleteSnapshots: 'include'
+            // }
+            // await blobClient.deleteIfExists(options)
             Logger.error("Failed to Process Questions");
             console.log(error);
         }
