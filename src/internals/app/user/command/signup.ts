@@ -40,7 +40,7 @@ export class AddUserCommandC implements AddUserCommand {
                 mailTo: [userResult.email],
                 plainText: `
                 Verify your account by clicking on this link: \n
-                ${this.environmentVariables.url}/api/${this.environmentVariables.apiVersion}/user/verify?jwt=${token}
+                ${this.environmentVariables.url}/api/${this.environmentVariables.apiVersion}/user/onboarding/verify?jwt=${token}
                 `,
             };
             const emailQueueRecord: Record = newEmailQueueRecord(email);
