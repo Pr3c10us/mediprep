@@ -1,7 +1,7 @@
 import {UserExamAccessRepository} from "../../../../../domain/examAccess/repository";
 import {PaginationFilter, PaginationMetaData} from "../../../../../../pkg/types/pagination";
 import {Exam} from "../../../../../domain/exams/exam";
-import {and, count, eq, ilike, ne} from "drizzle-orm";
+import {and, count, eq, ilike, inArray, ne} from "drizzle-orm";
 import * as schemaExam from "../../../../../../../stack/drizzle/schema/exams";
 import {Exams, Questions} from "../../../../../../../stack/drizzle/schema/exams";
 import {PoolClient} from "pg";
@@ -82,15 +82,21 @@ export class UserExamAccessRepositoryDrizzle implements UserExamAccessRepository
                 }
             }
 
-            const rows = await this.db.query.Exams.findMany({
-                where: and(...filters),
-                with: {
-                    userExamAccess: {
-                        where: eq(UserExamAccesses.userId, filter.userId as string)
-                    }
-                },
+            const uerows = await this.db.query.UserExamAccess.findMany({
+                where: eq(UserExamAccesses.userId, filter.userId as string),
+                // with: {
+                //     userExamAccess: {
+                //         where: eq(UserExamAccesses.userId, filter.userId as string)
+                //     }
+                // },
                 limit: filter.limit,
                 offset: (filter.page - 1) * filter.limit
+            })
+            const examIds = uerows.map((ue)=>{
+                return ue.examId
+            })
+            const rows = await this.db.query.Exams.findMany({
+                where: inArray(Exams.id,examIds),
             })
             let exams: Exam[] = []
             for await (const exam of rows) {
