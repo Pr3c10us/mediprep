@@ -1,14 +1,17 @@
-import { AdminRepository } from "../../domain/admins/repository";
-import { QueueRepository } from "../../domain/queue/repository";
-import { AddAdminCommand, AddAdminCommandC } from "./command/addAdmin";
-import {
-    AuthenticateAdmin,
-    AuthenticateAdminC,
-} from "./command/authenticateAdmin";
+import {AdminRepository} from "../../domain/admins/repository";
+import {QueueRepository} from "../../domain/queue/repository";
+import {AddAdminCommand, AddAdminCommandC} from "./command/addAdmin";
+import {AuthenticateAdmin, AuthenticateAdminC,} from "./command/authenticateAdmin";
 import {GetAdminsQuery, GetAdminsQueryC} from "./query/getAdmins";
+import {RemoveAdminCommand, RemoveAdminCommandC} from "./command/removeAdmin";
+import {UpdateAdminCommand, UpdateAdminCommandC} from "./command/updateAdmin";
+import {ChangeAdminPasswordCommand, ChangeAdminPasswordCommandC} from "./command/changePassword";
 
 export class Commands {
     addAdmin: AddAdminCommand;
+    removeAdmin: RemoveAdminCommand
+    updateAdmin: UpdateAdminCommand
+    changePassword: ChangeAdminPasswordCommand
     authenticateAdmin: AuthenticateAdmin;
 
     constructor(
@@ -19,12 +22,16 @@ export class Commands {
             adminRepository,
             emailQueueRepository
         );
+        this.removeAdmin = new RemoveAdminCommandC(adminRepository)
+        this.updateAdmin = new UpdateAdminCommandC(adminRepository)
+        this.changePassword = new ChangeAdminPasswordCommandC(adminRepository)
         this.authenticateAdmin = new AuthenticateAdminC(adminRepository);
     }
 }
 
 export class Queries {
     getAdmins: GetAdminsQuery;
+
     constructor(adminRepository: AdminRepository) {
         this.getAdmins = new GetAdminsQueryC(adminRepository);
     }

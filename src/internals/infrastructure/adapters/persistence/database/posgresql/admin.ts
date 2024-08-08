@@ -122,7 +122,7 @@ export class AdminRepositoryPG implements AdminRepository {
         }
     };
 
-    updateUser(admin: Admin): Promise<void> {
+    updateAdmin(admin: Admin): Promise<void> {
         throw new Error("Implement me!!")
     }
 }

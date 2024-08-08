@@ -1,4 +1,4 @@
-import { z } from "zod";
+import {z} from "zod";
 
 export const passwordRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
@@ -26,6 +26,23 @@ export const addAdminSchema = z.object({
         .optional(),
     roles: z.array(rolesEnumSchema),
     examAccess: z.array(uuidSchema).optional(),
+});
+
+export const removeAdminSchema = z.object({
+    id: uuidSchema
+})
+
+export const updateAdminSchema = z.object({
+    email: z.string().email().optional(),
+    name: z.string().optional(),
+});
+
+export const changeAdminPasswordSchema = z.object({
+    oldPassword: z.string(),
+    newPassword: z.string().regex(
+        passwordRegex,
+        "Password must be at least 8 characters long, contain at least one lowercase letter, one uppercase letter, one digit, and one special character (!@#$%^&*)."
+    ),
 });
 
 export const authenticateAdminSchema = z.object({

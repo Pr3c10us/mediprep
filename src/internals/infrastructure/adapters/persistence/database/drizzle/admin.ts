@@ -57,8 +57,15 @@ export class AdminRepositoryDrizzle implements AdminRepository {
             throw error;
         }
     };
+    RemoveAdmin = async (adminId: string) : Promise<void> => {
+        try {
+            await this.db.delete(Admins).where(eq(Admins.id, adminId as string))
+        }catch(error) {
+            throw error
+        }
+    }
 
-    updateUser = async (admin: Partial<Admin>): Promise<void> => {
+    updateAdmin = async (admin: Partial<Admin>): Promise<void> => {
         try {
             const result = await this.db.update(Admins).set(admin).where(eq(Admins.id, admin.id as string)).returning()
         } catch (error) {
