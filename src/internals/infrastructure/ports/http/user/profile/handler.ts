@@ -23,8 +23,14 @@ export class UserProfileHandler {
                 this.updateUserHandler
             );
 
-    }
+        this.router
+            .route("/")
+            .get(
+                AuthorizeUser(userServices.userRepository),
+                this.getUserDetails
+            );
 
+    }
 
 
     updateUserHandler = async (req: Request, res: Response) => {
@@ -37,5 +43,9 @@ export class UserProfileHandler {
 
         new SuccessResponse(res, {message: "account updated"}).send();
     };
+
+    getUserDetails = async (req: Request, res: Response) => {
+        new SuccessResponse(res, {user: req.userD}).send();
+    }
 
 }
