@@ -12,7 +12,7 @@
     "drizzle-migrate": "drizzle-kit --config=stack/drizzle/drizzle.config.ts migrate",
     "dev": "ts-node-dev --respawn --rs --files src/index.ts",
     "build": "tsc -p .",
-    "start": "npm run build && node dist",
+    "start": "node dist/src",
     "pm2": "tsc && pm2 start pm2.config.js",
     "pm2-stop": "pm2 stop all"
   },
@@ -62,7 +62,7 @@
     "@types/node": "^20.14.2",
     "@types/pg": "^8.11.6",
     "@types/uuid": "^10.0.0",
-    "drizzle-kit": "^0.22.7",
+    "drizzle-kit": "^0.22.8",
     "node-pg-migrate": "^7.4.0",
     "typescript": "^5.4.5"
   }
