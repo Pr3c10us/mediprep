@@ -74,7 +74,7 @@ export class Environment {
         this.url = this.getEnvAsString("URL", "http://localhost:5000");
         this.apiVersion = this.getEnvAsString("API_VERSION", "v1");
 
-        this.clientOrigin = [this.getEnvORError("CLIENT_ORIGIN_1")];
+        this.clientOrigin = [this.getEnvORError("CLIENT_ORIGIN_1"),this.getEnvAsString("CLIENT_ORIGIN_2","http://localhost:3000")];
 
         this.azSessionId = this.getEnvORError("AZURE_SESSION_ID");
         this.azClientId = this.getEnvORError("AZURE_CLIENT_ID")

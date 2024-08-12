@@ -10,3 +10,4 @@ stack/terraform/azure/.terraform.lock.hcl
 /view/
 ./dist
 dist
+/init.sql/
