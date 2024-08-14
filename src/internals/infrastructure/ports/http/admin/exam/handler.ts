@@ -1,7 +1,15 @@
 import {AdminServices} from "../../../../../app/admin/admin";
 import {Request, Response} from "express";
 import {ExamServices} from "../../../../../app/exam/exam";
-import {Course, EditQuestionParams, Exam, Option, Question, Subject} from "../../../../../domain/exams/exam";
+import {
+    Course,
+    EditQuestionParams,
+    Exam,
+    ExamDiscount,
+    Option,
+    Question,
+    Subject
+} from "../../../../../domain/exams/exam";
 import {SuccessResponse} from "../../../../../../pkg/responses/success";
 import {BadRequestError} from "../../../../../../pkg/errors/customError";
 import {PaginationFilter} from "../../../../../../pkg/types/pagination";
@@ -28,6 +36,19 @@ export class ExamHandler {
 
         new SuccessResponse(res, {message: `exam ${req.body.name} added`}).send()
     }
+
+    addExamDiscountHandler = async (req: Request, res: Response) => {
+        const examDiscount: ExamDiscount = {
+            month: req.body.month,
+            type: req.body.type,
+            value: req.body.value,
+            examID: req.body.examId,
+        }
+
+        await this.examServices.commands.addExamDiscount.Handle(examDiscount)
+        new SuccessResponse(res, {message: `discount added`}).send()
+    }
+
     getExamsHandler = async (req: Request, res: Response) => {
         const {limit, page, name} = req.query;
         const filter: PaginationFilter = {
@@ -41,7 +62,7 @@ export class ExamHandler {
         new SuccessResponse(res, {exams: exams}, metadata).send();
     }
     getExamDetails = async (req: Request, res: Response) => {
-        const {exam } = await this.examServices.queries.getExamDetails.handle(req.params.id);
+        const {exam} = await this.examServices.queries.getExamDetails.handle(req.params.id);
 
         new SuccessResponse(res, {exam}).send();
     }
@@ -88,7 +109,7 @@ export class ExamHandler {
         new SuccessResponse(res, {message: `course ${req.body.name} added`}).send()
     }
     getCoursesHandler = async (req: Request, res: Response) => {
-        const {limit, page, name,examId} = req.query;
+        const {limit, page, name, examId} = req.query;
         const filter: PaginationFilter = {
             limit: Number(limit) || 10,
             page: Number(page) || 1,
@@ -129,7 +150,7 @@ export class ExamHandler {
         new SuccessResponse(res, {message: `subject ${req.body.name} added`}).send()
     }
     getSubjectsHandler = async (req: Request, res: Response) => {
-        const {limit, page, name,courseId,examId} = req.query;
+        const {limit, page, name, courseId, examId} = req.query;
         const filter: PaginationFilter = {
             limit: Number(limit) || 10,
             page: Number(page) || 1,
@@ -180,7 +201,7 @@ export class ExamHandler {
         const file = req.file
         if (!file) throw new BadRequestError("issue uploading file")
 
-        await this.examServices.commands.addQuestionFile.Handle(req.params.id,file)
+        await this.examServices.commands.addQuestionFile.Handle(req.params.id, file)
         new SuccessResponse(res, {message: `questions added by file upload processing`}).send()
     }
     getQuestionsHandler = async (req: Request, res: Response) => {

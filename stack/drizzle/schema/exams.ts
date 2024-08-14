@@ -1,4 +1,4 @@
-import {boolean, integer, pgTable, primaryKey, text, timestamp, uuid, varchar} from 'drizzle-orm/pg-core';
+import {boolean, integer, decimal,pgTable, primaryKey, text, timestamp, uuid, varchar} from 'drizzle-orm/pg-core';
 import {InferSelectModel, relations} from "drizzle-orm";
 import {Admins} from "./admins";
 import {UserExamAccess, Users} from "./users";
@@ -27,7 +27,7 @@ export const Exams = pgTable('exam', {
     name: varchar('name', {length: 32}).unique(),
     description: text('description').notNull(),
     imageURL: varchar('image_url', {length: 255}),
-    subscriptionAmount: integer('subscription_amount').default(0),
+    subscriptionAmount: decimal('subscription_amount').default('0.0'),
     mockQuestions: integer("mock_questions").notNull().default(100),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
@@ -39,10 +39,28 @@ export const examRelations = relations(Exams, ({many}) => ({
     examsAccess: many(ExamAccess),
     userExamAccess: many(UserExamAccess),
     courses: many(Courses),
+    discounts: many(ExamDiscounts),
     sales: many(Sales),
     questions: many(Questions),
     questionBatches: many(QuestionBatch)
 }));
+
+export const ExamDiscounts = pgTable('discounts',{
+    id: uuid('id').defaultRandom(),
+    month: integer('month').notNull(),
+    type: varchar('type',{length:32}).default('percent'),
+    value: decimal('value').default('0.0'),
+    examId: uuid('exam_id').references(() => Exams.id, {onDelete: 'cascade', onUpdate: 'cascade'})
+}, (t) => ({
+    pk: primaryKey({columns: [t.id]}),
+}))
+
+export const discountExamRelation = relations(ExamDiscounts, ({one}) => ({
+    exam: one(Exams, {
+        fields: [ExamDiscounts.examId],
+        references: [Exams.id]
+    })
+}))
 
 export const Courses = pgTable('courses', {
     id: uuid('id').defaultRandom(),

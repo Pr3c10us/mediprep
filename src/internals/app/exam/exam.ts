@@ -24,6 +24,7 @@ import {TestRepository} from "../../domain/tests/repository";
 import {TagQuestionCommand, TagQuestionCommandC} from "./commands/tagQuestion";
 import {ReportQuestionCommand, ReportQuestionCommandC} from "./commands/reportQuestion";
 import {GetExamsDetails, GetExamsDetailsC} from "./query/getExamDetails";
+import {AddExamDiscountCommand, AddExamDiscountCommandC} from "./commands/addExamDiscount";
 
 export class Commands {
     addExam: AddExamCommand;
@@ -47,6 +48,8 @@ export class Commands {
     tagQuestion: TagQuestionCommand
     reportQuestion: ReportQuestionCommand
 
+    addExamDiscount: AddExamDiscountCommand
+
     constructor(examRepository: ExamRepository, storageRepository: StorageRepository, queueRepository: QueueRepository) {
         this.addExam = new AddExamCommandC(examRepository)
         this.deleteExam = new DeleteExamCommandC(examRepository)
@@ -68,6 +71,8 @@ export class Commands {
 
         this.tagQuestion = new TagQuestionCommandC(examRepository)
         this.reportQuestion = new ReportQuestionCommandC(examRepository)
+
+        this.addExamDiscount = new AddExamDiscountCommandC(examRepository)
     }
 }
 

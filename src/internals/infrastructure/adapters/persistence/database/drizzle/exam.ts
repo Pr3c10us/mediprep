@@ -5,6 +5,7 @@ import {
     EditExamParams,
     EditQuestionParams,
     Exam,
+    ExamDiscount,
     Option,
     Question,
     QuestionBatch as QB,
@@ -15,13 +16,15 @@ import {
 import * as schema from "../../../../../../../stack/drizzle/schema/exams"
 import {
     Courses,
+    ExamDiscounts,
     Exams,
     Options,
     Question as QuestionT,
     QuestionBatch,
     Questions,
     Subject as SubjectT,
-    Subjects, UserReportQuestionRecords,
+    Subjects,
+    UserReportQuestionRecords,
     UserTagQuestionRecords
 } from "../../../../../../../stack/drizzle/schema/exams"
 import {PaginationFilter, PaginationMetaData} from "../../../../../../pkg/types/pagination";
@@ -41,12 +44,74 @@ export class ExamRepositoryDrizzle implements ExamRepository {
     // Add
     async AddExam(examParam: Exam): Promise<void> {
         try {
-            await this.db.insert(Exams).values({
+            const exam = await this.db.insert(Exams).values({
                 name: examParam.name,
                 description: examParam.description,
-                subscriptionAmount: examParam.subscriptionAmount,
+                subscriptionAmount: String(examParam.subscriptionAmount),
                 mockQuestions: examParam.mockQuestions
-            })
+            }).returning()
+
+            await this.db.insert(ExamDiscounts).values([{
+                month: 1,
+                type: 'percent',
+                value: String(0),
+                examId: exam[0].id,
+            }, {
+                month: 2,
+                type: 'percent',
+                value: String(0),
+                examId: exam[0].id,
+            }, {
+                month: 3,
+                type: 'percent',
+                value: String(0),
+                examId: exam[0].id,
+            }, {
+                month: 4,
+                type: 'percent',
+                value: String(0),
+                examId: exam[0].id,
+            }, {
+                month: 5,
+                type: 'percent',
+                value: String(0),
+                examId: exam[0].id,
+            }, {
+                month: 6,
+                type: 'percent',
+                value: String(0),
+                examId: exam[0].id,
+            }, {
+                month: 12,
+                type: 'percent',
+                value: String(0),
+                examId: exam[0].id,
+            }])
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async AddExamDiscount(discount: ExamDiscount): Promise<void> {
+        try {
+            const examDiscount = await this.db.select().from(ExamDiscounts).where(and(eq(ExamDiscounts.month, discount.month), eq(ExamDiscounts.examId, discount.examID)))
+            console.log(examDiscount)
+            if (examDiscount.length > 0) {
+                await this.db.update(ExamDiscounts).set({
+                    month: discount.month,
+                    type: discount.type,
+                    value: String(discount.value),
+                    examId: discount.examID,
+                }).where(eq(ExamDiscounts.id, examDiscount[0].id as string))
+            } else {
+                await this.db.insert(ExamDiscounts).values({
+                    month: discount.month,
+                    type: discount.type,
+                    value: String(discount.value),
+                    examId: discount.examID,
+                })
+            }
+
         } catch (error) {
             throw error
         }
@@ -204,7 +269,10 @@ export class ExamRepositoryDrizzle implements ExamRepository {
     // Edit
     async EditExam(id: string, examParams: EditExamParams): Promise<void> {
         try {
-            const updatedExam = await this.db.update(Exams).set(examParams).where(eq(Exams.id, id)).returning({id: Exams.id})
+            const updatedExam = await this.db.update(Exams).set({
+                ...examParams,
+                subscriptionAmount: String(examParams.subscriptionAmount)
+            }).where(eq(Exams.id, id)).returning({id: Exams.id})
             if (updatedExam.length < 1) {
                 throw new BadRequestError(`exam with id '${id}' does not exist`)
             }
@@ -308,7 +376,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                             id: row.id as string,
                             name: row.name as string,
                             description: row.description as string,
-                            subscriptionAmount: row.subscriptionAmount as number,
+                            subscriptionAmount: Number(row.subscriptionAmount),
                             imageURL: row.imageURL as string,
                             createdAt: row.createdAt as Date,
                             updatedAt: row.updatedAt as Date
@@ -328,6 +396,26 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                     currentPage: filter.page
                 }
             };
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async GetExamDiscounts(examID: string): Promise<ExamDiscount[]> {
+        try {
+            const rows = await this.db.select().from(ExamDiscounts).where(eq(ExamDiscounts.id, examID))
+            if (rows.length > 0) {
+                return rows.map((row): ExamDiscount => {
+                    return {
+                        id: row.id as string,
+                        month: row.month,
+                        type: row.type as 'percent' | 'flat',
+                        value: Number(row.value),
+                        examID: row.examId as string,
+                    }
+                })
+            }
+            return []
         } catch (error) {
             throw error
         }
@@ -406,6 +494,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
             if (filter.examId || filter.examId != undefined) {
                 filters.push(eq(Subjects.examId, filter.examId));
             }
+            console.log(filter)
 
             // Get the total count of rows
             const totalResult = await this.db.select({count: count()}).from(Subjects).where(and(...filters));
@@ -614,7 +703,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 id: examResult[0].id as string,
                 name: examResult[0].name as string,
                 description: examResult[0].description as string,
-                subscriptionAmount: examResult[0].subscriptionAmount as number,
+                subscriptionAmount: Number(examResult[0].subscriptionAmount),
                 imageURL: examResult[0].imageURL as string,
                 createdAt: examResult[0].createdAt as Date,
                 updatedAt: examResult[0].updatedAt as Date
@@ -639,7 +728,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 id: exam.id as string,
                 name: exam.name as string,
                 description: exam.description as string,
-                subscriptionAmount: exam.subscriptionAmount as number,
+                subscriptionAmount: Number(exam.subscriptionAmount),
                 imageURL: exam.imageURL as string,
                 createdAt: exam.createdAt as Date,
                 updatedAt: exam.updatedAt as Date,
@@ -746,7 +835,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         }
     }
 
-    async ReportQuestion(userId: string, questionId: string,reason:string): Promise<void> {
+    async ReportQuestion(userId: string, questionId: string, reason: string): Promise<void> {
         try {
             await this.db.insert(UserReportQuestionRecords).values({
                 userId,

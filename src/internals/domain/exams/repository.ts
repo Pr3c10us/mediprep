@@ -3,6 +3,7 @@ import {
     EditExamParams,
     EditQuestionParams,
     Exam,
+    ExamDiscount,
     Question,
     QuestionBatch,
     QuestionBatchStatus,
@@ -18,6 +19,8 @@ export interface ExamRepository {
     GetExamById: (id: string) => Promise<Exam>
     GetExamAnalytics: (id: string) => Promise<Exam>
     GetExams: (filter: PaginationFilter) => Promise<{ exams: Exam[], metadata: PaginationMetaData }>
+    AddExamDiscount: (discount: ExamDiscount) => Promise<void>
+    GetExamDiscounts: (examId: string) => Promise<ExamDiscount[]>
 
     AddCourse: (course: Course) => Promise<Course>
     EditCourseName: (id: string, name: string) => Promise<void>

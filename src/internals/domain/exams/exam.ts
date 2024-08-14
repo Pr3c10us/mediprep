@@ -16,6 +16,14 @@ export type Exam = {
     salesNo?: number
 };
 
+export type ExamDiscount = {
+    id?: string;
+    month: number;
+    type: 'percent' | 'flat'
+    value :number;
+    examID: string;
+}
+
 export type EditExamParams = {
     name?: string;
     description?: string;

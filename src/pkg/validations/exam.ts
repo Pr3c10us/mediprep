@@ -8,6 +8,13 @@ export const addExamSchema = z.object({
     mockQuestions: z.number()
 });
 
+export const addExamDiscountSchema = z.object({
+    month: z.number(),
+    type: z.enum(["percent", "flat"]).optional().default('percent'),
+    value: z.number(),
+    examId: uuidSchema,
+});
+
 export const editExamSchema = z.object({
     name: z.string().optional(),
     description: z.string().optional(),
@@ -32,8 +39,8 @@ export const getCommandFilterSchema = z.object({
     firstName: z.string().optional(),
     lastName: z.string().optional(),
     email: z.string().optional(),
-    profession : z.string().optional(),
-    country : z.string().optional(),
+    profession: z.string().optional(),
+    country: z.string().optional(),
     subjectId: uuidSchema.optional(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),
@@ -75,7 +82,7 @@ const optionSchema = z.object({
 })
 
 export const questionSchema = z.object({
-    type: z.enum(["singleChoice" , "multiChoice" , "fillInTheGap"]),
+    type: z.enum(["singleChoice", "multiChoice", "fillInTheGap"]),
     question: z.string(),
     explanation: z.string(),
     subjectId: uuidSchema,
@@ -90,7 +97,7 @@ const editOptionSchema = z.object({
 })
 
 export const editQuestionSchema = z.object({
-    type: z.enum(["singleChoice" , "multiChoice" , "fillInTheGap"]).optional(),
+    type: z.enum(["singleChoice", "multiChoice", "fillInTheGap"]).optional(),
     question: z.string().optional(),
     explanation: z.string().optional(),
     options: z.array(editOptionSchema).optional()

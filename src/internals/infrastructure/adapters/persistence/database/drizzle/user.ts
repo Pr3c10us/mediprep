@@ -9,6 +9,7 @@ import {and, count, eq, gte, ilike, lte, ne} from "drizzle-orm";
 import {BadRequestError} from "../../../../../../pkg/errors/customError";
 import {Sales} from "../../../../../../../stack/drizzle/schema/sales";
 import {Tests} from "../../../../../../../stack/drizzle/schema/test";
+import {Carts} from "../../../../../../../stack/drizzle/schema/cart";
 
 
 export class UserRepositoryDrizzle implements UserRepository {
@@ -19,31 +20,50 @@ export class UserRepositoryDrizzle implements UserRepository {
     }
 
     addUser = async (user: User): Promise<User> => {
-        try {
-            const result = await this.db.insert(Users).values({
-                firstName: user.firstName as string,
-                lastName: user.lastName as string,
-                email: user.email as string,
-                password: user.password as string,
-                country: user.country as string,
-                profession: user.profession as string,
-                blacklisted: user.blacklisted,
-                verified: user.verified ? user.verified : false
-            }).returning()
 
-            return {
-                id: result[0].id as string,
-                firstName: result[0].firstName as string,
-                lastName: result[0].lastName as string,
-                email: result[0].email as string,
-                password: result[0].password as string,
-                country: result[0].country as string,
-                verified: result[0].verified as boolean,
-                profession: result[0].profession as string,
-                blacklisted: result[0].blacklisted,
-                createdAt: result[0].createdAt as Date,
-                updatedAt: result[0].updatedAt as Date
-            }
+        try {
+            return await this.db.transaction(async (tx): Promise<User> => {
+                try {
+                    const result = await tx.insert(Users).values({
+                        firstName: user.firstName as string,
+                        lastName: user.lastName as string,
+                        email: user.email as string,
+                        password: user.password as string,
+                        country: user.country as string,
+                        profession: user.profession as string,
+                        blacklisted: user.blacklisted,
+                        verified: user.verified ? user.verified : false
+                    }).returning()
+
+                    await tx.insert(Carts).values({
+                        userID: result[0].id,
+                    })
+
+                    return {
+                        id: result[0].id as string,
+                        firstName: result[0].firstName as string,
+                        lastName: result[0].lastName as string,
+                        email: result[0].email as string,
+                        password: result[0].password as string,
+                        country: result[0].country as string,
+                        verified: result[0].verified as boolean,
+                        profession: result[0].profession as string,
+                        blacklisted: result[0].blacklisted,
+                        createdAt: result[0].createdAt as Date,
+                        updatedAt: result[0].updatedAt as Date
+                    }
+                } catch (error) {
+                    console.log(error)
+                    try {
+                        tx.rollback()
+                        throw error
+                    } catch (e) {
+                        throw error
+                    }
+                }
+            })
+
+
         } catch (error) {
             throw error
         }

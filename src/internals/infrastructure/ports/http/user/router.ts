@@ -5,6 +5,7 @@ import {ExamRouter} from "./exam/router";
 import {AuthorizeUser} from "../../../../../pkg/middleware/authorization";
 import {TestsHandler} from "./test/handler";
 import {UserProfileHandler} from "./profile/handler";
+import {CartHandler} from "./cart/handler";
 
 export default class UserRouter {
     router: Router
@@ -18,6 +19,7 @@ export default class UserRouter {
         this.exam();
         this.test();
         this.profile();
+        this.cart();
     }
 
     onboarding = () => {
@@ -38,5 +40,10 @@ export default class UserRouter {
     profile = () => {
         const router = new UserProfileHandler(this.services.UserServices);
         this.router.use("/profile", AuthorizeUser(this.services.UserServices.userRepository), router.router);
+    };
+
+    cart = () => {
+        const router = new CartHandler(this.services.CartServices);
+        this.router.use("/cart", AuthorizeUser(this.services.UserServices.userRepository), router.router);
     };
 }

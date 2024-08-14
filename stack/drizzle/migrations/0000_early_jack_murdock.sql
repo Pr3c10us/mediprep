@@ -24,13 +24,23 @@ CREATE TABLE IF NOT EXISTS "exam_access" (
 	CONSTRAINT "exam_access_admin_id_exam_id_pk" PRIMARY KEY("admin_id","exam_id")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "discounts" (
+	"id" uuid DEFAULT gen_random_uuid(),
+	"min_month" integer NOT NULL,
+	"max_month" integer NOT NULL,
+	"type" varchar(32) DEFAULT 'percent',
+	"value" numeric DEFAULT '0.0',
+	"exam_id" uuid,
+	CONSTRAINT "discounts_id_pk" PRIMARY KEY("id")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "exam" (
 	"id" uuid DEFAULT gen_random_uuid(),
 	"name" varchar(32),
 	"description" text NOT NULL,
 	"image_url" varchar(255),
-	"subscription_amount" integer DEFAULT 0,
-	"mock_questions" integer DEFAULT 100,
+	"subscription_amount" numeric DEFAULT '0.0',
+	"mock_questions" integer DEFAULT 100 NOT NULL,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
 	CONSTRAINT "exam_id_pk" PRIMARY KEY("id"),
@@ -90,6 +100,21 @@ CREATE TABLE IF NOT EXISTS "user_question_records" (
 	CONSTRAINT "user_question_records_id_pk" PRIMARY KEY("id")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "user_report_question_records" (
+	"id" uuid DEFAULT gen_random_uuid(),
+	"user_id" uuid NOT NULL,
+	"question_id" uuid NOT NULL,
+	"reason" text NOT NULL,
+	CONSTRAINT "user_report_question_records_id_pk" PRIMARY KEY("id")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "user_tag_question_records" (
+	"id" uuid DEFAULT gen_random_uuid(),
+	"user_id" uuid NOT NULL,
+	"question_id" uuid NOT NULL,
+	CONSTRAINT "user_tag_question_records_id_pk" PRIMARY KEY("id")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "sale" (
 	"id" uuid DEFAULT gen_random_uuid(),
 	"reference" varchar(128),
@@ -106,7 +131,7 @@ CREATE TABLE IF NOT EXISTS "sale" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "test_question_records" (
 	"id" uuid DEFAULT gen_random_uuid(),
-	"question_status" varchar(32) DEFAULT 'unanswered',
+	"question_status" varchar(32) DEFAULT 'unanswered' NOT NULL,
 	"type" varchar(32) NOT NULL,
 	"test_id" uuid NOT NULL,
 	"user_id" uuid NOT NULL,
@@ -122,7 +147,8 @@ CREATE TABLE IF NOT EXISTS "test_question_records" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "tests" (
 	"id" uuid DEFAULT gen_random_uuid(),
-	"score" integer DEFAULT 0,
+	"status" varchar(32) DEFAULT 'inProgress' NOT NULL,
+	"score" double precision DEFAULT 0 NOT NULL,
 	"questions" integer DEFAULT 0,
 	"correct_answers" integer DEFAULT 0,
 	"incorrect_answers" integer DEFAULT 0,
@@ -133,7 +159,7 @@ CREATE TABLE IF NOT EXISTS "tests" (
 	"subject_id" uuid,
 	"course_id" uuid,
 	"exam_id" uuid NOT NULL,
-	"end_Time" timestamp DEFAULT '2024-07-18 00:23:52.236',
+	"end_Time" timestamp DEFAULT '2024-08-13 20:55:14.493',
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
 	CONSTRAINT "tests_id_pk" PRIMARY KEY("id")
@@ -151,10 +177,11 @@ CREATE TABLE IF NOT EXISTS "user" (
 	"first_name" varchar(64) NOT NULL,
 	"last_name" varchar(64) NOT NULL,
 	"email" varchar(64) NOT NULL,
-	"password" varchar(256) NOT NULL,
-	"profession" varchar(64) NOT NULL,
-	"country" varchar(64) NOT NULL,
+	"password" varchar(256),
+	"profession" varchar(64),
+	"country" varchar(64),
 	"verified" boolean DEFAULT false,
+	"black_listed" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
 	CONSTRAINT "user_id_pk" PRIMARY KEY("id"),
@@ -175,6 +202,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "exam_access" ADD CONSTRAINT "exam_access_exam_id_exam_id_fk" FOREIGN KEY ("exam_id") REFERENCES "public"."exam"("id") ON DELETE cascade ON UPDATE cascade;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "discounts" ADD CONSTRAINT "discounts_exam_id_exam_id_fk" FOREIGN KEY ("exam_id") REFERENCES "public"."exam"("id") ON DELETE cascade ON UPDATE cascade;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -253,6 +286,30 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "user_question_records" ADD CONSTRAINT "user_question_records_exam_id_exam_id_fk" FOREIGN KEY ("exam_id") REFERENCES "public"."exam"("id") ON DELETE cascade ON UPDATE cascade;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "user_report_question_records" ADD CONSTRAINT "user_report_question_records_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "user_report_question_records" ADD CONSTRAINT "user_report_question_records_question_id_question_id_fk" FOREIGN KEY ("question_id") REFERENCES "public"."question"("id") ON DELETE cascade ON UPDATE cascade;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "user_tag_question_records" ADD CONSTRAINT "user_tag_question_records_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "user_tag_question_records" ADD CONSTRAINT "user_tag_question_records_question_id_question_id_fk" FOREIGN KEY ("question_id") REFERENCES "public"."question"("id") ON DELETE cascade ON UPDATE cascade;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

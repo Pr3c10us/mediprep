@@ -6,6 +6,7 @@ import {UserServices} from "./user/user";
 import {SalesServices} from "./sale/sale";
 import {UserExamAccessService} from "./examAccess/examAccess";
 import {TestsServices} from "./test/test";
+import {CartServices} from "./cart/cart";
 
 export class Services {
     AdminServices: AdminServices;
@@ -15,6 +16,7 @@ export class Services {
     SalesServices: SalesServices
     userExamAccessService: UserExamAccessService
     testServices: TestsServices
+    CartServices: CartServices
 
     constructor(adapter: Adapter) {
         this.AdminServices = new AdminServices(
@@ -27,5 +29,6 @@ export class Services {
         this.SalesServices = new SalesServices(adapter.salesRepository, adapter.UserRepository, adapter.ExamRepository)
         this.userExamAccessService = new UserExamAccessService(adapter.userExamAccessRepository)
         this.testServices = new TestsServices(adapter.testRepositories)
+        this.CartServices = new CartServices(adapter.cartRepositories)
     }
 }

@@ -1,6 +1,6 @@
 {
-  "id": "3342f030-043a-4a12-9aad-3b848c9b768e",
-  "prevId": "84b0c2f1-7319-425c-b5e8-505d44cfb9a3",
+  "id": "26efb689-524f-48fa-8bb7-b6ef64941a8f",
+  "prevId": "82edb094-8c75-40f9-aca4-02dc66dce9e9",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -182,6 +182,70 @@
       },
       "uniqueConstraints": {}
     },
+    "public.discounts": {
+      "name": "discounts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "gen_random_uuid()"
+        },
+        "month": {
+          "name": "month",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'percent'"
+        },
+        "value": {
+          "name": "value",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0.0'"
+        },
+        "exam_id": {
+          "name": "exam_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "discounts_exam_id_exam_id_fk": {
+          "name": "discounts_exam_id_exam_id_fk",
+          "tableFrom": "discounts",
+          "tableTo": "exam",
+          "columnsFrom": [
+            "exam_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {
+        "discounts_id_pk": {
+          "name": "discounts_id_pk",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
     "public.exam": {
       "name": "exam",
       "schema": "",
@@ -213,10 +277,10 @@
         },
         "subscription_amount": {
           "name": "subscription_amount",
-          "type": "integer",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": false,
-          "default": 0
+          "default": "'0.0'"
         },
         "mock_questions": {
           "name": "mock_questions",
@@ -728,6 +792,138 @@
       },
       "uniqueConstraints": {}
     },
+    "public.user_report_question_records": {
+      "name": "user_report_question_records",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "question_id": {
+          "name": "question_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "user_report_question_records_user_id_user_id_fk": {
+          "name": "user_report_question_records_user_id_user_id_fk",
+          "tableFrom": "user_report_question_records",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "user_report_question_records_question_id_question_id_fk": {
+          "name": "user_report_question_records_question_id_question_id_fk",
+          "tableFrom": "user_report_question_records",
+          "tableTo": "question",
+          "columnsFrom": [
+            "question_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {
+        "user_report_question_records_id_pk": {
+          "name": "user_report_question_records_id_pk",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "public.user_tag_question_records": {
+      "name": "user_tag_question_records",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "question_id": {
+          "name": "question_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "user_tag_question_records_user_id_user_id_fk": {
+          "name": "user_tag_question_records_user_id_user_id_fk",
+          "tableFrom": "user_tag_question_records",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "user_tag_question_records_question_id_question_id_fk": {
+          "name": "user_tag_question_records_question_id_question_id_fk",
+          "tableFrom": "user_tag_question_records",
+          "tableTo": "question",
+          "columnsFrom": [
+            "question_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {
+        "user_tag_question_records_id_pk": {
+          "name": "user_tag_question_records_id_pk",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
     "public.sale": {
       "name": "sale",
       "schema": "",
@@ -852,7 +1048,7 @@
           "name": "question_status",
           "type": "varchar(32)",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "'unanswered'"
         },
         "type": {
@@ -1117,7 +1313,7 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
-          "default": "'2024-07-18 03:22:25.399'"
+          "default": "'2024-08-14 11:24:18.394'"
         },
         "created_at": {
           "name": "created_at",
@@ -1295,25 +1491,32 @@
           "name": "password",
           "type": "varchar(256)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "profession": {
           "name": "profession",
           "type": "varchar(64)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "country": {
           "name": "country",
           "type": "varchar(64)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "verified": {
           "name": "verified",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
+          "default": false
+        },
+        "black_listed": {
+          "name": "black_listed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
           "default": false
         },
         "created_at": {

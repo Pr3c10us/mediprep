@@ -7,6 +7,7 @@ import CheckPermission from "../../../../../../pkg/middleware/checkPermission";
 import ValidationMiddleware from "../../../../../../pkg/middleware/validation";
 import {Multer} from 'multer';
 import {
+    addExamDiscountSchema,
     addExamSchema,
     courseIdSchema,
     courseSchema,
@@ -45,32 +46,14 @@ export class ExamRouter {
             ValidationMiddleware(getCommandFilterSchema, "query"),
             this.handler.getExamsHandler
         )
-        this.router.route('/:id').patch(
-            CheckPermission("edit_exam"),
-            ValidationMiddleware(editExamSchema, "body"),
-            ValidationMiddleware(examIdSchema, "params"),
-            this.handler.editExamHandler
-        ).delete(
-            CheckPermission("delete_exam"),
-            ValidationMiddleware(examIdSchema, "params"),
-            this.handler.deleteExamHandler
-        ).get(
-            CheckPermission("read_exam"),
-            this.handler.getExamDetails
-        )
-        this.router.route('/:id/image').patch(
-            CheckPermission("edit_exam"),
-            ValidationMiddleware(examIdSchema, "params"),
-            this.uploadImage.single("image"),
-            this.handler.uploadExamImageHandler
+        this.router.route('/discount').post(
+            CheckPermission("create_exam"),
+            ValidationMiddleware(addExamDiscountSchema, "body"),
+            this.handler.addExamDiscountHandler
         )
 
-        this.router.route('/:id/question').post(
-            CheckPermission("edit_exam"),
-            ValidationMiddleware(examIdSchema, "params"),
-            this.uploadCSV.single("csv"),
-            this.handler.addQuestionFileHandler
-        )
+
+
 
 
         // Courses Route
@@ -137,6 +120,35 @@ export class ExamRouter {
             CheckPermission("edit_exam"),
             ValidationMiddleware(questionIdSchema, "params"),
             this.handler.deleteQuestionHandler
+        )
+
+
+        // Exam Route
+        this.router.route('/:id').patch(
+            CheckPermission("edit_exam"),
+            ValidationMiddleware(editExamSchema, "body"),
+            ValidationMiddleware(examIdSchema, "params"),
+            this.handler.editExamHandler
+        ).delete(
+            CheckPermission("delete_exam"),
+            ValidationMiddleware(examIdSchema, "params"),
+            this.handler.deleteExamHandler
+        ).get(
+            CheckPermission("read_exam"),
+            this.handler.getExamDetails
+        )
+        this.router.route('/:id/image').patch(
+            CheckPermission("edit_exam"),
+            ValidationMiddleware(examIdSchema, "params"),
+            this.uploadImage.single("image"),
+            this.handler.uploadExamImageHandler
+        )
+
+        this.router.route('/:id/question').post(
+            CheckPermission("edit_exam"),
+            ValidationMiddleware(examIdSchema, "params"),
+            this.uploadCSV.single("csv"),
+            this.handler.addQuestionFileHandler
         )
     }
 }

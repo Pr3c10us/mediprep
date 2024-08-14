@@ -13,6 +13,8 @@ import {UserExamAccessRepository} from "../../domain/examAccess/repository";
 import {UserExamAccessRepositoryDrizzle} from "./persistence/database/drizzle/examAccess";
 import {TestRepository} from "../../domain/tests/repository";
 import {TestRepositoryDrizzle} from "./persistence/database/drizzle/test";
+import {CartRepository} from "../../domain/carts/repository";
+import {CartRepositoryDrizzle} from "./persistence/database/drizzle/cart";
 
 export class Adapter {
     EnvironmentVariables
@@ -36,6 +38,8 @@ export class Adapter {
 
     testRepositories: TestRepository
 
+    cartRepositories: CartRepository
+
 
     constructor(
         dbClient: PoolClient,
@@ -53,5 +57,6 @@ export class Adapter {
         this.salesRepository = new SalesRepositoryDrizzle(dbClient)
         this.userExamAccessRepository = new UserExamAccessRepositoryDrizzle(dbClient)
         this.testRepositories = new TestRepositoryDrizzle(dbClient)
+        this.cartRepositories = new CartRepositoryDrizzle(dbClient)
     }
 }
