@@ -20,6 +20,7 @@ export type Test = {
     endTime: Date;
     createdAt: Date;
     updatedAt: Date;
+    timeLeft?: number;
     testQuestions?: TestQuestion[]
 }
 

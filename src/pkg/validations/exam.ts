@@ -44,7 +44,8 @@ export const getCommandFilterSchema = z.object({
     subjectId: uuidSchema.optional(),
     startDate: z.string().optional(),
     endDate: z.string().optional(),
-    testType: z.enum(["subjectBased", "courseBased", "mock"]).optional()
+    testType: z.enum(["subjectBased", "courseBased", "mock"]).optional(),
+    status: z.enum(["inProgress", "complete", "paused"]).optional()
 });
 
 

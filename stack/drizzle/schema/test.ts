@@ -18,6 +18,7 @@ export const Tests = pgTable("tests", {
     courseId: uuid('course_id').references(() => Courses.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
     examId: uuid('exam_id').references(() => Exams.id, {onDelete: 'cascade', onUpdate: 'cascade'}).notNull(),
     endTime: timestamp('end_Time').default(new Date(new Date().getTime() + 60 * 60 * 1000)),
+    timeLeft: integer('time_left').default(0).notNull(),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 }, (t) => ({

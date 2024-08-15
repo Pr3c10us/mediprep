@@ -53,6 +53,8 @@ export class Environment {
     oauthFailureRedirect: string
     oauthSuccessRedirect: string
 
+    redisURL : string
+
     constructor() {
         this.pgDBUsername = this.getEnvAsString("PG_DB_USERNAME", "postgres");
         this.pgDBPassword = this.getEnvAsString("PG_DB_PASSWORD", "password");
@@ -117,6 +119,8 @@ export class Environment {
 
         this.oauthFailureRedirect = this.getEnvAsString("OAUTH_FAILURE_REDIRECT","/")
         this.oauthSuccessRedirect = this.getEnvAsString("OAUTH_SUCCESS_REDIRECT","/dashboard")
+
+        this.redisURL = this.getEnvAsString('REDIS_URL',"redis://default:1234@localhost:6379")
     }
 
     getEnvORError = (key: string): string => {

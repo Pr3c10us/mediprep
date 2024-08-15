@@ -46,7 +46,7 @@ export type Subject = {
     questions?: Question[]
 }
 
-export type QuestionType = "singleChoice" | "multiChoice" | "fillInTheGap"
+export type QuestionType = "single_choice" | "multiple_choice" | "fill_in_the_blanks"
 export type QuestionStatus = "correct" | "unanswered" | "wrong";
 export type Question = {
     id?: string;

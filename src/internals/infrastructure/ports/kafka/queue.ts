@@ -45,5 +45,6 @@ export class KafkaQueue {
     listen = async () => {
         await this.consumerEmailMessages();
         await this.consumerExamQuestionFileMessages()
+        console.log("kafka listening")
     };
 }

@@ -28,6 +28,7 @@ export class TestRepositoryDrizzle implements TestRepository {
         })
     }
 
+
     getTestAnalytics = async (testId: string, userId: string): Promise<{ test: Test, questions: Question[] }> => {
         try {
             const testRes = await this.db.query.Tests.findFirst({
@@ -51,6 +52,7 @@ export class TestRepositoryDrizzle implements TestRepository {
                 subjectId: testRes.subjectId as string,
                 courseId: testRes.courseId as string,
                 endTime: testRes.endTime as Date,
+                timeLeft: testRes.timeLeft as number
             }
 
             const testQuestionsRes = await this.db.query.TestQuestionRecords.findMany({
@@ -71,9 +73,9 @@ export class TestRepositoryDrizzle implements TestRepository {
                 const result = testQuestionsRes.find((question) => question.questionId == questionData.id)
                 if (result) {
                     questionData.questionStatus = result.questionStatus as QuestionStatus
-                    if (questionData.type == "singleChoice") {
+                    if (questionData.type == "single_choice") {
                         questionData.selectedAnswer = result.optionId as string
-                    } else if (questionData.type == "multiChoice") {
+                    } else if (questionData.type == "multiple_choice") {
                         questionData.selectedAnswer = result.options as string[]
                     } else {
                         questionData.selectedAnswer = result.answer as string
@@ -161,6 +163,9 @@ export class TestRepositoryDrizzle implements TestRepository {
         if (filter.userId || filter.userId != undefined) {
             filters.push(eq(Tests.userId, filter.userId as string))
         }
+        if (filter.status || filter.status != undefined) {
+            filters.push(eq(Tests.status, filter.status as string))
+        }
         // Get the total count of rows
         const totalResult = await this.db.select({count: count()}).from(Tests).where(and(...filters));
         const total = totalResult[0].count;
@@ -210,9 +215,12 @@ export class TestRepositoryDrizzle implements TestRepository {
         return {tests: [], metadata: {total: 0, perPage: filter.limit, currentPage: filter.page}}
     }
 
-    CreateTest = async (test: PartialWithRequired<Test, "questions" | "questionMode" | "userId" | "examId" | "endTime" | "type">): Promise<string> => {
+    CreateTest = async (test: PartialWithRequired<Test, "questions" | "questionMode" | "userId" | "examId" | "endTime" | "type">): Promise<{
+        testId: string,
+        endTime: Date
+    }> => {
         try {
-            return await this.db.transaction(async (tx): Promise<string> => {
+            return await this.db.transaction(async (tx): Promise<{ testId: string, endTime: Date }> => {
                 try {
                     const exam = await tx.query.Exams.findFirst({
                         where: eq(Exams.id, test.examId)
@@ -275,9 +283,13 @@ export class TestRepositoryDrizzle implements TestRepository {
                         throw new NotFoundError(`no more ${test.questionMode} questions`)
                     }
                     test.questions = questionsRes.length
-                    const testRes = await tx.insert(Tests).values(test).returning({id: Tests.id})
+                    const testRes = await tx.insert(Tests).values(test).returning({
+                        id: Tests.id,
+                        endTime: Tests.endTime
+                    })
                     if (testRes.length <= 0) throw new BadRequestError("Test failed to creat")
                     const testId = testRes[0].id as string
+                    const endTime = testRes[0].endTime as Date
 
                     const questions = questionsRes.map((question) => {
                         return {
@@ -297,7 +309,7 @@ export class TestRepositoryDrizzle implements TestRepository {
                     }
                     await tx.insert(TestQuestionRecords).values(questions)
 
-                    return testId
+                    return {testId, endTime}
                 } catch (error) {
                     console.log(error)
                     try {
@@ -372,7 +384,7 @@ export class TestRepositoryDrizzle implements TestRepository {
                 throw new BadRequestError("test does not exist")
             }
             if (test.status !== "inProgress") {
-                throw new BadRequestError("test scored")
+                throw new BadRequestError("test completed ")
             }
             // fetch all user questions record
             const testQuestionsRes = await this.db.query.TestQuestionRecords.findMany({
@@ -396,13 +408,14 @@ export class TestRepositoryDrizzle implements TestRepository {
                 },
             })
 
-            let correctAnswers: number = 0
-            let incorrectAnswers: number = 0
-            let unansweredQuestions: number = 0
+            let correctAnswers: number = test.correctAnswers as number
+            let incorrectAnswers: number = test.incorrectAnswers as number
+            let unansweredQuestions: number = test.unansweredQuestions as number
 
             let answeredQuestions: string[] = []
 
             for await (const answer of answers) {
+                console.log(answer)
                 let status: QuestionStatus = "unanswered"
                 const question = questionsRes.find((question) => question?.id === answer.questionId)
                 if (!question) {
@@ -422,16 +435,33 @@ export class TestRepositoryDrizzle implements TestRepository {
                         explanation: option.explanation
                     }
                 })
-                if (question?.type == "singleChoice" && answer.option) {
+                const previousQuestionStatus = testQuestionsRes.find((question) => answer.questionId == question.questionId)
+                if (!previousQuestionStatus) {
+                    continue
+                }
+                if (question?.type == "single_choice" && answer.option) {
                     const selectedOption = options?.find((option) => option.id == answer.option)
                     if (selectedOption) {
                         const correctOption = options?.find((option) => option.answer)
+
                         if (correctOption && (correctOption.id == selectedOption.id)) {
                             status = "correct"
-                            correctAnswers += 1
+                            if (previousQuestionStatus.questionStatus == "unanswered") correctAnswers += 1
+                            if (previousQuestionStatus.questionStatus == "wrong") {
+                                correctAnswers += 1
+                                incorrectAnswers -= 1
+                            }
+                            // if (previousQuestionStatus.questionStatus == "correct") {}
+
                         } else {
                             status = "wrong"
-                            incorrectAnswers += 1
+
+                            if (previousQuestionStatus.questionStatus == "unanswered") incorrectAnswers += 1
+                            if (previousQuestionStatus.questionStatus == "correct") {
+                                correctAnswers -= 1
+                                incorrectAnswers += 1
+                            }
+                            // if (previousQuestionStatus.questionStatus == "wrong") {}
                         }
                         await this.db.update(Options).set({selected: selectedOption.selected as number + 1}).where(eq(Options.id, selectedOption.id as string))
                         await this.db.update(TestQuestionRecords).set({
@@ -439,16 +469,27 @@ export class TestRepositoryDrizzle implements TestRepository {
                             optionId: selectedOption.id
                         }).where(eq(TestQuestionRecords.questionId, answer.questionId))
                     }
-                } else if (question?.type == "singleChoice" && answer.options && answer.options.length > 0) {
+                } else if (question?.type == "multiple_choice" && answer.options && answer.options.length > 0) {
                     const selectedOptions = options?.filter((option) => answer.options?.includes(option.id as string))
                     if (selectedOptions && selectedOptions.length > 0) {
                         const correctOptions = options?.filter((option) => option.answer)
                         if (correctOptions && (selectedOptions.length === correctOptions.length) && (selectedOptions.every((element, index) => element === correctOptions[index]))) {
                             status = "correct"
-                            correctAnswers += 1
+                            if (previousQuestionStatus.questionStatus == "unanswered") correctAnswers += 1
+                            if (previousQuestionStatus.questionStatus == "wrong") {
+                                correctAnswers += 1
+                                incorrectAnswers -= 1
+                            }
+                            // if (previousQuestionStatus.questionStatus == "correct") {}
                         } else {
                             status = "wrong"
-                            incorrectAnswers += 1
+
+                            if (previousQuestionStatus.questionStatus == "unanswered") incorrectAnswers += 1
+                            if (previousQuestionStatus.questionStatus == "correct") {
+                                correctAnswers -= 1
+                                incorrectAnswers += 1
+                            }
+                            // if (previousQuestionStatus.questionStatus == "wrong") {}
                         }
                         for await (let option of selectedOptions) {
                             await this.db.update(Options).set({selected: option.selected as number + 1}).where(eq(Options.id, option.id as string))
@@ -459,14 +500,25 @@ export class TestRepositoryDrizzle implements TestRepository {
                             options: ids
                         }).where(eq(TestQuestionRecords.questionId, answer.questionId))
                     }
-                } else if (question?.type == "fillInTheGap" && answer.answer) {
+                } else if (question?.type == "fill_in_the_blanks" && answer.answer) {
                     const correctOptions = options?.filter((option) => option.value == answer.answer)
                     if (correctOptions && correctOptions.length > 0) {
                         status = "correct"
-                        correctAnswers += 1
+                        if (previousQuestionStatus.questionStatus == "unanswered") correctAnswers += 1
+                        if (previousQuestionStatus.questionStatus == "wrong") {
+                            correctAnswers += 1
+                            incorrectAnswers -= 1
+                        }
+                        // if (previousQuestionStatus.questionStatus == "correct") {}
                     } else {
                         status = "wrong"
-                        incorrectAnswers += 1
+
+                        if (previousQuestionStatus.questionStatus == "unanswered") incorrectAnswers += 1
+                        if (previousQuestionStatus.questionStatus == "correct") {
+                            correctAnswers -= 1
+                            incorrectAnswers += 1
+                        }
+                        // if (previousQuestionStatus.questionStatus == "wrong") {}
                     }
                     await this.db.update(TestQuestionRecords).set({
                         questionStatus: status,
@@ -479,7 +531,7 @@ export class TestRepositoryDrizzle implements TestRepository {
 
             const testUpdate = {
                 correctAnswers,
-                status: "complete",
+                // status: "complete",
                 incorrectAnswers,
                 unansweredQuestions: questionsRes.length - (correctAnswers + incorrectAnswers),
                 score: (correctAnswers / questionsRes.length) * 100
@@ -490,6 +542,113 @@ export class TestRepositoryDrizzle implements TestRepository {
             throw error
         }
 
+    }
+
+    pauseTestStatus = async (testId: string, userId: string): Promise<void> => {
+        try {
+            const test = await this.db.query.Tests.findFirst({
+                where: and(eq(Tests.id, testId), eq(Tests.userId, userId))
+            })
+            if (!test) {
+                throw new BadRequestError("test does not exist")
+            }
+            if (test.status !== "inProgress") {
+                throw new BadRequestError("test completed ")
+            }
+
+            const endTime = test.endTime as Date
+            const timeLeft = (endTime.getTime() - new Date().getTime()) / 1000
+
+            await this.db.update(Tests).set({
+                status: 'paused',
+                timeLeft: Math.round(timeLeft),
+            }).where(eq(Tests.id, testId))
+
+
+        } catch (error) {
+            throw error
+        }
+    }
+
+    resumeTestStatus = async (testId: string, userId: string): Promise<{ testId: string, timeLeft: number }> => {
+        try {
+            const test = await this.db.query.Tests.findFirst({
+                where: and(eq(Tests.id, testId), eq(Tests.userId, userId))
+            })
+            if (!test) {
+                throw new BadRequestError("test does not exist")
+            }
+            if (test.status !== "paused") {
+                throw new BadRequestError("test is not paused ")
+            }
+
+            if (test.timeLeft < 1) {
+                await this.db.update(Tests).set({
+                    status: 'complete',
+                }).where(eq(Tests.id, testId))
+                throw new BadRequestError("test completed ")
+            }
+
+            const timeLeft = test.timeLeft as number
+            const endTime = new Date((timeLeft * 1000) + (new Date().getTime()))
+
+
+            await this.db.update(Tests).set({
+                status: 'inProgress',
+                endTime,
+            }).where(eq(Tests.id, testId))
+
+            return {
+                timeLeft,
+                testId: test.id as string
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    endTest = async (testId: string, userId: string): Promise<void> => {
+        try {
+            const test = await this.db.query.Tests.findFirst({
+                where: and(eq(Tests.id, testId), eq(Tests.userId, userId))
+            })
+            if (!test) {
+                throw new BadRequestError("test does not exist")
+            }
+            if (test.status !== "inProgress") {
+                throw new BadRequestError("test not in progress ")
+            }
+
+            await this.db.update(Tests).set({
+                status: 'complete',
+                timeLeft: 0,
+            }).where(eq(Tests.id, testId))
+
+        } catch (error) {
+            throw error
+        }
+    }
+
+    forceEndTest = async (testId: string): Promise<void> => {
+        try {
+            const test = await this.db.query.Tests.findFirst({
+                where: and(eq(Tests.id, testId))
+            })
+            if (!test) {
+                throw new BadRequestError("test does not exist")
+            }
+            if (test.status !== "inProgress") {
+                throw new BadRequestError("test not in progress ")
+            }
+
+            await this.db.update(Tests).set({
+                status: 'complete',
+                timeLeft: 0,
+            }).where(eq(Tests.id, testId))
+
+        } catch (error) {
+            throw error
+        }
     }
 
 }

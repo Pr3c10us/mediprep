@@ -15,6 +15,9 @@ import {TestRepository} from "../../domain/tests/repository";
 import {TestRepositoryDrizzle} from "./persistence/database/drizzle/test";
 import {CartRepository} from "../../domain/carts/repository";
 import {CartRepositoryDrizzle} from "./persistence/database/drizzle/cart";
+import {createClient} from "redis";
+import {CacheRepository} from "../../domain/cache/repository";
+import {RedisCacheRepository} from "./persistence/cache/redis";
 
 export class Adapter {
     EnvironmentVariables
@@ -40,12 +43,15 @@ export class Adapter {
 
     cartRepositories: CartRepository
 
+    CacheRepository : CacheRepository
+
 
     constructor(
         dbClient: PoolClient,
         azureBlobClient: BlobServiceClient,
         kafka: Kafka,
-        environmentVariables: Environment
+        environmentVariables: Environment,
+        redisClient:  ReturnType<typeof createClient>
     ) {
         this.EnvironmentVariables = environmentVariables;
         this.QueueRepository = new QueueRepositoryKafka(kafka);
@@ -58,5 +64,6 @@ export class Adapter {
         this.userExamAccessRepository = new UserExamAccessRepositoryDrizzle(dbClient)
         this.testRepositories = new TestRepositoryDrizzle(dbClient)
         this.cartRepositories = new CartRepositoryDrizzle(dbClient)
+        this.CacheRepository = new RedisCacheRepository(redisClient,environmentVariables)
     }
 }

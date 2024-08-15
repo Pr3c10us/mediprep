@@ -28,7 +28,7 @@ export class Services {
         this.UserServices = new UserServices(adapter.UserRepository, adapter.QueueRepository)
         this.SalesServices = new SalesServices(adapter.salesRepository, adapter.UserRepository, adapter.ExamRepository)
         this.userExamAccessService = new UserExamAccessService(adapter.userExamAccessRepository)
-        this.testServices = new TestsServices(adapter.testRepositories)
+        this.testServices = new TestsServices(adapter.testRepositories,adapter.CacheRepository)
         this.CartServices = new CartServices(adapter.cartRepositories)
     }
 }

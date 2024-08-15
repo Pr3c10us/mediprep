@@ -47,6 +47,30 @@ export class TestsHandler {
                 this.getTestQuestions
             )
 
+        this.router.route("/:examId/:testId/end")
+            .post(
+                ValidationMiddleware(userExamIdSchema, "params"),
+                ValidationMiddleware(testIdSchema, "params"),
+                CheckExamAccess(userExamAccessService),
+                this.endTest
+            )
+
+        this.router.route("/:examId/:testId/pause")
+            .post(
+                ValidationMiddleware(userExamIdSchema, "params"),
+                ValidationMiddleware(testIdSchema, "params"),
+                CheckExamAccess(userExamAccessService),
+                this.pauseTest
+            )
+
+        this.router.route("/:examId/:testId/resume")
+            .post(
+                ValidationMiddleware(userExamIdSchema, "params"),
+                ValidationMiddleware(testIdSchema, "params"),
+                CheckExamAccess(userExamAccessService),
+                this.resumeTest
+            )
+
         this.router.route("/:examId/:testId/analytics")
             .get(
                 ValidationMiddleware(userExamIdSchema, "params"),
@@ -63,25 +87,27 @@ export class TestsHandler {
             questionMode: req.body.questionMode,
             userId: req.userD?.id as string,
             examId: req.params.examId,
-            endTime: new Date(),
+            endTime: new Date(req.body.endTime),
             type: req.body.type,
             subjectId: req.body.subjectId || null,
             courseId: req.body.courseId || null,
         }
+        console.log(testParams.endTime, req.params.endTime)
         const testId = await this.testServices.commands.createTest.Handle(testParams)
 
         new SuccessResponse(res, {testId}).send();
     }
 
     getTests = async (req: Request, res: Response) => {
-        const {limit, page, testType, startDate, endDate} = req.query;
+        const {limit, page, testType,status, startDate, endDate} = req.query;
         const filter: PaginationFilter = {
             limit: Number(limit) || 10,
             page: Number(page) || 1,
             startDate: startDate ? new Date(startDate as string) : undefined,
             endDate: endDate ? new Date(endDate as string) : undefined,
             testType: testType ? testType as TestType : undefined,
-            userId: req.userD?.id as string
+            userId: req.userD?.id as string,
+            status: status as string || undefined
         };
         const {tests, metadata} = await this.testServices.queries.getTests.Handle(filter)
 
@@ -105,6 +131,33 @@ export class TestsHandler {
         const id = await this.testServices.commands.scoreTest.Handle(testId, userId, answers as UserAnswer[])
 
         new SuccessResponse(res, {testId: id}).send();
+    }
+
+    endTest = async (req: Request, res: Response) => {
+        const testId = req.params.testId
+        const userId = req.userD?.id as string
+
+        await this.testServices.commands.endTest.Handle(testId, userId)
+
+        new SuccessResponse(res, {message: "test ended"}).send();
+    }
+
+    pauseTest = async (req: Request, res: Response) => {
+        const testId = req.params.testId
+        const userId = req.userD?.id as string
+
+        await this.testServices.commands.pauseTest.Handle(testId, userId)
+
+        new SuccessResponse(res, {message: "test paused"}).send();
+    }
+
+    resumeTest = async (req: Request, res: Response) => {
+        const testId = req.params.testId
+        const userId = req.userD?.id as string
+
+        const testIde = await this.testServices.commands.resumeTest.Handle(testId, userId)
+
+        new SuccessResponse(res, {message: "test paused", testIde}).send();
     }
 
     getTestQuestions = async (req: Request, res: Response) => {

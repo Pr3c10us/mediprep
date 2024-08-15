@@ -40,11 +40,11 @@
             key: 'pk_test_2bd1847db9309248327cc9df2228692b4b9b91f6', // Replace with your public key
             email: document.getElementById('email-address').value,
             amount: document.getElementById('amount').value * 100, // the amount value is multiplied by 100 to convert to the lowest currency unit
-            currency: 'USD', // Use GHS for Ghana Cedis or USD for US Dollars
+            currency: 'NGN', // Use GHS for Ghana Cedis or USD for US Dollars
             ref: '' + Math.floor((Math.random() * 1000000000) + 1), // Replace with a better reference generation method
             metadata: {
-              "examId": "477a4e67-be47-4ef2-80b1-ee035fb69079",
-              "userId" : "0b95353e-5e8a-4818-a78a-f4d8e773e416"
+              "examId": "b8449293-9744-4d89-bf33-4e43f67f6afe",
+              "userId" : "dc08db46-d721-4730-886d-1e8fa0971ad2"
             },
             callback: function(response) {
                 var reference = response.reference;

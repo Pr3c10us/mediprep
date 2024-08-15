@@ -43,6 +43,13 @@
       "when": 1723631099454,
       "tag": "0005_optimal_hawkeye",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1723677267341,
+      "tag": "0006_superb_exodus",
+      "breakpoints": true
     }
   ]
 }

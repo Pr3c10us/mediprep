@@ -494,7 +494,6 @@ export class ExamRepositoryDrizzle implements ExamRepository {
             if (filter.examId || filter.examId != undefined) {
                 filters.push(eq(Subjects.examId, filter.examId));
             }
-            console.log(filter)
 
             // Get the total count of rows
             const totalResult = await this.db.select({count: count()}).from(Subjects).where(and(...filters));

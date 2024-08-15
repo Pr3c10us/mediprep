@@ -3,17 +3,19 @@ import {Services} from "./internals/app/services";
 import {Adapter} from "./internals/infrastructure/adapters/adapters";
 import {Server} from "./internals/infrastructure/ports/http/server";
 import pg, {Pool} from "pg";
-import {drizzle} from "drizzle-orm/node-postgres";
 import {Environment} from "./pkg/configs/env";
 import {Kafka, logLevel} from "kafkajs";
 import {KafkaQueue} from "./internals/infrastructure/ports/kafka/queue";
 import {getBlobClient} from "./pkg/azure/storage";
 import {BlobServiceClient} from "@azure/storage-blob";
+import {createClient} from "redis";
+import {RedisQueue} from "./internals/infrastructure/ports/redis/queue";
+
 
 const getDBClient = (
     environmentVariables: Environment
 ): Pool => {
-    const { Pool } = pg;
+    const {Pool} = pg;
     return new Pool({
         user: environmentVariables.pgDBUsername,
         password: environmentVariables.pgDBPassword,
@@ -59,9 +61,25 @@ const main = async () => {
     const environmentVariables = new Environment();
     const dbClient = await getDBClient(environmentVariables).connect();
     const kafka = await getKafka(environmentVariables);
-    const azureBlobClient : BlobServiceClient = getBlobClient(environmentVariables)
+    const azureBlobClient: BlobServiceClient = getBlobClient(environmentVariables)
+    const redisClient: ReturnType<typeof createClient> = createClient({
+        url: environmentVariables.redisURL,
+    })
+    await redisClient.on('error', err => {
+        console.log("redis error")
+        process.exit(1)
+    }).connect();
 
-    const adapter: Adapter = new Adapter(dbClient,azureBlobClient,kafka, environmentVariables);
+    const subRedisClient: ReturnType<typeof createClient> = createClient({
+        url: environmentVariables.redisURL,
+    })
+    await subRedisClient.on('error', err => {
+        console.log("redis error")
+        process.exit(1)
+    }).connect();
+
+
+    const adapter: Adapter = new Adapter(dbClient, azureBlobClient, kafka, environmentVariables, redisClient);
     const services: Services = new Services(adapter);
     const httpServer: Server = new Server(services, environmentVariables);
     const kafkaQueue: KafkaQueue = new KafkaQueue(
@@ -70,9 +88,15 @@ const main = async () => {
         azureBlobClient,
         environmentVariables
     );
+    const redisQueue: RedisQueue = new RedisQueue(
+        services,
+        subRedisClient,
+    )
+
 
     httpServer.listen();
     await kafkaQueue.listen();
+    await redisQueue.listen()
 };
 
-main();
+main().then(r => {});
