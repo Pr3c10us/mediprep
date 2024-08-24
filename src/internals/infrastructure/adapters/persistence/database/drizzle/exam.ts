@@ -846,6 +846,8 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         }
     }
 
+    // get tagged question
+
     async ReportQuestion(userId: string, questionId: string, reason: string): Promise<void> {
         try {
             await this.db.insert(UserReportQuestionRecords).values({
@@ -857,5 +859,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
             throw error
         }
     }
+
+    // get reported question
 }
 

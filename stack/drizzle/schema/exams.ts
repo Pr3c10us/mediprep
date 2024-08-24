@@ -252,6 +252,7 @@ export const UserTagQuestionRecords = pgTable("user_tag_question_records", {
         onDelete: 'cascade',
         onUpdate: 'cascade'
     }).notNull(),
+    createdAt: timestamp('created_at').defaultNow(),
 }, (t) => ({
     pk: primaryKey({columns: [t.id]}),
 }))
@@ -274,6 +275,7 @@ export const UserReportQuestionRecords = pgTable("user_report_question_records",
         onDelete: 'cascade',
         onUpdate: 'cascade'
     }).notNull(),
+    createdAt: timestamp('created_at').defaultNow(),
     reason: text("reason").notNull()
 }, (t) => ({
     pk: primaryKey({columns: [t.id]}),
