@@ -1,4 +1,15 @@
-import {boolean, integer, decimal,pgTable, primaryKey, text, timestamp, uuid, varchar} from 'drizzle-orm/pg-core';
+import {
+    boolean,
+    integer,
+    decimal,
+    pgTable,
+    primaryKey,
+    text,
+    timestamp,
+    uuid,
+    varchar,
+    doublePrecision
+} from 'drizzle-orm/pg-core';
 import {InferSelectModel, relations} from "drizzle-orm";
 import {Admins} from "./admins";
 import {UserExamAccess, Users} from "./users";
@@ -25,6 +36,8 @@ export const adminsToExamRelations = relations(ExamAccess, ({one}) => ({
 export const Exams = pgTable('exam', {
     id: uuid('id').defaultRandom(),
     name: varchar('name', {length: 32}).unique(),
+    averageMockScore: doublePrecision("average_mock_score").notNull().default(0.0),
+    mockTestTime: integer('mock_tes_time').notNull().default(60),
     description: text('description').notNull(),
     imageURL: varchar('image_url', {length: 255}),
     subscriptionAmount: decimal('subscription_amount').default('0.0'),

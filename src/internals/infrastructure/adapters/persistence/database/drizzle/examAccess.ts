@@ -48,6 +48,8 @@ export class UserExamAccessRepositoryDrizzle implements UserExamAccessRepository
                     subscriptionAmount: Number(result.exam.subscriptionAmount),
                     imageURL: result.exam.imageURL as string,
                     mockQuestions: result.exam.mockQuestions as number,
+                    averageMockScore: result.exam.averageMockScore,
+                    mockTestTime: result.exam.mockTestTime,
                     createdAt: result.exam.createdAt as Date,
                     updatedAt: result.exam.updatedAt as Date
                 },
@@ -137,6 +139,8 @@ export class UserExamAccessRepositoryDrizzle implements UserExamAccessRepository
                     updatedAt: exam.updatedAt as Date,
                     testAveragePercent: totalTestScore / totalTest,
                     mockAveragePercent: totalMockScore / totalMocks,
+                    averageMockScore: exam.averageMockScore,
+                    mockTestTime: exam.mockTestTime,
                 }
 
                 exams.push(toAdd)

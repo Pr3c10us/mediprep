@@ -2,6 +2,7 @@ import {doublePrecision, integer, pgTable, primaryKey, text, timestamp, uuid, va
 import {relations, sql} from "drizzle-orm";
 import {Users} from "./users";
 import {Courses, Exams, Options, Questions, Subjects} from "./exams";
+import {array} from "zod";
 
 export const Tests = pgTable("tests", {
     id: uuid('id').defaultRandom(),
@@ -14,8 +15,8 @@ export const Tests = pgTable("tests", {
     type: varchar("type", {length: 32}).default('mock'),
     questionMode: varchar("question_mode", {length: 32}).default("unused"),
     userId: uuid('user_id').references(() => Users.id).notNull(),
-    subjectId: uuid('subject_id').references(() => Subjects.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
-    courseId: uuid('course_id').references(() => Courses.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
+    subjectIds: uuid('subject_ids').array().notNull().default(sql`'{}'::uuid[]`),
+    courseIds: uuid('course_ids').array().notNull().default(sql`'{}'::uuid[]`),
     examId: uuid('exam_id').references(() => Exams.id, {onDelete: 'cascade', onUpdate: 'cascade'}).notNull(),
     endTime: timestamp('end_Time').default(new Date(new Date().getTime() + 60 * 60 * 1000)),
     timeLeft: integer('time_left').default(0).notNull(),
@@ -29,14 +30,6 @@ export const testsRelation = relations(Tests, ({one, many}) => ({
     user: one(Users, {
         fields: [Tests.userId],
         references: [Users.id]
-    }),
-    subject: one(Subjects, {
-        fields: [Tests.subjectId],
-        references: [Subjects.id]
-    }),
-    course: one(Courses, {
-        fields: [Tests.courseId],
-        references: [Courses.id]
     }),
     exam: one(Exams, {
         fields: [Tests.examId],

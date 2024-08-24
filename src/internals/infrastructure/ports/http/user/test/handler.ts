@@ -7,7 +7,7 @@ import {CheckExamAccess} from "../../../../../../pkg/middleware/checkExamAccess"
 import {UserExamAccessService} from "../../../../../app/examAccess/examAccess";
 import {SuccessResponse} from "../../../../../../pkg/responses/success";
 import {PaginationFilter} from "../../../../../../pkg/types/pagination";
-import {TestType, UserAnswer} from "../../../../../domain/tests/test";
+import {Test, TestType, UserAnswer} from "../../../../../domain/tests/test";
 
 export class TestsHandler {
     testServices: TestsServices
@@ -82,17 +82,16 @@ export class TestsHandler {
     }
 
     createTest = async (req: Request, res: Response) => {
-        const testParams = {
+        const testParams: PartialWithRequired<Test, "questions" | "questionMode" | "endTime" | "type" | "examId" | "userId"> = {
             questions: req.body.questions,
             questionMode: req.body.questionMode,
             userId: req.userD?.id as string,
             examId: req.params.examId,
             endTime: new Date(req.body.endTime),
             type: req.body.type,
-            subjectId: req.body.subjectId || null,
-            courseId: req.body.courseId || null,
+            subjectIds: req.body.subjectIds || null,
+            courseIds: req.body.courseIds || null,
         }
-        console.log(testParams.endTime, req.params.endTime)
         const testId = await this.testServices.commands.createTest.Handle(testParams)
 
         new SuccessResponse(res, {testId}).send();

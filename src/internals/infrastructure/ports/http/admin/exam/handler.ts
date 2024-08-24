@@ -28,6 +28,8 @@ export class ExamHandler {
         const exam: Exam = {
             name: req.body.name,
             description: req.body.description,
+            averageMockScore: req.body.averageMockScore || 0,
+            mockTestTime: req.body.mockTestTime,
             subscriptionAmount: req.body.subscriptionAmount,
             mockQuestions: req.body.mockQuestions
         }
@@ -75,6 +77,8 @@ export class ExamHandler {
         const exam: Exam = {
             name: req.body.name,
             description: req.body.description,
+            averageMockScore: req.body.averageMockScore,
+            mockTestTime: req.body.mockTestTime,
             subscriptionAmount: req.body.subscriptionAmount,
             mockQuestions: req.body.mockQuestions
         }

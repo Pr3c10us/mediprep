@@ -6,8 +6,8 @@ export const createTestSchema = z.object({
     questionMode: z.enum(["used", "unused","all"]).default("unused"),
     endTime: z.string().regex(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d+)?(Z|[+-]\d{2}:\d{2})$/),
     type: z.enum(["subjectBased", "courseBased", "mock"]).default("mock"),
-    subjectId: z.string().optional(),
-    courseId: z.string().optional()
+    subjectIds: uuidSchema.array().optional(),
+    courseIds: uuidSchema.array().optional()
 });
 
 const answerSchema = z.object({

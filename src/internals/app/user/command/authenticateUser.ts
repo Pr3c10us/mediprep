@@ -1,12 +1,10 @@
-import {
-    BadRequestError,
-    UnAuthorizedError,
-} from "../../../../pkg/errors/customError";
-import { compareHash, signToken } from "../../../../pkg/utils/encryption";
-import { UserRepository } from "../../../domain/users/repository";
+import {BadRequestError, UnAuthorizedError,} from "../../../../pkg/errors/customError";
+import {compareHash, signToken} from "../../../../pkg/utils/encryption";
+import {UserRepository} from "../../../domain/users/repository";
+import {User} from "../../../domain/users/user";
 
 export interface AuthenticateUser {
-    Handle: (email: string, password: string) => Promise<string | void>;
+    Handle: (email: string, password: string) => Promise<{ user: User, token: string }>;
 }
 
 export class AuthenticateUserC implements AuthenticateUser {
@@ -16,7 +14,7 @@ export class AuthenticateUserC implements AuthenticateUser {
         this.repository = repository;
     }
 
-    Handle = async (email: string, password: string): Promise<string> => {
+    Handle = async (email: string, password: string): Promise<{ user: User, token: string }> => {
         try {
             const user = await this.repository.getUserByEmail(email);
             if (!user?.email || user?.email != email) {
@@ -27,10 +25,10 @@ export class AuthenticateUserC implements AuthenticateUser {
                 throw new UnAuthorizedError(`invalid password`);
             }
 
-            const payload = { id: user.id };
+            const payload = {id: user.id};
             const token = signToken(payload);
 
-            return token;
+            return {user, token};
         } catch (error) {
             throw error;
         }

@@ -122,6 +122,8 @@ export class CartRepositoryDrizzle implements CartRepository {
                             description: item.exam.description as string,
                             subscriptionAmount: Number(item.exam.subscriptionAmount),
                             imageURL: item.exam.imageURL as string,
+                            averageMockScore: item.exam.averageMockScore,
+                            mockTestTime: item.exam.mockTestTime,
                         },
                     }
                 })

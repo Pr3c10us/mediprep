@@ -46,6 +46,8 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         try {
             const exam = await this.db.insert(Exams).values({
                 name: examParam.name,
+                averageMockScore: examParam.averageMockScore,
+                mockTestTime: examParam.mockTestTime,
                 description: examParam.description,
                 subscriptionAmount: String(examParam.subscriptionAmount),
                 mockQuestions: examParam.mockQuestions
@@ -377,6 +379,8 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                             name: row.name as string,
                             description: row.description as string,
                             subscriptionAmount: Number(row.subscriptionAmount),
+                            averageMockScore: row.averageMockScore,
+                            mockTestTime: row.mockTestTime,
                             imageURL: row.imageURL as string,
                             createdAt: row.createdAt as Date,
                             updatedAt: row.updatedAt as Date
@@ -702,6 +706,8 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 id: examResult[0].id as string,
                 name: examResult[0].name as string,
                 description: examResult[0].description as string,
+                averageMockScore: examResult[0].averageMockScore,
+                mockTestTime: examResult[0].mockTestTime,
                 subscriptionAmount: Number(examResult[0].subscriptionAmount),
                 imageURL: examResult[0].imageURL as string,
                 createdAt: examResult[0].createdAt as Date,
@@ -728,6 +734,8 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 name: exam.name as string,
                 description: exam.description as string,
                 subscriptionAmount: Number(exam.subscriptionAmount),
+                averageMockScore: exam.averageMockScore,
+                mockTestTime: exam.mockTestTime,
                 imageURL: exam.imageURL as string,
                 createdAt: exam.createdAt as Date,
                 updatedAt: exam.updatedAt as Date,

@@ -83,7 +83,7 @@ export class UserOnboardingHandler {
     authenticateUser = async (req: Request, res: Response) => {
         const {email, password} = req.body;
 
-        const token = await this.userServices.commands.authenticateUser.Handle(
+        const {token,user} = await this.userServices.commands.authenticateUser.Handle(
             email,
             password
         );
@@ -92,7 +92,8 @@ export class UserOnboardingHandler {
             key: "userToken",
             value: token,
         };
-        new SuccessResponseWithCookies(res, cookie, {jwt: token}).send();
+        delete user.password
+        new SuccessResponseWithCookies(res, cookie, {jwt: token,user}).send();
     };
 
     forgottenPassword = async (req: Request, res: Response) => {

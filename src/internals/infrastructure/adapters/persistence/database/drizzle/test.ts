@@ -49,8 +49,8 @@ export class TestRepositoryDrizzle implements TestRepository {
                 incorrectAnswers: testRes.incorrectAnswers as number,
                 unansweredQuestions: testRes.unansweredQuestions as number,
                 questionMode: testRes.questionMode as TestMode,
-                subjectId: testRes.subjectId as string,
-                courseId: testRes.courseId as string,
+                subjectIds: testRes.subjectIds,
+                courseIds: testRes.courseIds,
                 endTime: testRes.endTime as Date,
                 timeLeft: testRes.timeLeft as number
             }
@@ -201,8 +201,8 @@ export class TestRepositoryDrizzle implements TestRepository {
                         incorrectAnswers: test.incorrectAnswers as number,
                         unansweredQuestions: test.unansweredQuestions as number,
                         questionMode: test.questionMode as TestMode,
-                        subjectId: test.subjectId as string,
-                        courseId: test.courseId as string,
+                        subjectIds: test.subjectIds,
+                        courseIds: test.courseIds,
                         endTime: test.endTime as Date,
                     }
                 }), metadata: {
@@ -229,17 +229,18 @@ export class TestRepositoryDrizzle implements TestRepository {
 
                     if (test.type == "mock") {
                         test.questions = exam.mockQuestions as number
+                        test.endTime = new Date(new Date().getTime() + exam.mockTestTime * 60 * 1000)
                     }
                     let filters = []
                     if (test.type == "subjectBased") {
-                        if (test.subjectId) {
-                            filters.push(eq(Questions.subjectId, test.subjectId))
+                        if (test.subjectIds && test.subjectIds.length > 0) {
+                            filters.push(inArray(Questions.subjectId, test.subjectIds))
                         } else {
                             throw new BadRequestError(("pass valid subject id"))
                         }
                     } else if (test.type == "courseBased") {
-                        if (test.courseId) {
-                            filters.push(eq(Questions.courseId, test.courseId))
+                        if (test.courseIds && test.courseIds.length > 0) {
+                            filters.push(inArray(Questions.courseId, test.courseIds))
                         } else {
                             throw new BadRequestError("pass valid course id")
                         }
@@ -280,7 +281,7 @@ export class TestRepositoryDrizzle implements TestRepository {
                         ()`
                     })
                     if (questionsRes.length <= 0) {
-                        throw new NotFoundError(`no more ${test.questionMode} questions`)
+                        throw new NotFoundError(`no questions`)
                     }
                     test.questions = questionsRes.length
                     const testRes = await tx.insert(Tests).values(test).returning({

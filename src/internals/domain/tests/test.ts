@@ -14,8 +14,8 @@ export type Test = {
     type: TestType
     questionMode: TestMode;
     userId: string;
-    subjectId: string;
-    courseId: string;
+    subjectIds: string[];
+    courseIds: string[];
     examId: string;
     endTime: Date;
     createdAt: Date;
