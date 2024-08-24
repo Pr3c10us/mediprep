@@ -157,7 +157,8 @@ export class SalesRepositoryDrizzle implements UserExamAccessRepository {
                             imageURL: item.exam.imageURL as string,
                             subscriptionAmount: Number(item.exam.subscriptionAmount),
                             mockQuestions: item.exam.mockQuestions as number,
-                            averageMockScore: item.exam.averageMockScore,
+                            totalMockScores: item.exam.totalMockScores,
+                            mocksTaken: item.exam.mocksTaken,
                             mockTestTime: item.exam.mockTestTime,
                         }
                     }
@@ -216,7 +217,8 @@ export class SalesRepositoryDrizzle implements UserExamAccessRepository {
                             createdAt: item.exam.createdAt as Date,
                             updatedAt: item.exam.updatedAt as Date,
                             description: item.exam.description as string,
-                            averageMockScore: item.exam.averageMockScore,
+                            totalMockScores: item.exam.totalMockScores,
+                            mocksTaken: item.exam.mocksTaken,
                             mockTestTime: item.exam.mockTestTime,
                             imageURL: item.exam.imageURL as string,
                             subscriptionAmount: Number(item.exam.subscriptionAmount),

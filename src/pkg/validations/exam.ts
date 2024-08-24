@@ -4,7 +4,7 @@ import {uuidSchema} from "./admin";
 export const addExamSchema = z.object({
     name: z.string(),
     description: z.string(),
-    averageMockScore: z.number().optional(),
+    totalMockScores: z.number().optional(),
     mockTestTime: z.number(),
     subscriptionAmount: z.number(),
     mockQuestions: z.number()
@@ -20,7 +20,7 @@ export const addExamDiscountSchema = z.object({
 export const editExamSchema = z.object({
     name: z.string().optional(),
     description: z.string().optional(),
-    averageMockScore: z.number().optional(),
+    totalMockScores: z.number().optional(),
     mockTestTime: z.number().optional(),
     subscriptionAmount: z.number().optional(),
     mockQuestions: z.number().optional()

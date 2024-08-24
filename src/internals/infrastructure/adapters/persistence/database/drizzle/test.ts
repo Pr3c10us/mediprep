@@ -530,14 +530,17 @@ export class TestRepositoryDrizzle implements TestRepository {
                 answeredQuestions.push(answer.questionId)
             }
 
+            const score = (correctAnswers / questionsRes.length) * 100
+
             const testUpdate = {
                 correctAnswers,
                 // status: "complete",
                 incorrectAnswers,
                 unansweredQuestions: questionsRes.length - (correctAnswers + incorrectAnswers),
-                score: (correctAnswers / questionsRes.length) * 100
+                score
             }
             await this.db.update(Tests).set(testUpdate).where(eq(Tests.id, testId))
+
             return testId
         } catch (error) {
             throw error
@@ -625,6 +628,11 @@ export class TestRepositoryDrizzle implements TestRepository {
                 timeLeft: 0,
             }).where(eq(Tests.id, testId))
 
+            if (test.type == "mock") {
+                await this.db.update(Exams).set({totalMockScores: sql`${Exams.totalMockScores} + ${test.score}`,mocksTaken: sql`${Exams.mocksTaken} + 1`}).where(eq(Exams.id,test.examId))
+            }
+
+
         } catch (error) {
             throw error
         }
@@ -646,6 +654,10 @@ export class TestRepositoryDrizzle implements TestRepository {
                 status: 'complete',
                 timeLeft: 0,
             }).where(eq(Tests.id, testId))
+
+            if (test.type == "mock") {
+                await this.db.update(Exams).set({totalMockScores: sql`${Exams.totalMockScores} + ${test.score}`,mocksTaken: sql`${Exams.mocksTaken} + 1`}).where(eq(Exams.id,test.examId))
+            }
 
         } catch (error) {
             throw error

@@ -3,7 +3,8 @@ export type Exam = {
     name: string;
     description: string;
     subscriptionAmount: number;
-    averageMockScore: number;
+    totalMockScores: number;
+    mocksTaken: number;
     mockTestTime: number;
     imageURL?: string;
     mockQuestions?: number;

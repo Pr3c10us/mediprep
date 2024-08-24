@@ -71,6 +71,13 @@
       "when": 1724466359995,
       "tag": "0009_slim_caretaker",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1724467879056,
+      "tag": "0010_motionless_switch",
+      "breakpoints": true
     }
   ]
 }

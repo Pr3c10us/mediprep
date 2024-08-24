@@ -36,8 +36,9 @@ export const adminsToExamRelations = relations(ExamAccess, ({one}) => ({
 export const Exams = pgTable('exam', {
     id: uuid('id').defaultRandom(),
     name: varchar('name', {length: 32}).unique(),
-    averageMockScore: doublePrecision("average_mock_score").notNull().default(0.0),
-    mockTestTime: integer('mock_tes_time').notNull().default(60),
+    totalMockScores: doublePrecision("total_mock_score").notNull().default(0.0),
+    mocksTaken: integer('mock_taken').notNull().default(0),
+    mockTestTime: integer('mock_test_time').notNull().default(60),
     description: text('description').notNull(),
     imageURL: varchar('image_url', {length: 255}),
     subscriptionAmount: decimal('subscription_amount').default('0.0'),
