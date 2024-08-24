@@ -10,7 +10,8 @@ import {getBlobClient} from "./pkg/azure/storage";
 import {BlobServiceClient} from "@azure/storage-blob";
 import {createClient} from "redis";
 import {RedisQueue} from "./internals/infrastructure/ports/redis/queue";
-
+import {Paystack} from 'paystack-sdk';
+import Stripe from 'stripe';
 
 const getDBClient = (
     environmentVariables: Environment
@@ -78,10 +79,14 @@ const main = async () => {
         process.exit(1)
     }).connect();
 
+    const paystack = new Paystack(environmentVariables.paystackSecret)
+    const stripe = new Stripe(environmentVariables.stripeSecret);
 
-    const adapter: Adapter = new Adapter(dbClient, azureBlobClient, kafka, environmentVariables, redisClient);
+
+
+    const adapter: Adapter = new Adapter(dbClient, azureBlobClient, kafka, environmentVariables, redisClient,paystack,stripe);
     const services: Services = new Services(adapter);
-    const httpServer: Server = new Server(services, environmentVariables);
+    const httpServer: Server = new Server(adapter,services, environmentVariables);
     const kafkaQueue: KafkaQueue = new KafkaQueue(
         kafka,
         services,

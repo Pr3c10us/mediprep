@@ -16,9 +16,11 @@ import passport from "passport";
 import {Strategy as GoogleStrategy} from "passport-google-oauth20";
 import {User} from "../../../domain/users/user";
 import {signToken} from "../../../../pkg/utils/encryption";
-import {BadRequestError, NotFoundError} from "../../../../pkg/errors/customError";
+import {NotFoundError} from "../../../../pkg/errors/customError";
+import {Adapter} from "../../adapters/adapters";
 
 export class Server {
+    adapters: Adapter
     services: Services;
     environmentVariables: Environment;
     port: number;
@@ -26,7 +28,8 @@ export class Server {
     apiRouter: Router;
 
 
-    constructor(services: Services, environmentVariables: Environment) {
+    constructor(adapters: Adapter, services: Services, environmentVariables: Environment,) {
+        this.adapters = adapters
         this.services = services;
         this.environmentVariables = environmentVariables;
         this.port = environmentVariables.port;
@@ -36,7 +39,14 @@ export class Server {
         this.initializePassport();
 
 
-        this.server.use(express.json());
+        this.server.use((req, res, next) => {
+            if (req.originalUrl === "/api/v1/webhook/stripe") {
+                express.raw({ type: "application/json" })(req, res, next);
+            } else {
+                express.json()(req, res, next);
+            }
+        });
+        // this.server.use(express.json());
         this.server.use(express.urlencoded({extended: false}));
         this.server.use(helmet());
         this.server.use(cookieParser(environmentVariables.cookieSecret));
@@ -85,7 +95,7 @@ export class Server {
     };
 
     webhook = () => {
-        const router = new WebhookHandler(this.services.SalesServices, this.environmentVariables);
+        const router = new WebhookHandler(this.services.SalesServices, this.environmentVariables, this.adapters.StripeClient);
         this.apiRouter.use("/webhook", router.router);
     };
 

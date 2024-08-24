@@ -2,13 +2,16 @@ import {UserExamAccessRepository} from "../../../../../domain/sales/repository";
 import {PoolClient} from "pg";
 import {drizzle} from "drizzle-orm/node-postgres";
 import * as schema from '../../../../../../../stack/drizzle/schema/sales'
-import {Sales} from '../../../../../../../stack/drizzle/schema/sales'
+import {SaleItems, Sales} from '../../../../../../../stack/drizzle/schema/sales'
 import * as schema2 from "../../../../../../../stack/drizzle/schema/exams"
 import * as schema3 from "../../../../../../../stack/drizzle/schema/users"
-import {Sale} from "../../../../../domain/sales/sale";
+import * as schemaCart from "../../../../../../../stack/drizzle/schema/cart";
+import {Carts} from "../../../../../../../stack/drizzle/schema/cart";
+import {AddSaleParams, Sale, SaleItem} from "../../../../../domain/sales/sale";
 import {PaginationFilter, PaginationMetaData} from "../../../../../../pkg/types/pagination";
 import {and, count, eq, gte, lte} from "drizzle-orm";
-import {BadRequestError} from "../../../../../../pkg/errors/customError";
+import {BadRequestError, UnAuthorizedError} from "../../../../../../pkg/errors/customError";
+import {undefined} from "zod";
 
 export class SalesRepositoryDrizzle implements UserExamAccessRepository {
     db
@@ -16,24 +19,88 @@ export class SalesRepositoryDrizzle implements UserExamAccessRepository {
     constructor(client: PoolClient) {
         this.db = drizzle(client, {
             schema: {
-                ...schema, ...schema2, ...schema3
+                ...schema, ...schema2, ...schema3, ...schemaCart
             }
         })
+
     }
 
-    AddSale = async (sale: Sale): Promise<void> => {
+    AddSale = async (params: AddSaleParams): Promise<{ totalPrice: number, saleID: string }> => {
         try {
-            await this.db.insert(Sales).values(
-                {
-                    userId: sale.userId,
-                    examId: sale.examId,
-                    reference: sale.reference,
-                    amount: sale.amount,
-                    expiryDate: sale.expiryDate,
-                    email: sale.email,
-                    status: sale.status,
+            const cart = await this.db.query.Carts.findFirst({
+                where: and(eq(Carts.userID, params.userID), eq(Carts.id, params.cartID)),
+                with: {
+                    cartItems: {
+                        with: {
+                            exam: {
+                                with: {
+                                    discounts: true
+                                },
+                            }
+                        }
+                    }
                 }
-            )
+            })
+            if (!cart) {
+                throw new UnAuthorizedError('try login again')
+            }
+            if (cart.cartItems.length < 1) {
+                throw new BadRequestError("empty cart")
+            }
+
+            let totalPrice: number = 0
+            let examPrices = cart.cartItems.map((item): number => {
+                const discount = item.exam.discounts.find((discount) => discount.month == item.months)
+                if (!discount) {
+                    return Number(item.exam.subscriptionAmount) * Number(item.months)
+                } else {
+                    if (discount.type == 'flat') {
+                        return (Number(item.exam.subscriptionAmount) - Number(discount.value)) * discount.month
+                    }
+                    if (discount.type == 'percent') {
+                        const examPrice = Number(item.exam.subscriptionAmount)
+                        const priceDiscount = examPrice * (Number(discount.value) / 100)
+                        return (examPrice - priceDiscount) * discount.month
+                    }
+                    return Number(item.exam.subscriptionAmount) * Number(item.months)
+                }
+            })
+            for (let i = 0; i < examPrices.length; i++) {
+                totalPrice += examPrices[i]
+            }
+
+            let saleID = ""
+            await this.db.transaction(async (tx) => {
+                try {
+                    const saleRes = await tx.insert(Sales).values(
+                        {
+                            userId: params.userID,
+                            amount: totalPrice,
+                            email: params.email,
+                        }
+                    ).returning({id: Sales.id})
+                    saleID = saleRes[0].id
+
+                    const saleItems = cart.cartItems.map((item): Omit<SaleItem, "id"> => {
+                        return {
+                            months: Number(item.months),
+                            price: Number(item.price),
+                            saleID: saleID,
+                            examID: item.examID,
+                        }
+                    })
+                    await tx.insert(SaleItems).values(saleItems)
+                } catch (error) {
+                    tx.rollback()
+                    throw error
+                }
+            })
+
+            if (!saleID || saleID == "") {
+                throw new Error("failed to initiate sale")
+            }
+
+            return {totalPrice, saleID: saleID}
         } catch (error) {
             throw error
         }
@@ -50,9 +117,9 @@ export class SalesRepositoryDrizzle implements UserExamAccessRepository {
                             lastName: true
                         }
                     },
-                    exam: {
-                        columns: {
-                            name: true
+                    saleItems: {
+                        with: {
+                            exam: true
                         }
                     }
                 }
@@ -64,17 +131,95 @@ export class SalesRepositoryDrizzle implements UserExamAccessRepository {
             return {
                 id: sale.id as string,
                 userId: sale.userId as string,
-                examId: sale.examId as string,
                 reference: sale.reference as string,
+                accessCode: sale.accessCode as string,
+                paymentGateway: sale.paymentGateway,
                 amount: sale.amount as number,
-                expiryDate: sale.expiryDate as Date,
                 email: sale.email as string,
                 status: sale.status as string,
                 createdAt: sale.createdAt as Date,
                 updatedAt: sale.updatedAt as Date,
                 firstName: sale.user?.firstName,
                 lastName: sale.user?.lastName,
-                examName: sale.exam?.name as string | undefined
+                saleItems: sale.saleItems.map((item): SaleItem => {
+                    return {
+                        id: item.id,
+                        months: item.months,
+                        price: Number(item.price),
+                        saleID: item.saleID,
+                        examID: item.examID,
+                        exam: {
+                            id: item.exam.id as string,
+                            name: item.exam.name as string,
+                            createdAt: item.exam.createdAt as Date,
+                            updatedAt: item.exam.updatedAt as Date,
+                            description: item.exam.description as string,
+                            imageURL: item.exam.imageURL as string,
+                            subscriptionAmount: Number(item.exam.subscriptionAmount),
+                            mockQuestions: item.exam.mockQuestions as number,
+                        }
+                    }
+                })
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    GetSaleByReference = async (reference: string): Promise<Sale> => {
+        try {
+            const sale = await this.db.query.Sales.findFirst({
+                where: eq(Sales.reference, reference),
+                with: {
+                    user: {
+                        columns: {
+                            firstName: true,
+                            lastName: true
+                        }
+                    },
+                    saleItems: {
+                        with: {
+                            exam: true
+                        }
+                    }
+                }
+            })
+
+            if (!sale) {
+                throw new BadRequestError(`sale with ${reference} does not exist`)
+            }
+            return {
+                id: sale.id as string,
+                userId: sale.userId as string,
+                reference: sale.reference as string,
+                accessCode: sale.accessCode as string,
+                paymentGateway: sale.paymentGateway,
+                amount: sale.amount as number,
+                email: sale.email as string,
+                status: sale.status as string,
+                createdAt: sale.createdAt as Date,
+                updatedAt: sale.updatedAt as Date,
+                firstName: sale.user?.firstName,
+                lastName: sale.user?.lastName,
+                saleItems: sale.saleItems.map((item): SaleItem => {
+                    return {
+                        id: item.id,
+                        months: item.months,
+                        price: Number(item.price),
+                        saleID: item.saleID,
+                        examID: item.examID,
+                        exam: {
+                            id: item.exam.id as string,
+                            name: item.exam.name as string,
+                            createdAt: item.exam.createdAt as Date,
+                            updatedAt: item.exam.updatedAt as Date,
+                            description: item.exam.description as string,
+                            imageURL: item.exam.imageURL as string,
+                            subscriptionAmount: Number(item.exam.subscriptionAmount),
+                            mockQuestions: item.exam.mockQuestions as number,
+                        }
+                    }
+                })
             }
         } catch (error) {
             throw error
@@ -83,14 +228,15 @@ export class SalesRepositoryDrizzle implements UserExamAccessRepository {
 
     GetSales = async (filter: PaginationFilter): Promise<{ sales: Sale[]; metadata: PaginationMetaData }> => {
         try {
+
             let filters = []
-            if (filter.startDate || filter.startDate != undefined) {
-                filters.push(gte(Sales.createdAt, filter.startDate as Date))
-            }
-            if (filter.endDate || filter.endDate != undefined) {
-                filters.push(lte(Sales.createdAt, filter.endDate as Date))
-            }
-            if (filter.reference || filter.reference != undefined) {
+            // if (filter.startDate || filter.startDate != undefined) {
+            //     filters.push(gte(Sales.createdAt, filter.startDate as Date))
+            // }
+            // if (filter.endDate || filter.endDate != undefined) {
+            //     filters.push(lte(Sales.createdAt, filter.endDate as Date))
+            // }
+            if (filter.reference) {
                 filters.push(eq(Sales.reference, filter.reference as string))
             }
             // Get the total count of rows
@@ -115,11 +261,6 @@ export class SalesRepositoryDrizzle implements UserExamAccessRepository {
                             lastName: true
                         }
                     },
-                    exam: {
-                        columns: {
-                            name: true
-                        }
-                    }
                 },
                 limit: filter.limit,
                 offset: (filter.page - 1) * filter.limit,
@@ -132,17 +273,16 @@ export class SalesRepositoryDrizzle implements UserExamAccessRepository {
                         return {
                             id: sale.id as string,
                             userId: sale.userId as string,
-                            examId: sale.examId as string,
                             reference: sale.reference as string,
+                            accessCode: sale.accessCode as string,
+                            paymentGateway: sale.paymentGateway,
                             amount: sale.amount as number,
-                            expiryDate: sale.expiryDate as Date,
                             email: sale.email as string,
                             status: sale.status as string,
                             createdAt: sale.createdAt as Date,
                             updatedAt: sale.updatedAt as Date,
                             firstName: sale.user?.firstName,
                             lastName: sale.user?.lastName,
-                            examName: sale.exam?.name as string | undefined
                         }
                     }), metadata: {
                         total: total,
@@ -153,6 +293,17 @@ export class SalesRepositoryDrizzle implements UserExamAccessRepository {
             }
             return {sales: [], metadata: {total: 0, perPage: filter.limit, currentPage: filter.page}}
 
+        } catch (error) {
+            throw error
+        }
+    }
+
+    UpdateSale = async (params: Partial<Sale>): Promise<void> => {
+        try {
+            if (!params.id || !params.userId) {
+                throw new BadRequestError("provide necessary info")
+            }
+            await this.db.update(Sales).set(params).where(and(eq(Sales.userId, params.userId), eq(Sales.id, params.id)))
         } catch (error) {
             throw error
         }

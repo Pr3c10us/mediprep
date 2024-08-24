@@ -46,6 +46,8 @@ export class Environment {
     resetPasswordURL: string;
 
     paystackSecret: string;
+    stripeSecret: string;
+    stripeSigningSecret : string;
 
     googleClientId: string
     googleClientSecret: string
@@ -112,6 +114,8 @@ export class Environment {
         this.resetPasswordURL = this.getEnvORError("RESET_PASSWORD_URL");
 
         this.paystackSecret = this.getEnvORError("PAYSTACK_SECRET")
+        this.stripeSecret = this.getEnvORError("STRIPE_SECRET")
+        this.stripeSigningSecret = this.getEnvORError("STRIPE_SIGNING_SECRET")
 
         this.googleClientId = this.getEnvORError("GOOGLE_CLIENT_ID")
         this.googleClientSecret = this.getEnvORError("GOOGLE_CLIENT_SECRET")

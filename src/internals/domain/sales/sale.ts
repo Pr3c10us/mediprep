@@ -1,15 +1,32 @@
+import {Exam} from "../exams/exam";
+
 export type Sale = {
-    id?: string;
-    userId: string;
-    examId: string;
+    id: string;
     reference: string;
+    accessCode: string;
+    paymentGateway: string;
     amount: number;
-    email: string;
     status: string;
-    expiryDate?: Date;
-    createdAt?: Date;
-    updatedAt?: Date;
+    email: string;
+    createdAt: Date;
+    updatedAt: Date;
+    userId: string;
     firstName?: string,
     lastName?: string,
-    examName? : string
+    saleItems?: SaleItem[]
+}
+
+export type SaleItem = {
+    id: string;
+    months: number;
+    price: number;
+    saleID: string;
+    examID: string;
+    exam?: Exam
+}
+
+export type AddSaleParams = {
+    userID: string,
+    cartID: string,
+    email: string,
 }

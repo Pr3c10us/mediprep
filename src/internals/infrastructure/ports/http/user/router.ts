@@ -43,7 +43,7 @@ export default class UserRouter {
     };
 
     cart = () => {
-        const router = new CartHandler(this.services.CartServices);
+        const router = new CartHandler(this.services.CartServices, this.services.SalesServices);
         this.router.use("/cart", AuthorizeUser(this.services.UserServices.userRepository), router.router);
     };
 }

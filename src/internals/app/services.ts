@@ -24,11 +24,11 @@ export class Services {
             adapter.QueueRepository
         );
         this.EmailServices = new EmailServices(adapter.EmailRepository);
-        this.ExamServices = new ExamServices(adapter.ExamRepository, adapter.StorageRepository, adapter.QueueRepository,adapter.testRepositories)
+        this.ExamServices = new ExamServices(adapter.ExamRepository, adapter.StorageRepository, adapter.QueueRepository, adapter.testRepositories)
         this.UserServices = new UserServices(adapter.UserRepository, adapter.QueueRepository)
-        this.SalesServices = new SalesServices(adapter.salesRepository, adapter.UserRepository, adapter.ExamRepository)
+        this.SalesServices = new SalesServices(adapter.salesRepository, adapter.UserRepository, adapter.cartRepositories, adapter.PaystackClient, adapter.StripeClient)
         this.userExamAccessService = new UserExamAccessService(adapter.userExamAccessRepository)
-        this.testServices = new TestsServices(adapter.testRepositories,adapter.CacheRepository)
+        this.testServices = new TestsServices(adapter.testRepositories, adapter.CacheRepository)
         this.CartServices = new CartServices(adapter.cartRepositories)
     }
 }

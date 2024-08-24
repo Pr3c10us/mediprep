@@ -18,6 +18,8 @@ import {CartRepositoryDrizzle} from "./persistence/database/drizzle/cart";
 import {createClient} from "redis";
 import {CacheRepository} from "../../domain/cache/repository";
 import {RedisCacheRepository} from "./persistence/cache/redis";
+import {Paystack} from "paystack-sdk";
+import Stripe from "stripe";
 
 export class Adapter {
     EnvironmentVariables
@@ -45,13 +47,18 @@ export class Adapter {
 
     CacheRepository : CacheRepository
 
+    PaystackClient:  Paystack
+    StripeClient:  Stripe
+
 
     constructor(
         dbClient: PoolClient,
         azureBlobClient: BlobServiceClient,
         kafka: Kafka,
         environmentVariables: Environment,
-        redisClient:  ReturnType<typeof createClient>
+        redisClient:  ReturnType<typeof createClient>,
+        paystackClient:  Paystack,
+        stripeClient:  Stripe
     ) {
         this.EnvironmentVariables = environmentVariables;
         this.QueueRepository = new QueueRepositoryKafka(kafka);
@@ -65,5 +72,7 @@ export class Adapter {
         this.testRepositories = new TestRepositoryDrizzle(dbClient)
         this.cartRepositories = new CartRepositoryDrizzle(dbClient)
         this.CacheRepository = new RedisCacheRepository(redisClient,environmentVariables)
+        this.PaystackClient = paystackClient
+        this.StripeClient = stripeClient
     }
 }

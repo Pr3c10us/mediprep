@@ -32,7 +32,7 @@ import {and, count, eq, ilike, sql} from "drizzle-orm";
 import {BadRequestError} from "../../../../../../pkg/errors/customError";
 import {PoolClient} from "pg";
 import {UserExamAccess} from "../../../../../../../stack/drizzle/schema/users";
-import {Sales} from "../../../../../../../stack/drizzle/schema/sales";
+import {SaleItems} from "../../../../../../../stack/drizzle/schema/sales";
 
 export class ExamRepositoryDrizzle implements ExamRepository {
     db
@@ -722,7 +722,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
             const subjects = await this.db.select().from(Subjects).where(eq(Subjects.examId, id))
             const courses = await this.db.select().from(Courses).where(eq(Courses.examId, id))
             const users = await this.db.select().from(UserExamAccess).where(eq(UserExamAccess.examId, id))
-            const sales = await this.db.select().from(Sales).where(eq(Sales.examId, id))
+            const sales = await this.db.select().from(SaleItems).where(eq(SaleItems.examID, id))
             return {
                 id: exam.id as string,
                 name: exam.name as string,

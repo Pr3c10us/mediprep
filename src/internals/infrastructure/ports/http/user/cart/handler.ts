@@ -5,13 +5,16 @@ import {addItemSchema, removeItemSchema} from "../../../../../../pkg/validations
 import {SuccessResponse} from "../../../../../../pkg/responses/success";
 import {UnAuthorizedError} from "../../../../../../pkg/errors/customError";
 import {AddItem2Cart} from "../../../../../domain/carts/cart";
+import {SalesServices} from "../../../../../app/sale/sale";
 
 export class CartHandler {
     cartServices;
     router;
+    salesService
 
-    constructor(cartServices: CartServices) {
+    constructor(cartServices: CartServices, salesService: SalesServices) {
         this.cartServices = cartServices;
+        this.salesService = salesService;
         this.router = Router();
 
         this.router
@@ -30,6 +33,18 @@ export class CartHandler {
             .delete(
                 ValidationMiddleware(removeItemSchema, "params"),
                 this.removeItemFromCartHandler
+            );
+
+        this.router
+            .route("/checkout/paystack")
+            .post(
+                this.checkoutPaystack
+            );
+
+        this.router
+            .route("/checkout/stripe")
+            .post(
+                this.checkoutStripe
             );
     }
 
@@ -84,4 +99,26 @@ export class CartHandler {
         new SuccessResponse(res, {message: "exam added to cart"}).send();
     };
 
+
+    checkoutPaystack = async (req: Request, res: Response) => {
+        const userID = req.userD?.id
+        if (!userID) {
+            throw new UnAuthorizedError("try login again")
+        }
+
+        const accessCode = await this.salesService.commands.checkoutPaystack.Handle({userID})
+
+        new SuccessResponse(res, {accessCode}).send();
+    };
+
+    checkoutStripe = async (req: Request, res: Response) => {
+        const userID = req.userD?.id
+        if (!userID) {
+            throw new UnAuthorizedError("try login again")
+        }
+
+        const clientSecret = await this.salesService.commands.checkoutStripe.Handle({userID})
+
+        new SuccessResponse(res, {clientSecret}).send();
+    };
 }

@@ -11,3 +11,5 @@ stack/terraform/azure/.terraform.lock.hcl
 ./dist
 dist
 /init.sql/
+/view/paystack.html
+/view/stripe.html
