@@ -28,12 +28,15 @@ import {AddExamDiscountCommand, AddExamDiscountCommandC} from "./commands/addExa
 import {GetTaggedQuestionsQuery, GetTaggedQuestionsQueryC} from "./query/getTaggedQuestion";
 import {GetReportedQuestionsQuery, GetReportedQuestionsQueryC} from "./query/getReportedQuestions";
 import {GetQuestionByIdQuery, GetQuestionByIdQueryC} from "./query/getQuestionById";
+import {UploadImageCommand, UploadImageCommandC} from "./commands/uploadImage";
+import {GetQuestionBatch, GetQuestionBatchC} from "./query/getBatchSatus";
 
 export class Commands {
     addExam: AddExamCommand;
     deleteExam: DeleteExamCommand
     editExam: EditExamCommand
     uploadExamImage: UploadExamImageCommand
+    uploadImage: UploadImageCommand
 
     addCourse: AddCourseCommand
     deleteCourse: DeleteCourseCommand
@@ -58,6 +61,7 @@ export class Commands {
         this.deleteExam = new DeleteExamCommandC(examRepository)
         this.editExam = new EditExamCommandC(examRepository)
         this.uploadExamImage = new UploadExamImageCommandC(examRepository, storageRepository)
+        this.uploadImage = new UploadImageCommandC(storageRepository)
 
         this.addCourse = new AddCourseCommandC(examRepository)
         this.deleteCourse = new DeleteCourseCommandC(examRepository)
@@ -89,6 +93,7 @@ export class Queries {
     getExamDetails: GetExamsDetails
     getTaggedQuestionsQuery: GetTaggedQuestionsQuery
     getReportedQuestionsQuery: GetReportedQuestionsQuery
+    getQuestionBatches: GetQuestionBatch
 
     constructor(examRepository: ExamRepository, testRepository: TestRepository) {
         this.getExams = new GetExamsQueryC(examRepository)
@@ -100,6 +105,7 @@ export class Queries {
         this.getExamDetails = new GetExamsDetailsC(examRepository)
         this.getTaggedQuestionsQuery = new GetTaggedQuestionsQueryC(examRepository)
         this.getReportedQuestionsQuery = new GetReportedQuestionsQueryC(examRepository)
+        this.getQuestionBatches = new GetQuestionBatchC(examRepository)
     }
 }
 

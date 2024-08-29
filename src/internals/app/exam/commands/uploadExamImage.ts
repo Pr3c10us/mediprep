@@ -22,9 +22,9 @@ export class UploadExamImageCommandC implements UploadExamImageCommand {
         try {
             const examExist = await this.examRepository.GetExamById(id)
 
-            const {fileURL: imageUrl, blobName  } = await this.storageRepository.upload(file,this.environmentVariable.azExamImageContainerName,examExist.id as string,)
+            const {fileURL, blobName  } = await this.storageRepository.upload(file,this.environmentVariable.azExamImageContainerName,examExist.id as string,)
             const updatedExam : EditExamParams = {
-                imageURL: imageUrl,
+                imageURL: fileURL,
             }
 
             await this.examRepository.EditExam(examExist.id as string,updatedExam)

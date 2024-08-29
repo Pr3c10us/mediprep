@@ -69,6 +69,16 @@ export class ExamHandler {
 
         new SuccessResponse(res, {exam}).send();
     }
+
+    getQuestionBatches = async (req: Request, res: Response) => {
+        const filter: PaginationFilter = {
+            limit: Number(req.query.limit) || 10,
+            page: Number(req.query.page) || 1,
+        };
+        const {questionBatches,metadata} = await this.examServices.queries.getQuestionBatches.handle(filter);
+
+        new SuccessResponse(res, {questionBatches},metadata).send();
+    }
     deleteExamHandler = async (req: Request, res: Response) => {
         await this.examServices.commands.deleteExam.Handle(req.params.id)
 
@@ -100,6 +110,14 @@ export class ExamHandler {
         await this.examServices.commands.uploadExamImage.Handle(req.params.id, file)
 
         new SuccessResponse(res, {message: "image uploaded"}).send()
+    }
+    uploadImageHandler = async (req: Request, res: Response) => {
+        const file = req.file
+        if (!file) throw new BadRequestError("issue uploading file")
+
+        const fileURL = await this.examServices.commands.uploadImage.Handle(file)
+
+        new SuccessResponse(res, {url: fileURL}).send()
     }
 
 

@@ -1,4 +1,3 @@
-import {PaginationFilter} from "../../../../pkg/types/pagination";
 import {Question} from "../../../domain/exams/exam";
 import {ExamRepository} from "../../../domain/exams/repository";
 

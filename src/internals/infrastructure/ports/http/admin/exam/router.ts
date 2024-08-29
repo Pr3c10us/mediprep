@@ -16,7 +16,7 @@ import {
     editQuestionSchema,
     editSubjectSchema,
     examIdSchema,
-    getCommandFilterSchema,
+    getCommandFilterSchema, paginationSchema,
     questionIdSchema,
     questionSchema,
     subjectIdSchema,
@@ -35,6 +35,18 @@ export class ExamRouter {
         this.uploadImage = new MulterConfig().multer
         this.uploadCSV = new MulterConfig("tabularDocument", 1024 * 1024 * 1024).multer
 
+
+        this.router.route('/upload/image').post(
+            CheckPermission("create_exam"),
+            this.uploadImage.single("image"),
+            this.handler.uploadImageHandler
+        )
+
+        this.router.route('/upload/exam').get(
+            CheckPermission("read_exam"),
+            ValidationMiddleware(paginationSchema, "query"),
+            this.handler.getQuestionBatches
+        )
 
         // Exams Route
         this.router.route('/').post(
