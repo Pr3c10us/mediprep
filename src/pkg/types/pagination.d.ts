@@ -20,6 +20,7 @@ export type PaginationFilter = {
     free?: boolean;
     random?: boolean;
     testType?: TestType;
+    questionStatus?: "unanswered" | "correct" | "wrong"
 };
 
 export type PaginationMetaData = {

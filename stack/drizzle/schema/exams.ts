@@ -129,8 +129,6 @@ export const Questions = pgTable('question', {
     id: uuid('id').defaultRandom(),
     type: varchar('type', {length: 32}).notNull(),
     question: text('question').notNull(),
-    questionImageUrl: varchar('question_image_url', {length: 128}),
-    explanationImageUrl: varchar('explanation_image_url', {length: 128}),
     explanation: text('explanation'),
     free: boolean('free').default(false),
     subjectId: uuid('subject_id').references(() => Subjects.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
@@ -177,7 +175,6 @@ export const Options = pgTable('option', {
     value: text('value').notNull(),
     selected: integer('selected').default(0),
     answer: boolean('answer').default(false),
-    explanation: text('explanation'),
     questionId: uuid('question_id').references(() => Questions.id, {onDelete: 'cascade', onUpdate: 'cascade'})
 }, (t) => ({
     pk: primaryKey({columns: [t.id]}),
@@ -252,6 +249,7 @@ export const UserTagQuestionRecords = pgTable("user_tag_question_records", {
         onDelete: 'cascade',
         onUpdate: 'cascade'
     }).notNull(),
+        examId: uuid('exam_id').references(() => Exams.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
     createdAt: timestamp('created_at').defaultNow(),
 }, (t) => ({
     pk: primaryKey({columns: [t.id]}),
@@ -266,6 +264,10 @@ export const userTagQuestionRecordsRelation = relations(UserTagQuestionRecords, 
         fields: [UserTagQuestionRecords.questionId],
         references: [Questions.id],
     }),
+    exam: one(Exams, {
+        fields: [UserTagQuestionRecords.examId],
+        references: [Exams.id]
+    }),
 }))
 
 export const UserReportQuestionRecords = pgTable("user_report_question_records", {
@@ -275,6 +277,7 @@ export const UserReportQuestionRecords = pgTable("user_report_question_records",
         onDelete: 'cascade',
         onUpdate: 'cascade'
     }).notNull(),
+        examId: uuid('exam_id').references(() => Exams.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
     createdAt: timestamp('created_at').defaultNow(),
     reason: text("reason").notNull()
 }, (t) => ({
@@ -289,5 +292,9 @@ export const userReportQuestionRecordsRelation = relations(UserReportQuestionRec
     question: one(Questions, {
         fields: [UserReportQuestionRecords.questionId],
         references: [Questions.id],
+    }),
+    exam: one(Exams, {
+        fields: [UserReportQuestionRecords.examId],
+        references: [Exams.id]
     }),
 }))

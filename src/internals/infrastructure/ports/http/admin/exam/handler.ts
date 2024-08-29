@@ -250,4 +250,9 @@ export class ExamHandler {
 
         new SuccessResponse(res, {message: `question updated`}).send()
     }
+
+    getQuestionByIdHandler = async (req: Request, res: Response) => {
+        const question = await this.examServices.queries.getQuestionById.handle(req.params.questionId)
+        new SuccessResponse(res, {question}).send()
+    }
 }

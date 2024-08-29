@@ -6,7 +6,7 @@ import {ExamHandler} from "./handler";
 import ValidationMiddleware from "../../../../../../pkg/middleware/validation";
 import {
     courseIdSchema,
-    getCommandFilterSchema,
+    getCommandFilterSchema, paginationSchema,
     questionIdSchema,
     userExamIdSchema
 } from "../../../../../../pkg/validations/exam";
@@ -69,9 +69,30 @@ export class ExamRouter {
             this.adminExamHandler.getSubjectsHandler
         )
 
+        this.router.route('/:examId/question/:questionId').get(
+            ValidationMiddleware(userExamIdSchema, "params"),
+            ValidationMiddleware(questionIdSchema, "params"),
+            CheckExamAccess(userExamAccessService),
+            this.adminExamHandler.getQuestionByIdHandler
+        )
+
         this.router.route('/:examId/free').get(
             ValidationMiddleware(userExamIdSchema, "params"),
             this.examHandler.getFreeQuestions
+        )
+
+        this.router.route("/:examId/tag").get(
+            ValidationMiddleware(userExamIdSchema, "params"),
+            ValidationMiddleware(paginationSchema,"query"),
+            CheckExamAccess(userExamAccessService),
+            this.examHandler.getTaggedQuestion
+        )
+        this.router.route("/:examId/report").get(
+            ValidationMiddleware(userExamIdSchema, "params"),
+            ValidationMiddleware(paginationSchema,"query"),
+            CheckExamAccess(userExamAccessService),
+            this.examHandler.getReportQuestion
+
         )
 
         this.router.route("/:examId/:questionId/tag").post(
@@ -88,5 +109,14 @@ export class ExamRouter {
             CheckExamAccess(userExamAccessService),
             this.examHandler.reportQuestion
         )
+
+        this.router.route("/:examId/report").get(
+            ValidationMiddleware(userExamIdSchema, "params"),
+            CheckExamAccess(userExamAccessService),
+
+        )
+
+
+
     }
 }

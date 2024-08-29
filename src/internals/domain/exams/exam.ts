@@ -55,14 +55,24 @@ export type Question = {
     id?: string;
     type: QuestionType;
     question: string;
-    questionImageUrl?: string;
     explanation: string;
-    explanationImageUrl?: string;
     subjectId?: string;
+    subjectName?: string;
+    courseName?: string;
     questionBatchId?: string;
     options?: Option[];
     questionStatus?: QuestionStatus;
     selectedAnswer?: string | string[]
+}
+
+export type QuestionWithReason = {
+    id?: string;
+    type: QuestionType;
+    reason: string;
+    subjectName?: string;
+    courseName?: string;
+    createdAt: Date
+    questionStatus?: QuestionStatus;
 }
 
 export type EditQuestionParams = {
@@ -81,7 +91,6 @@ export type Option = {
     value: string;
     selected?: number;
     answer?: boolean;
-    explanation?: string;
 }
 
 export type EditOptionParams = {

@@ -120,6 +120,10 @@ export class ExamRouter {
             CheckPermission("edit_exam"),
             ValidationMiddleware(questionIdSchema, "params"),
             this.handler.deleteQuestionHandler
+        ).get(
+            CheckPermission("read_exam"),
+            ValidationMiddleware(questionIdSchema, "params"),
+            this.handler.getQuestionByIdHandler
         )
 
 

@@ -1,6 +1,6 @@
 import {TestRepository} from "../../../../../domain/tests/repository";
 import {Test, TestAnalytics, TestMode, TestType, UserAnswer} from "../../../../../domain/tests/test";
-import {Option, Question, QuestionStatus, QuestionType} from "../../../../../domain/exams/exam";
+import {Option, Question, QuestionStatus, QuestionType, QuestionWithReason} from "../../../../../domain/exams/exam";
 import {PoolClient} from "pg";
 import {drizzle} from "drizzle-orm/node-postgres";
 import * as schema from "../../../../../../../stack/drizzle/schema/exams";
@@ -356,8 +356,6 @@ export class TestRepositoryDrizzle implements TestRepository {
                     type: question?.type as QuestionType,
                     explanation: question?.explanation as string,
                     question: question?.question as string,
-                    questionImageUrl: question?.questionImageUrl as string,
-                    explanationImageUrl: question?.explanationImageUrl as string,
                     options: question?.options?.map((option: any): Option => {
                         return {
                             id: option.id,
@@ -365,7 +363,6 @@ export class TestRepositoryDrizzle implements TestRepository {
                             value: option.value,
                             selected: option.selected,
                             answer: option.answer,
-                            explanation: option.explanation
                         }
                     })
                 }
@@ -433,7 +430,6 @@ export class TestRepositoryDrizzle implements TestRepository {
                         value: option.value,
                         selected: option.selected,
                         answer: option.answer,
-                        explanation: option.explanation
                     }
                 })
                 const previousQuestionStatus = testQuestionsRes.find((question) => answer.questionId == question.questionId)
@@ -659,6 +655,74 @@ export class TestRepositoryDrizzle implements TestRepository {
                 await this.db.update(Exams).set({totalMockScores: sql`${Exams.totalMockScores} + ${test.score}`,mocksTaken: sql`${Exams.mocksTaken} + 1`}).where(eq(Exams.id,test.examId))
             }
 
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async GetTestQuestions(filter: PaginationFilter): Promise<{
+        questions: QuestionWithReason[],
+        metadata: PaginationMetaData
+    }> {
+        try {
+            const filters: string | any[] = [];
+            filters.push(and(eq(TestQuestionRecords.userId, filter.userId as string),eq(TestQuestionRecords.examId, filter.examId as string)));
+            if (filter.questionStatus || filter.questionStatus != undefined) {
+                filters.push(eq(TestQuestionRecords.questionStatus, filter.questionStatus as string));
+            }
+            const totalResult = await this.db.select({count: count()}).from(TestQuestionRecords).where(and(...filters));
+            const total = totalResult[0].count;
+            if (total <= 0) {
+                return {
+                    questions: [], metadata: {
+                        total: 0,
+                        perPage: filter.limit,
+                        currentPage: filter.page
+                    }
+                }
+            }
+
+            const testQuestions = await this.db.query.TestQuestionRecords.findMany({
+                where: and(...filters),
+                with: {
+                    question: {
+                        with: {
+                            subject: true,
+                            course: true
+                        }
+                    }
+                },
+                limit: filter.limit,
+                offset: (filter.page - 1) * filter.limit,
+            })
+
+            if (testQuestions.length > 0) {
+                return {
+                    questions: testQuestions.map((question: any): QuestionWithReason => {
+                        return {
+                            id: question.question.id as string,
+                            type: question.question.type as QuestionType,
+                            reason: question.reason,
+                            courseName: question.question.course.name,
+                            subjectName: question.question.subject.name,
+                            createdAt:question.createdAt as Date
+                        }
+                    }), metadata: {
+                        total: total,
+                        perPage: filter.limit,
+                        currentPage: filter.page
+                    }
+                }
+            }
+
+
+            return {
+                questions: [], metadata: {
+                    total: 0,
+                    perPage: filter.limit,
+                    currentPage: filter.page
+                }
+            };
         } catch (error) {
             throw error
         }

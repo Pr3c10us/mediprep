@@ -11,6 +11,7 @@ import {
     QuestionBatch as QB,
     QuestionBatchStatus,
     QuestionType,
+    QuestionWithReason,
     Subject
 } from "../../../../../domain/exams/exam";
 import * as schema from "../../../../../../../stack/drizzle/schema/exams"
@@ -33,6 +34,7 @@ import {BadRequestError} from "../../../../../../pkg/errors/customError";
 import {PoolClient} from "pg";
 import {UserExamAccess} from "../../../../../../../stack/drizzle/schema/users";
 import {SaleItems} from "../../../../../../../stack/drizzle/schema/sales";
+import {TestQuestionRecords} from "../../../../../../../stack/drizzle/schema/test";
 
 export class ExamRepositoryDrizzle implements ExamRepository {
     db
@@ -183,8 +185,6 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                         subjectId: questionParams.subjectId,
                         courseId: subject.course?.id as string,
                         examId: subject.course?.exam?.id as unknown as string,
-                        questionImageUrl: questionParams.questionImageUrl,
-                        explanationImageUrl: questionParams.explanationImageUrl,
                         questionBatchId: questionParams.questionBatchId
                     }).returning()
                     const newQuestion = newQuestionResults[0]
@@ -195,7 +195,6 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                                 index: index,
                                 value: optionParams.value,
                                 answer: optionParams.answer,
-                                explanation: optionParams.explanation,
                                 questionId: newQuestion.id
                             })
                             index++
@@ -602,15 +601,12 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                             type: question.type as QuestionType,
                             explanation: question.explanation as string,
                             question: question.question as string,
-                            questionImageUrl: question.questionImageUrl as string,
-                            explanationImageUrl: question.explanationImageUrl as string,
                             options: question.options?.map((option: any): Option => {
                                 return {
                                     index: option.index,
                                     value: option.value,
                                     selected: option.selected,
                                     answer: option.answer,
-                                    explanation: option.explanation
                                 }
                             })
                         }
@@ -799,15 +795,12 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 type: questionResult.type as QuestionType,
                 explanation: questionResult.explanation as string,
                 question: questionResult.question as string,
-                questionImageUrl: questionResult.questionImageUrl as string,
-                explanationImageUrl: questionResult.explanationImageUrl as string,
                 options: questionResult.options?.map((option: any): Option => {
                     return {
                         index: option.index,
                         value: option.value,
                         selected: option.selected,
                         answer: option.answer,
-                        explanation: option.explanation
                     }
                 })
             }
@@ -837,29 +830,164 @@ export class ExamRepositoryDrizzle implements ExamRepository {
 
     async TagQuestion(userId: string, questionId: string): Promise<void> {
         try {
+            const question = await this.db.select().from(Questions).where(eq(Questions.id,questionId));
+           if (question.length < 1) {
+               throw new BadRequestError("question does not exist")
+           }
             await this.db.insert(UserTagQuestionRecords).values({
                 userId,
-                questionId
+                questionId,
+                examId: question[0].examId
             })
         } catch (error) {
             throw error
         }
     }
 
-    // get tagged question
+    async GetTaggedQuestions(filter: PaginationFilter): Promise<{
+        questions: QuestionWithReason[],
+        metadata: PaginationMetaData
+    }> {
+        try {
+            const totalResult = await this.db.select({count: count()}).from(UserTagQuestionRecords).where(and(eq(UserTagQuestionRecords.userId, filter.userId as string),eq(UserTagQuestionRecords.examId, filter.examId as string)));
+            const total = totalResult[0].count;
+            if (total <= 0) {
+                return {
+                    questions: [], metadata: {
+                        total: 0,
+                        perPage: filter.limit,
+                        currentPage: filter.page
+                    }
+                }
+            }
+
+            const taggedQuestions = await this.db.query.UserTagQuestionRecords.findMany({
+                where: and(eq(UserTagQuestionRecords.userId, filter.userId as string),eq(UserTagQuestionRecords.examId, filter.examId as string)),
+                with: {
+                    question: {
+                        with: {
+                            subject: true,
+                            course: true
+                        }
+                    }
+                },
+                limit: filter.limit,
+                offset: (filter.page - 1) * filter.limit,
+            })
+            // const questions = taggedQuestions.map((tq) => tq.question)
+
+            if (taggedQuestions.length > 0) {
+                return {
+                    questions: taggedQuestions.map((question: any): QuestionWithReason => {
+                        return {
+                            id: question.id as string,
+                            type: question.type as QuestionType,
+                            courseName: question.question.course.name,
+                            subjectName: question.question.subject.name,
+                            createdAt: question.createdAt,
+                            reason: "",
+                        }
+                    }), metadata: {
+                        total: total,
+                        perPage: filter.limit,
+                        currentPage: filter.page
+                    }
+                }
+            }
+
+
+            return {
+                questions: [], metadata: {
+                    total: 0,
+                    perPage: filter.limit,
+                    currentPage: filter.page
+                }
+            };
+        } catch (error) {
+            throw error
+        }
+    }
 
     async ReportQuestion(userId: string, questionId: string, reason: string): Promise<void> {
         try {
+            const question = await this.db.select().from(Questions).where(eq(Questions.id,questionId));
+            if (question.length < 1) {
+                throw new BadRequestError("question does not exist")
+            }
             await this.db.insert(UserReportQuestionRecords).values({
                 userId,
                 questionId,
-                reason
+                reason,
+                examId: question[0].examId
             })
         } catch (error) {
             throw error
         }
     }
 
-    // get reported question
+    async GetReportedQuestions(filter: PaginationFilter): Promise<{
+        questions: QuestionWithReason[],
+        metadata: PaginationMetaData
+    }> {
+        try {
+            const totalResult = await this.db.select({count: count()}).from(UserReportQuestionRecords).where(and(eq(UserReportQuestionRecords.userId, filter.userId as string),eq(UserReportQuestionRecords.examId, filter.examId as string)));
+            const total = totalResult[0].count;
+            if (total <= 0) {
+                return {
+                    questions: [], metadata: {
+                        total: 0,
+                        perPage: filter.limit,
+                        currentPage: filter.page
+                    }
+                }
+            }
+
+            const reportedQuestions = await this.db.query.UserReportQuestionRecords.findMany({
+                where: and(eq(UserReportQuestionRecords.userId, filter.userId as string),eq(UserReportQuestionRecords.examId, filter.examId as string)),
+                with: {
+                    question: {
+                        with: {
+                            subject: true,
+                            course: true
+                        }
+                    }
+                },
+                limit: filter.limit,
+                offset: (filter.page - 1) * filter.limit,
+            })
+
+            if (reportedQuestions.length > 0) {
+                return {
+                    questions: reportedQuestions.map((question: any): QuestionWithReason => {
+                        return {
+                            id: question.question.id as string,
+                            type: question.question.type as QuestionType,
+                            reason: question.reason,
+                            courseName: question.question.course.name,
+                            subjectName: question.question.subject.name,
+                            createdAt:question.createdAt as Date
+                        }
+                    }), metadata: {
+                        total: total,
+                        perPage: filter.limit,
+                        currentPage: filter.page
+                    }
+                }
+            }
+
+
+            return {
+                questions: [], metadata: {
+                    total: 0,
+                    perPage: filter.limit,
+                    currentPage: filter.page
+                }
+            };
+        } catch (error) {
+            throw error
+        }
+    }
+
+
 }
 

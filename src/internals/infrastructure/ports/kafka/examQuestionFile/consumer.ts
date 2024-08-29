@@ -80,9 +80,7 @@ export class ExamQuestionFileConsumer {
                     await this.examServices.commands.addQuestion.Handle({
                         type: question.type,
                         question: question.question,
-                        questionImageUrl: question.questionImageName && question.questionImageName,
                         explanation: question.explanation,
-                        explanationImageUrl: question.explanationImageName && question.explanationImageName,
                         subjectId: subjectId,
                         options,
                         questionBatchId: data.batchId
@@ -145,7 +143,6 @@ export class ExamQuestionFileConsumer {
             options.push({
                 value: option.value,
                 answer: line.correctOption.includes(key), // Assuming false as no specific answer logic is provided
-                explanation: option.explanation
             })
         }
         question.options = options

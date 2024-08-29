@@ -111,3 +111,9 @@ export const editQuestionSchema = z.object({
 export const questionIdSchema = z.object({
     questionId: uuidSchema
 })
+
+export const paginationSchema = z.object({
+    limit: z.string().optional(),
+    page: z.string().optional(),
+    questionStatus: z.enum([ "correct", "unanswered", "wrong"]).optional()
+});

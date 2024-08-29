@@ -49,14 +49,40 @@ export class ExamHandler {
         new SuccessResponse(res, {exam}, metadata).send();
     }
 
-    tagQuestion = async (req:Request,res:Response)=> {
-        await this.examServices.commands.tagQuestion.Handle(req.userD?.id as string,req.params.questionId)
+    tagQuestion = async (req: Request, res: Response) => {
+        await this.examServices.commands.tagQuestion.Handle(req.userD?.id as string, req.params.questionId)
         new SuccessResponse(res, {message: "question Tagged"}).send();
     }
 
-    reportQuestion = async (req:Request,res:Response)=> {
-        await this.examServices.commands.reportQuestion.Handle(req.userD?.id as string,req.params.questionId,req.body.reason)
+    reportQuestion = async (req: Request, res: Response) => {
+        await this.examServices.commands.reportQuestion.Handle(req.userD?.id as string, req.params.questionId, req.body.reason)
         new SuccessResponse(res, {message: "question reported"}).send();
     }
 
+    getReportQuestion = async (req: Request, res: Response) => {
+        const filter: PaginationFilter = {
+            userId: req.userD?.id,
+            examId: req.params.examId,
+            limit: Number(req.query.limit) || 10,
+            page: Number(req.query.page) || 1,
+        }
+        const questionsResponse = await this.examServices.queries.getReportedQuestionsQuery.handle(filter)
+        new SuccessResponse(res, {questions: questionsResponse.questions}, questionsResponse.metadata).send();
+    }
+
+    getTaggedQuestion = async (req: Request, res: Response) => {
+        const filter: PaginationFilter = {
+            userId: req.userD?.id,
+            examId: req.params.examId,
+            limit: Number(req.query.limit) || 10,
+            page: Number(req.query.page) || 1,
+        }
+        const questionsResponse = await this.examServices.queries.getTaggedQuestionsQuery.handle(filter)
+        new SuccessResponse(res, {questions: questionsResponse.questions}, questionsResponse.metadata).send();
+    }
+
+    getQuestionByIdHandler = async (req: Request, res: Response) => {
+        const question = await this.examServices.queries.getQuestionById.handle(req.params.questionId)
+        new SuccessResponse(res, {question}).send()
+    }
 }

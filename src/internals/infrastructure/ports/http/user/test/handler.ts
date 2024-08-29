@@ -2,12 +2,13 @@ import {TestsServices} from "../../../../../app/test/test";
 import {Request, Response, Router} from "express";
 import ValidationMiddleware from "../../../../../../pkg/middleware/validation";
 import {createTestSchema, scoreTestSchema, testIdSchema} from "../../../../../../pkg/validations/test";
-import {getCommandFilterSchema, userExamIdSchema} from "../../../../../../pkg/validations/exam";
+import {getCommandFilterSchema, paginationSchema, userExamIdSchema} from "../../../../../../pkg/validations/exam";
 import {CheckExamAccess} from "../../../../../../pkg/middleware/checkExamAccess";
 import {UserExamAccessService} from "../../../../../app/examAccess/examAccess";
 import {SuccessResponse} from "../../../../../../pkg/responses/success";
 import {PaginationFilter} from "../../../../../../pkg/types/pagination";
 import {Test, TestType, UserAnswer} from "../../../../../domain/tests/test";
+import {QuestionStatus} from "../../../../../domain/exams/exam";
 
 export class TestsHandler {
     testServices: TestsServices
@@ -29,6 +30,14 @@ export class TestsHandler {
                 ValidationMiddleware(getCommandFilterSchema, "query"),
                 CheckExamAccess(userExamAccessService),
                 this.getTests
+            )
+
+        this.router.route("/:examId/questions")
+            .get(
+                ValidationMiddleware(userExamIdSchema, "params"),
+                ValidationMiddleware(paginationSchema, "query"),
+                CheckExamAccess(userExamAccessService),
+                this.getExamQuestions
             )
 
         this.router.route("/:examId/:testId")
@@ -166,5 +175,17 @@ export class TestsHandler {
         const questions = await this.testServices.queries.getTestQuestions.Handle(testId, userId)
 
         new SuccessResponse(res, {questions}).send();
+    }
+
+    getExamQuestions = async (req: Request, res: Response) => {
+        const filter: PaginationFilter = {
+            userId: req.userD?.id,
+            examId: req.params.examId,
+            limit: Number(req.query.limit) || 10,
+            page: Number(req.query.page) || 1,
+            questionStatus: req.query.questionStatus as QuestionStatus
+        }
+        const questionsResponse = await this.testServices.queries.getExamQuestions.Handle(filter)
+        new SuccessResponse(res, {questions: questionsResponse.questions}, questionsResponse.metadata).send();
     }
 }

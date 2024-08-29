@@ -51,6 +51,7 @@ export const TestQuestionRecords = pgTable("test_question_records", {
         onDelete: 'cascade',
         onUpdate: 'cascade'
     }).notNull(),
+    createdAt: timestamp('created_at').defaultNow(),
     subjectId: uuid('subject_id').references(() => Subjects.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
     courseId: uuid('course_id').references(() => Courses.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
     examId: uuid('exam_id').references(() => Exams.id, {onDelete: 'cascade', onUpdate: 'cascade'}).notNull(),

@@ -9,6 +9,7 @@ import {EndTest, EndTestC} from "./command/endTest";
 import {ForceEndTest, ForceEndTestC} from "./command/forceEndTest";
 import {PauseTest, PauseTestC} from "./command/pauseTest";
 import {ResumeTest, ResumeTestC} from "./command/resumeTest";
+import {GetExamQuestions, GetExamQuestionsC} from "./query/getExamQuestions";
 
 export class Commands {
     createTest: CreateTest
@@ -33,11 +34,13 @@ export class Queries {
     getTestQuestions: GetTestQuestions
     getTests: GetTests
     getTestDetails: GetTestDetails
+    getExamQuestions: GetExamQuestions
 
     constructor(testRepository: TestRepository) {
         this.getTestQuestions = new GetTestQuestionsC(testRepository)
         this.getTests = new GetTestsC(testRepository)
         this.getTestDetails = new GetTestDetailsC(testRepository)
+        this.getExamQuestions = new GetExamQuestionsC(testRepository)
     }
 }
 

@@ -25,6 +25,9 @@ import {TagQuestionCommand, TagQuestionCommandC} from "./commands/tagQuestion";
 import {ReportQuestionCommand, ReportQuestionCommandC} from "./commands/reportQuestion";
 import {GetExamsDetails, GetExamsDetailsC} from "./query/getExamDetails";
 import {AddExamDiscountCommand, AddExamDiscountCommandC} from "./commands/addExamDiscount";
+import {GetTaggedQuestionsQuery, GetTaggedQuestionsQueryC} from "./query/getTaggedQuestion";
+import {GetReportedQuestionsQuery, GetReportedQuestionsQueryC} from "./query/getReportedQuestions";
+import {GetQuestionByIdQuery, GetQuestionByIdQueryC} from "./query/getQuestionById";
 
 export class Commands {
     addExam: AddExamCommand;
@@ -81,16 +84,22 @@ export class Queries {
     getCourses: GetCoursesQuery
     getSubjects: GetSubjectsQuery
     getQuestions: GetQuestionsQuery
+    getQuestionById: GetQuestionByIdQuery
     getExamAnalytics: GetExamsAnalytics
     getExamDetails: GetExamsDetails
+    getTaggedQuestionsQuery: GetTaggedQuestionsQuery
+    getReportedQuestionsQuery: GetReportedQuestionsQuery
 
     constructor(examRepository: ExamRepository, testRepository: TestRepository) {
         this.getExams = new GetExamsQueryC(examRepository)
         this.getCourses = new GetCoursesQueryC(examRepository)
         this.getSubjects = new GetSubjectsQueryC(examRepository)
         this.getQuestions = new GetQuestionsQueryC(examRepository)
+        this.getQuestionById = new GetQuestionByIdQueryC(examRepository)
         this.getExamAnalytics = new GetExamsAnalyticsC(examRepository, testRepository)
         this.getExamDetails = new GetExamsDetailsC(examRepository)
+        this.getTaggedQuestionsQuery = new GetTaggedQuestionsQueryC(examRepository)
+        this.getReportedQuestionsQuery = new GetReportedQuestionsQueryC(examRepository)
     }
 }
 
