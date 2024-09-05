@@ -46,10 +46,6 @@ services:
     environment:
       - REDIS_REPLICATION_MODE=master
       - REDIS_PASSWORD=1234
-    volumes:
-      - redisData:/data
-    networks:
-      - project_net
 
 volumes:
   redis:
