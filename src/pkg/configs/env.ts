@@ -18,6 +18,7 @@ export class Environment {
     nodeENV: string;
     port: number;
     url: string;
+    verificationURL: string;
     apiVersion: string
 
     clientOrigin: string[];
@@ -47,7 +48,7 @@ export class Environment {
 
     paystackSecret: string;
     stripeSecret: string;
-    stripeSigningSecret : string;
+    stripeSigningSecret: string;
 
     googleClientId: string
     googleClientSecret: string
@@ -55,7 +56,11 @@ export class Environment {
     oauthFailureRedirect: string
     oauthSuccessRedirect: string
 
-    redisURL : string
+    redisURL: string
+
+    adminName: string
+    adminEmail: string
+    adminPassword: string
 
     constructor() {
         this.pgDBUsername = this.getEnvAsString("PG_DB_USERNAME", "postgres");
@@ -76,9 +81,10 @@ export class Environment {
         this.nodeENV = this.getEnvAsString("NODE_ENV", "development");
         this.port = this.getEnvAsInt("PORT", 5000);
         this.url = this.getEnvAsString("URL", "http://localhost:5000");
+        this.verificationURL = this.getEnvAsString("VERIFICATION_URL", "http://localhost:3000/verified");
         this.apiVersion = this.getEnvAsString("API_VERSION", "v1");
 
-        this.clientOrigin = [this.getEnvORError("CLIENT_ORIGIN_1"),this.getEnvAsString("CLIENT_ORIGIN_2","http://localhost:3000")];
+        this.clientOrigin = [this.getEnvORError("CLIENT_ORIGIN_1"), this.getEnvAsString("CLIENT_ORIGIN_2", "http://localhost:3000")];
 
         this.azSessionId = this.getEnvORError("AZURE_SESSION_ID");
         this.azClientId = this.getEnvORError("AZURE_CLIENT_ID")
@@ -121,10 +127,14 @@ export class Environment {
         this.googleClientSecret = this.getEnvORError("GOOGLE_CLIENT_SECRET")
         this.googleCallbackUrl = this.getEnvORError("GOOGLE_CALLBACK_URL")
 
-        this.oauthFailureRedirect = this.getEnvAsString("OAUTH_FAILURE_REDIRECT","/")
-        this.oauthSuccessRedirect = this.getEnvAsString("OAUTH_SUCCESS_REDIRECT","/dashboard")
+        this.oauthFailureRedirect = this.getEnvAsString("OAUTH_FAILURE_REDIRECT", "/")
+        this.oauthSuccessRedirect = this.getEnvAsString("OAUTH_SUCCESS_REDIRECT", "/dashboard")
 
-        this.redisURL = this.getEnvAsString('REDIS_URL',"redis://default:1234@localhost:6379")
+        this.redisURL = this.getEnvAsString('REDIS_URL', "redis://default:1234@localhost:6379")
+
+        this.adminName = this.getEnvORError("ADMIN_NAME")
+        this.adminEmail = this.getEnvORError("ADMIN_EMAIL")
+        this.adminPassword = this.getEnvORError("ADMIN_PASSWORD")
     }
 
     getEnvORError = (key: string): string => {

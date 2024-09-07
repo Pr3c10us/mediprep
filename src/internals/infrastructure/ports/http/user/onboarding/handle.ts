@@ -11,9 +11,7 @@ import ValidationMiddleware from "../../../../../../pkg/middleware/validation";
 import {verifyToken} from "../../../../../../pkg/utils/encryption";
 import {SuccessResponse, SuccessResponseWithCookies} from "../../../../../../pkg/responses/success";
 import {User} from "../../../../../domain/users/user";
-import {AuthorizeAdmin, AuthorizeUser} from "../../../../../../pkg/middleware/authorization";
-import passport from 'passport';
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import {AuthorizeUser} from "../../../../../../pkg/middleware/authorization";
 import {Environment} from "../../../../../../pkg/configs/env";
 
 export class UserOnboardingHandler {
@@ -25,7 +23,6 @@ export class UserOnboardingHandler {
         this.userServices = userServices;
         this.router = Router();
         this.environmentVariable = new Environment()
-
 
 
         this.router
@@ -76,14 +73,14 @@ export class UserOnboardingHandler {
         const userId = (payload as { id: string }).id;
 
         await this.userServices.queries.verifyAccount.Handle(userId)
-
-        new SuccessResponse(res, {msg: "Account verified"}).send();
+        console.log({vu: this.environmentVariable.verificationURL})
+        res.status(302).redirect(this.environmentVariable.verificationURL)
     }
 
     authenticateUser = async (req: Request, res: Response) => {
         const {email, password} = req.body;
 
-        const {token,user} = await this.userServices.commands.authenticateUser.Handle(
+        const {token, user} = await this.userServices.commands.authenticateUser.Handle(
             email,
             password
         );
@@ -93,7 +90,7 @@ export class UserOnboardingHandler {
             value: token,
         };
         delete user.password
-        new SuccessResponseWithCookies(res, cookie, {jwt: token,user}).send();
+        new SuccessResponseWithCookies(res, cookie, {jwt: token, user}).send();
     };
 
     forgottenPassword = async (req: Request, res: Response) => {

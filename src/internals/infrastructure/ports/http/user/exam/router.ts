@@ -27,6 +27,10 @@ export class ExamRouter {
         this.router.route('/').get(
             this.adminExamHandler.getExamsHandler
         )
+        this.router.route('/exams/:examId').get(
+            ValidationMiddleware(userExamIdSchema, "params"),
+            this.examHandler.getExamDetails
+        )
 
         this.router.route('/paid').get(
             this.examHandler.getUserExams

@@ -408,7 +408,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
 
     async GetExamDiscounts(examID: string): Promise<ExamDiscount[]> {
         try {
-            const rows = await this.db.select().from(ExamDiscounts).where(eq(ExamDiscounts.id, examID))
+            const rows = await this.db.select().from(ExamDiscounts).where(eq(ExamDiscounts.examId, examID))
             if (rows.length > 0) {
                 return rows.map((row): ExamDiscount => {
                     return {

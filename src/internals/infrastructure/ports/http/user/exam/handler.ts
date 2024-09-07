@@ -49,6 +49,12 @@ export class ExamHandler {
         new SuccessResponse(res, {exam}, metadata).send();
     }
 
+    getExamDetails = async (req: Request, res: Response) => {
+        const {exam, discounts} = await this.examServices.queries.getExamDetails.handle(req.params.examId);
+
+        new SuccessResponse(res, {exam, discounts: discounts}).send();
+    }
+
     tagQuestion = async (req: Request, res: Response) => {
         await this.examServices.commands.tagQuestion.Handle(req.userD?.id as string, req.params.questionId)
         new SuccessResponse(res, {message: "question Tagged"}).send();

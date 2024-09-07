@@ -1,8 +1,8 @@
-import {Exam} from "../../../domain/exams/exam";
+import {Exam, ExamDiscount} from "../../../domain/exams/exam";
 import {ExamRepository} from "../../../domain/exams/repository";
 
 export interface GetExamsDetails {
-    handle: (examId:string) => Promise<{ exam: Exam }>
+    handle: (examId:string) => Promise<{ exam: Exam ,discounts: ExamDiscount[]}>
 }
 
 export class GetExamsDetailsC implements GetExamsDetails {
@@ -12,11 +12,11 @@ export class GetExamsDetailsC implements GetExamsDetails {
         this.examRepository = examRepository;
     }
 
-    handle = async (examId:string): Promise<{ exam: Exam }> => {
+    handle = async (examId:string): Promise<{ exam: Exam ,discounts: ExamDiscount[]}> => {
         try {
             const exam = await this.examRepository.GetExamAnalytics(examId);
-            return {exam};
-
+            const discounts = await this.examRepository.GetExamDiscounts(examId)
+            return {exam, discounts: discounts};
         } catch (error) {
             throw error
         }

@@ -10,8 +10,10 @@
     "migrate-redo": "node-pg-migrate -m ./stack/migrations redo",
     "drizzle-generate": "drizzle-kit --config=stack/drizzle/drizzle.config.ts generate",
     "drizzle-migrate": "drizzle-kit --config=stack/drizzle/drizzle.config.ts migrate",
+
     "dev": "ts-node-dev --respawn --rs --files src/index.ts",
     "build": "tsc -p .",
+    "drizzle-seed": "npm run build && node dist/stack/drizzle/seeds",
     "start": "node dist/src",
     "pm2": "tsc && pm2 start pm2.config.js",
     "pm2-stop": "pm2 stop all"

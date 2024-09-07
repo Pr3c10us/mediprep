@@ -65,9 +65,9 @@ export class ExamHandler {
         new SuccessResponse(res, {exams: exams}, metadata).send();
     }
     getExamDetails = async (req: Request, res: Response) => {
-        const {exam} = await this.examServices.queries.getExamDetails.handle(req.params.id);
+        const {exam, discounts} = await this.examServices.queries.getExamDetails.handle(req.params.id);
 
-        new SuccessResponse(res, {exam}).send();
+        new SuccessResponse(res, {exam, discounts: discounts}).send();
     }
 
     getQuestionBatches = async (req: Request, res: Response) => {
@@ -75,9 +75,9 @@ export class ExamHandler {
             limit: Number(req.query.limit) || 10,
             page: Number(req.query.page) || 1,
         };
-        const {questionBatches,metadata} = await this.examServices.queries.getQuestionBatches.handle(filter);
+        const {questionBatches, metadata} = await this.examServices.queries.getQuestionBatches.handle(filter);
 
-        new SuccessResponse(res, {questionBatches},metadata).send();
+        new SuccessResponse(res, {questionBatches}, metadata).send();
     }
     deleteExamHandler = async (req: Request, res: Response) => {
         await this.examServices.commands.deleteExam.Handle(req.params.id)
