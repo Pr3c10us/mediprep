@@ -41,7 +41,7 @@ export class CheckoutStripeC implements CheckoutStripe {
             }
             const {totalPrice, saleID} = await this.salesRepository.AddSale(addParams)
             const transactionInitializer: InitializeTransaction = {
-                amount: (totalPrice * 100).toString(),
+                amount: (Math.round(totalPrice * 100)).toString(),
                 email: user.email
             }
             // clear cart
@@ -49,7 +49,7 @@ export class CheckoutStripeC implements CheckoutStripe {
 
             // initialize paystack transaction
             const paymentIntent = await this.stripeClient.paymentIntents.create({
-                amount: (totalPrice * 100),
+                amount: (Math.round(totalPrice * 100)),
                 currency: "usd",
                 automatic_payment_methods: {
                     enabled: true,

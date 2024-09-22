@@ -4,12 +4,12 @@ import {Paystack} from "paystack-sdk";
 import {InitializeTransaction} from "paystack-sdk/dist/transaction/interface";
 import {CartRepository} from "../../../domain/carts/repository";
 import {AddSaleParams} from "../../../domain/sales/sale";
-import {BadRequestError, UnAuthorizedError} from "../../../../pkg/errors/customError";
+import {UnAuthorizedError} from "../../../../pkg/errors/customError";
 
 export interface CheckoutPaystack {
     Handle: (params: {
         userID: string,
-    }) => Promise<string>
+    }) => Promise<{ accessCode: string, authorizationURL: string }>
 }
 
 export class CheckoutPaystackC implements CheckoutPaystack {
@@ -27,7 +27,7 @@ export class CheckoutPaystackC implements CheckoutPaystack {
 
     Handle = async (params: {
         userID: string,
-    }): Promise<string> => {
+    }): Promise<{ accessCode: string, authorizationURL: string }> => {
         try {
             const user = await this.userRepository.getUserDetails(params.userID)
             if (!user.id) {
@@ -41,7 +41,7 @@ export class CheckoutPaystackC implements CheckoutPaystack {
             }
             const {totalPrice, saleID} = await this.salesRepository.AddSale(addParams)
             const transactionInitializer: InitializeTransaction = {
-                amount: (totalPrice * 100).toString(),
+                amount: (Math.round(totalPrice * 100)).toString(),
                 email: user.email,
                 // currency:"usd"
             }
@@ -52,7 +52,6 @@ export class CheckoutPaystackC implements CheckoutPaystack {
             const response = await this.paystackClient.transaction.initialize(transactionInitializer).catch(async (error) => {
                 await this.salesRepository.UpdateSale({userId: params.userID, id: saleID, status: "failed"})
                 throw error
-
             })
             if (!response.data?.reference || !response.data.access_code) {
                 await this.salesRepository.UpdateSale({userId: params.userID, id: saleID, status: "failed"})
@@ -72,7 +71,7 @@ export class CheckoutPaystackC implements CheckoutPaystack {
             })
 
             // return access code
-            return response.data.access_code
+            return {accessCode: response.data.access_code, authorizationURL: response.data.authorization_url}
         } catch (error) {
             throw error;
         }

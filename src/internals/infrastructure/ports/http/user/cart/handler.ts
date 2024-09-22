@@ -106,9 +106,9 @@ export class CartHandler {
             throw new UnAuthorizedError("try login again")
         }
 
-        const accessCode = await this.salesService.commands.checkoutPaystack.Handle({userID})
+        const {accessCode,authorizationURL} = await this.salesService.commands.checkoutPaystack.Handle({userID})
 
-        new SuccessResponse(res, {accessCode}).send();
+        new SuccessResponse(res, {accessCode,authorizationURL}).send();
     };
 
     checkoutStripe = async (req: Request, res: Response) => {
