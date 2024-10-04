@@ -34,7 +34,6 @@ import {BadRequestError} from "../../../../../../pkg/errors/customError";
 import {PoolClient} from "pg";
 import {UserExamAccess} from "../../../../../../../stack/drizzle/schema/users";
 import {SaleItems} from "../../../../../../../stack/drizzle/schema/sales";
-import {TestQuestionRecords} from "../../../../../../../stack/drizzle/schema/test";
 
 export class ExamRepositoryDrizzle implements ExamRepository {
     db
@@ -271,10 +270,19 @@ export class ExamRepositoryDrizzle implements ExamRepository {
     // Edit
     async EditExam(id: string, examParams: EditExamParams): Promise<void> {
         try {
-            const updatedExam = await this.db.update(Exams).set({
-                ...examParams,
-                subscriptionAmount: String(examParams.subscriptionAmount)
-            }).where(eq(Exams.id, id)).returning({id: Exams.id})
+            console.log(examParams)
+            let setParams: any
+            if (examParams.subscriptionAmount != undefined) {
+                setParams = {
+                    ...examParams,
+                    subscriptionAmount: String(examParams.subscriptionAmount)
+                }
+            } else {
+                setParams = {
+                    ...examParams
+                }
+            }
+            const updatedExam = await this.db.update(Exams).set(setParams).where(eq(Exams.id, id)).returning({id: Exams.id})
             if (updatedExam.length < 1) {
                 throw new BadRequestError(`exam with id '${id}' does not exist`)
             }
@@ -830,10 +838,10 @@ export class ExamRepositoryDrizzle implements ExamRepository {
 
     async TagQuestion(userId: string, questionId: string): Promise<void> {
         try {
-            const question = await this.db.select().from(Questions).where(eq(Questions.id,questionId));
-           if (question.length < 1) {
-               throw new BadRequestError("question does not exist")
-           }
+            const question = await this.db.select().from(Questions).where(eq(Questions.id, questionId));
+            if (question.length < 1) {
+                throw new BadRequestError("question does not exist")
+            }
             await this.db.insert(UserTagQuestionRecords).values({
                 userId,
                 questionId,
@@ -849,7 +857,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         metadata: PaginationMetaData
     }> {
         try {
-            const totalResult = await this.db.select({count: count()}).from(UserTagQuestionRecords).where(and(eq(UserTagQuestionRecords.userId, filter.userId as string),eq(UserTagQuestionRecords.examId, filter.examId as string)));
+            const totalResult = await this.db.select({count: count()}).from(UserTagQuestionRecords).where(and(eq(UserTagQuestionRecords.userId, filter.userId as string), eq(UserTagQuestionRecords.examId, filter.examId as string)));
             const total = totalResult[0].count;
             if (total <= 0) {
                 return {
@@ -862,7 +870,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
             }
 
             const taggedQuestions = await this.db.query.UserTagQuestionRecords.findMany({
-                where: and(eq(UserTagQuestionRecords.userId, filter.userId as string),eq(UserTagQuestionRecords.examId, filter.examId as string)),
+                where: and(eq(UserTagQuestionRecords.userId, filter.userId as string), eq(UserTagQuestionRecords.examId, filter.examId as string)),
                 with: {
                     question: {
                         with: {
@@ -910,7 +918,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
 
     async ReportQuestion(userId: string, questionId: string, reason: string): Promise<void> {
         try {
-            const question = await this.db.select().from(Questions).where(eq(Questions.id,questionId));
+            const question = await this.db.select().from(Questions).where(eq(Questions.id, questionId));
             if (question.length < 1) {
                 throw new BadRequestError("question does not exist")
             }
@@ -930,7 +938,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         metadata: PaginationMetaData
     }> {
         try {
-            const totalResult = await this.db.select({count: count()}).from(UserReportQuestionRecords).where(and(eq(UserReportQuestionRecords.userId, filter.userId as string),eq(UserReportQuestionRecords.examId, filter.examId as string)));
+            const totalResult = await this.db.select({count: count()}).from(UserReportQuestionRecords).where(and(eq(UserReportQuestionRecords.userId, filter.userId as string), eq(UserReportQuestionRecords.examId, filter.examId as string)));
             const total = totalResult[0].count;
             if (total <= 0) {
                 return {
@@ -943,7 +951,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
             }
 
             const reportedQuestions = await this.db.query.UserReportQuestionRecords.findMany({
-                where: and(eq(UserReportQuestionRecords.userId, filter.userId as string),eq(UserReportQuestionRecords.examId, filter.examId as string)),
+                where: and(eq(UserReportQuestionRecords.userId, filter.userId as string), eq(UserReportQuestionRecords.examId, filter.examId as string)),
                 with: {
                     question: {
                         with: {
@@ -965,7 +973,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                             reason: question.reason,
                             courseName: question.question.course.name,
                             subjectName: question.question.subject.name,
-                            createdAt:question.createdAt as Date
+                            createdAt: question.createdAt as Date
                         }
                     }), metadata: {
                         total: total,

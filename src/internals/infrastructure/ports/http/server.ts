@@ -1,7 +1,6 @@
-import express, {Express, Request, Response, Router} from "express";
+import express, {Express, NextFunction, Request, Response, Router} from "express";
 import {Services} from "../../../app/services";
 import helmet from "helmet";
-import cors from "cors";
 import cookieParser from "cookie-parser";
 import {SuccessResponse} from "../../../../pkg/responses/success";
 import Logger from "../../../../pkg/utils/logger";
@@ -41,7 +40,7 @@ export class Server {
 
         this.server.use((req, res, next) => {
             if (req.originalUrl === "/api/v1/webhook/stripe") {
-                express.raw({ type: "application/json" })(req, res, next);
+                express.raw({type: "application/json"})(req, res, next);
             } else {
                 express.json()(req, res, next);
             }
@@ -51,12 +50,25 @@ export class Server {
         this.server.use(helmet());
         this.server.use(cookieParser(environmentVariables.cookieSecret));
         this.server.use(morganMiddleware);
-        this.server.use(
-            cors({
-                origin: environmentVariables.clientOrigin,
-                credentials: true,
-            })
-        );
+        // this.server.use(
+        //     cors({
+        //         origin: environmentVariables.clientOrigin,
+        //         credentials: true,
+        //     })
+        // );
+        const cors = (req: Request, res: Response, next: NextFunction) => {
+            const origin = req.headers.origin;
+            if (origin) {
+                res.setHeader('Access-Control-Allow-Origin', origin);
+            }
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+            next();
+        };
+
+        // Use the CORS middleware
+        this.server.use(cors);
+
 
         this.server.use(passport.initialize())
         this.server.get('/onboarding/google', passport.authenticate('google', {scope: ['profile', 'email']}));

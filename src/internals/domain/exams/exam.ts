@@ -31,7 +31,7 @@ export type EditExamParams = {
     name?: string;
     description?: string;
     imageURL?: string;
-    subscriptionAmount?: number;
+    subscriptionAmount?: number | string;
     mockQuestions?: number;
 };
 

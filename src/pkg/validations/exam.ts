@@ -83,11 +83,11 @@ export const subjectIdSchema = z.object({
 const optionSchema = z.object({
     value: z.string(),
     answer: z.boolean(),
-    explanation: z.string()
+    explanation: z.string().optional()
 })
 
 export const questionSchema = z.object({
-    type: z.enum(["singleChoice", "multiChoice", "fillInTheGap"]),
+    type: z.enum(["single_choice", "multiple_choice", "fill_in_the_blanks"]),
     question: z.string(),
     explanation: z.string(),
     subjectId: uuidSchema,
@@ -102,7 +102,7 @@ const editOptionSchema = z.object({
 })
 
 export const editQuestionSchema = z.object({
-    type: z.enum(["singleChoice", "multiChoice", "fillInTheGap"]).optional(),
+    type: z.enum(["single_choice", "multiple_choice", "fill_in_the_blanks"]).optional(),
     question: z.string().optional(),
     explanation: z.string().optional(),
     options: z.array(editOptionSchema).optional()

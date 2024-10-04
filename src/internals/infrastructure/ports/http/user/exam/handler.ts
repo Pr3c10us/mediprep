@@ -17,8 +17,8 @@ export class ExamHandler {
         const filter: PaginationFilter = {
             limit: 20,
             page: 1,
-            free: true,
-            random: true,
+            // free: true,
+            random: false,
             examId: req.params.examId
         };
 
