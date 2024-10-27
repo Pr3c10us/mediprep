@@ -1,4 +1,4 @@
-import {z} from "zod";
+import {number, z} from "zod";
 import {uuidSchema} from "./admin";
 
 export const getSalesFilterSchema = z.object({
@@ -9,4 +9,10 @@ export const getSalesFilterSchema = z.object({
 
 export const saleIdSchema = z.object({
     id: uuidSchema
+})
+
+export const addSaleSchema = z.object({
+    userID: uuidSchema,
+    examID: uuidSchema,
+    months: z.number(),
 })

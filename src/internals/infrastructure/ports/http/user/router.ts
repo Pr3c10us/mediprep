@@ -1,11 +1,12 @@
-import {Router} from "express";
-import {Services} from "../../../../app/services";
-import {UserOnboardingHandler} from "./onboarding/handle";
-import {ExamRouter} from "./exam/router";
-import {AuthorizeUser} from "../../../../../pkg/middleware/authorization";
-import {TestsHandler} from "./test/handler";
-import {UserProfileHandler} from "./profile/handler";
-import {CartHandler} from "./cart/handler";
+import { Router } from "express";
+import { Services } from "../../../../app/services";
+import { UserOnboardingHandler } from "./onboarding/handle";
+import { ExamRouter } from "./exam/router";
+import { AuthorizeUser } from "../../../../../pkg/middleware/authorization";
+import { TestsHandler } from "./test/handler";
+import { UserProfileHandler } from "./profile/handler";
+import { CartHandler } from "./cart/handler";
+import { SalesHandler } from "./sales/handler";
 
 export default class UserRouter {
     router: Router
@@ -20,6 +21,7 @@ export default class UserRouter {
         this.test();
         this.profile();
         this.cart();
+        this.sales();
     }
 
     onboarding = () => {
@@ -45,5 +47,10 @@ export default class UserRouter {
     cart = () => {
         const router = new CartHandler(this.services.CartServices, this.services.SalesServices);
         this.router.use("/cart", AuthorizeUser(this.services.UserServices.userRepository), router.router);
+    };
+
+    sales = () => {
+        const router = new SalesHandler(this.services.SalesServices);
+        this.router.use("/sales", AuthorizeUser(this.services.UserServices.userRepository), router.router);
     };
 }

@@ -1,6 +1,6 @@
-import {AdminServices} from "../../../../../app/admin/admin";
-import {Request, Response} from "express";
-import {ExamServices} from "../../../../../app/exam/exam";
+import { AdminServices } from "../../../../../app/admin/admin";
+import { Request, Response } from "express";
+import { ExamServices } from "../../../../../app/exam/exam";
 import {
     Course,
     EditQuestionParams,
@@ -10,9 +10,9 @@ import {
     Question,
     Subject
 } from "../../../../../domain/exams/exam";
-import {SuccessResponse} from "../../../../../../pkg/responses/success";
-import {BadRequestError} from "../../../../../../pkg/errors/customError";
-import {PaginationFilter} from "../../../../../../pkg/types/pagination";
+import { SuccessResponse } from "../../../../../../pkg/responses/success";
+import { BadRequestError } from "../../../../../../pkg/errors/customError";
+import { PaginationFilter } from "../../../../../../pkg/types/pagination";
 
 export class ExamHandler {
     examServices: ExamServices;
@@ -37,9 +37,8 @@ export class ExamHandler {
 
         await this.examServices.commands.addExam.Handle(exam)
 
-        new SuccessResponse(res, {message: `exam ${req.body.name} added`}).send()
+        new SuccessResponse(res, { message: `exam ${req.body.name} added` }).send()
     }
-
     addExamDiscountHandler = async (req: Request, res: Response) => {
         const examDiscount: ExamDiscount = {
             month: req.body.month,
@@ -49,40 +48,38 @@ export class ExamHandler {
         }
 
         await this.examServices.commands.addExamDiscount.Handle(examDiscount)
-        new SuccessResponse(res, {message: `discount added`}).send()
+        new SuccessResponse(res, { message: `discount added` }).send()
     }
-
     getExamsHandler = async (req: Request, res: Response) => {
-        const {limit, page, name} = req.query;
+        const { limit, page, name } = req.query;
         const filter: PaginationFilter = {
             limit: Number(limit) || 10,
             page: Number(page) || 1,
             name: name as string | undefined,
         };
 
-        const {exams, metadata} = await this.examServices.queries.getExams.handle(filter);
+        const { exams, metadata } = await this.examServices.queries.getExams.handle(filter);
 
-        new SuccessResponse(res, {exams: exams}, metadata).send();
+        new SuccessResponse(res, { exams: exams }, metadata).send();
     }
     getExamDetails = async (req: Request, res: Response) => {
-        const {exam, discounts} = await this.examServices.queries.getExamDetails.handle(req.params.id);
+        const { exam, discounts } = await this.examServices.queries.getExamDetails.handle(req.params.id);
 
-        new SuccessResponse(res, {exam, discounts: discounts}).send();
+        new SuccessResponse(res, { exam, discounts: discounts }).send();
     }
-
     getQuestionBatches = async (req: Request, res: Response) => {
         const filter: PaginationFilter = {
             limit: Number(req.query.limit) || 10,
             page: Number(req.query.page) || 1,
         };
-        const {questionBatches, metadata} = await this.examServices.queries.getQuestionBatches.handle(filter);
+        const { questionBatches, metadata } = await this.examServices.queries.getQuestionBatches.handle(filter);
 
-        new SuccessResponse(res, {questionBatches}, metadata).send();
+        new SuccessResponse(res, { questionBatches }, metadata).send();
     }
     deleteExamHandler = async (req: Request, res: Response) => {
         await this.examServices.commands.deleteExam.Handle(req.params.id)
 
-        new SuccessResponse(res, {message: `exam deleted`}).send()
+        new SuccessResponse(res, { message: `exam deleted` }).send()
     }
     editExamHandler = async (req: Request, res: Response) => {
         const exam: Exam = {
@@ -101,7 +98,7 @@ export class ExamHandler {
 
         await this.examServices.commands.editExam.Handle(req.params.id, exam)
 
-        new SuccessResponse(res, {message: `exam updated`}).send()
+        new SuccessResponse(res, { message: `exam updated` }).send()
     }
     uploadExamImageHandler = async (req: Request, res: Response) => {
         const file = req.file
@@ -109,7 +106,7 @@ export class ExamHandler {
 
         await this.examServices.commands.uploadExamImage.Handle(req.params.id, file)
 
-        new SuccessResponse(res, {message: "image uploaded"}).send()
+        new SuccessResponse(res, { message: "image uploaded" }).send()
     }
     uploadImageHandler = async (req: Request, res: Response) => {
         const file = req.file
@@ -117,7 +114,20 @@ export class ExamHandler {
 
         const fileURL = await this.examServices.commands.uploadImage.Handle(file)
 
-        new SuccessResponse(res, {url: fileURL}).send()
+        new SuccessResponse(res, { url: fileURL }).send()
+    }
+    getReportedQuestions = async (req: Request, res: Response) => {
+        const { limit, page } = req.query;
+        const filter: PaginationFilter = {
+            limit: Number(limit) || 10,
+            page: Number(page) || 1,
+            examId: req.params.id
+        };
+
+        const questionsResponse = await this.examServices.queries.getReportedQuestionsQuery.Handle(filter)
+        console.log(questionsResponse);
+
+        new SuccessResponse(res, { questions: questionsResponse.questions }, questionsResponse.metadata).send();
     }
 
 
@@ -130,10 +140,10 @@ export class ExamHandler {
 
         await this.examServices.commands.addCourse.Handle(course)
 
-        new SuccessResponse(res, {message: `course ${req.body.name} added`}).send()
+        new SuccessResponse(res, { message: `course ${req.body.name} added` }).send()
     }
     getCoursesHandler = async (req: Request, res: Response) => {
-        const {limit, page, name, examId} = req.query;
+        const { limit, page, name, examId } = req.query;
         const filter: PaginationFilter = {
             limit: Number(limit) || 10,
             page: Number(page) || 1,
@@ -141,14 +151,14 @@ export class ExamHandler {
             examId: examId as string | undefined
         };
 
-        const {courses, metadata} = await this.examServices.queries.getCourses.handle(filter);
+        const { courses, metadata } = await this.examServices.queries.getCourses.handle(filter);
 
-        new SuccessResponse(res, {courses: courses}, metadata).send();
+        new SuccessResponse(res, { courses: courses }, metadata).send();
     }
     deleteCourseHandler = async (req: Request, res: Response) => {
         await this.examServices.commands.deleteCourse.Handle(req.params.courseId)
 
-        new SuccessResponse(res, {message: `course deleted`}).send()
+        new SuccessResponse(res, { message: `course deleted` }).send()
     }
     editCourseHandler = async (req: Request, res: Response) => {
         const course: Course = {
@@ -158,7 +168,7 @@ export class ExamHandler {
 
         await this.examServices.commands.editCourse.Handle(course)
 
-        new SuccessResponse(res, {message: `course updated`}).send()
+        new SuccessResponse(res, { message: `course updated` }).send()
     }
 
 
@@ -171,10 +181,10 @@ export class ExamHandler {
 
         await this.examServices.commands.addSubject.Handle(subject)
 
-        new SuccessResponse(res, {message: `subject ${req.body.name} added`}).send()
+        new SuccessResponse(res, { message: `subject ${req.body.name} added` }).send()
     }
     getSubjectsHandler = async (req: Request, res: Response) => {
-        const {limit, page, name, courseId, examId} = req.query;
+        const { limit, page, name, courseId, examId } = req.query;
         const filter: PaginationFilter = {
             limit: Number(limit) || 10,
             page: Number(page) || 1,
@@ -183,14 +193,14 @@ export class ExamHandler {
             examId: examId as string | undefined
         };
 
-        const {subjects, metadata} = await this.examServices.queries.getSubjects.handle(filter);
+        const { subjects, metadata } = await this.examServices.queries.getSubjects.handle(filter);
 
-        new SuccessResponse(res, {subjects: subjects}, metadata).send();
+        new SuccessResponse(res, { subjects: subjects }, metadata).send();
     }
     deleteSubjectHandler = async (req: Request, res: Response) => {
         await this.examServices.commands.deleteSubject.Handle(req.params.subjectId)
 
-        new SuccessResponse(res, {message: `subject deleted`}).send()
+        new SuccessResponse(res, { message: `subject deleted` }).send()
     }
     editSubjectHandler = async (req: Request, res: Response) => {
         const subject: Subject = {
@@ -200,7 +210,7 @@ export class ExamHandler {
 
         await this.examServices.commands.editSubject.Handle(subject)
 
-        new SuccessResponse(res, {message: `subject updated`}).send()
+        new SuccessResponse(res, { message: `subject updated` }).send()
     }
 
 
@@ -219,30 +229,30 @@ export class ExamHandler {
 
         await this.examServices.commands.addQuestion.Handle(question)
 
-        new SuccessResponse(res, {message: `question added to subject`}).send()
+        new SuccessResponse(res, { message: `question added to subject` }).send()
     }
     addQuestionFileHandler = async (req: Request, res: Response) => {
         const file = req.file
         if (!file) throw new BadRequestError("issue uploading file")
 
         await this.examServices.commands.addQuestionFile.Handle(req.params.id, file)
-        new SuccessResponse(res, {message: `questions added by file upload processing`}).send()
+        new SuccessResponse(res, { message: `questions added by file upload processing` }).send()
     }
     getQuestionsHandler = async (req: Request, res: Response) => {
-        const {limit, page, subjectId} = req.query;
+        const { limit, page, subjectId } = req.query;
         const filter: PaginationFilter = {
             limit: Number(limit) || 100,
             page: Number(page) || 1,
             subjectId: subjectId as string | undefined
         };
 
-        const {questions, metadata} = await this.examServices.queries.getQuestions.handle(filter);
+        const { questions, metadata } = await this.examServices.queries.getQuestions.handle(filter);
 
-        new SuccessResponse(res, {questions: questions}, metadata).send();
+        new SuccessResponse(res, { questions: questions }, metadata).send();
     }
     deleteQuestionHandler = async (req: Request, res: Response) => {
         await this.examServices.commands.deleteQuestion.Handle(req.params.questionId)
-        new SuccessResponse(res, {message: `question deleted`}).send()
+        new SuccessResponse(res, { message: `question deleted` }).send()
     }
     editQuestionHandler = async (req: Request, res: Response) => {
         const question: EditQuestionParams = {
@@ -266,11 +276,10 @@ export class ExamHandler {
 
         await this.examServices.commands.editQuestion.Handle(question)
 
-        new SuccessResponse(res, {message: `question updated`}).send()
+        new SuccessResponse(res, { message: `question updated` }).send()
     }
-
     getQuestionByIdHandler = async (req: Request, res: Response) => {
         const question = await this.examServices.queries.getQuestionById.handle(req.params.questionId)
-        new SuccessResponse(res, {question}).send()
+        new SuccessResponse(res, { question }).send()
     }
 }

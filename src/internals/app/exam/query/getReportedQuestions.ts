@@ -4,7 +4,7 @@ import {ExamRepository} from "../../../domain/exams/repository";
 import {BadRequestError, UnAuthorizedError} from "../../../../pkg/errors/customError";
 
 export interface GetReportedQuestionsQuery {
-    handle: (filter: PaginationFilter) => Promise<{
+    Handle: (filter: PaginationFilter) => Promise<{
         questions
             : QuestionWithReason[], metadata: PaginationMetaData
     }>
@@ -17,16 +17,13 @@ export class GetReportedQuestionsQueryC implements GetReportedQuestionsQuery {
         this.examRepository = examRepository;
     }
 
-    handle = async (filter: PaginationFilter): Promise<{
+    Handle = async (filter: PaginationFilter): Promise<{
         questions
             : QuestionWithReason[], metadata: PaginationMetaData
     }> => {
         try {
             if (!filter.examId || filter.examId == "") {
                 throw new BadRequestError("pass exam Id")
-            }
-            if (!filter.userId || filter.userId == "") {
-                throw new UnAuthorizedError("try to login")
             }
             const {
                 questions

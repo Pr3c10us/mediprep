@@ -1,17 +1,18 @@
-import {UserExamAccessRepository} from "../../../../../domain/sales/repository";
-import {PoolClient} from "pg";
-import {drizzle} from "drizzle-orm/node-postgres";
+import { UserExamAccessRepository } from "../../../../../domain/sales/repository";
+import { PoolClient } from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from '../../../../../../../stack/drizzle/schema/sales'
-import {SaleItems, Sales} from '../../../../../../../stack/drizzle/schema/sales'
+import { SaleItems, Sales } from '../../../../../../../stack/drizzle/schema/sales'
 import * as schema2 from "../../../../../../../stack/drizzle/schema/exams"
+import { Exams } from "../../../../../../../stack/drizzle/schema/exams"
 import * as schema3 from "../../../../../../../stack/drizzle/schema/users"
+import { Users } from "../../../../../../../stack/drizzle/schema/users"
 import * as schemaCart from "../../../../../../../stack/drizzle/schema/cart";
-import {Carts} from "../../../../../../../stack/drizzle/schema/cart";
-import {AddSaleParams, Sale, SaleItem} from "../../../../../domain/sales/sale";
-import {PaginationFilter, PaginationMetaData} from "../../../../../../pkg/types/pagination";
-import {and, count, eq, gte, lte} from "drizzle-orm";
-import {BadRequestError, UnAuthorizedError} from "../../../../../../pkg/errors/customError";
-import {undefined} from "zod";
+import { Carts } from "../../../../../../../stack/drizzle/schema/cart";
+import { AddSaleParams, Sale, SaleItem } from "../../../../../domain/sales/sale";
+import { PaginationFilter, PaginationMetaData } from "../../../../../../pkg/types/pagination";
+import { and, count, eq } from "drizzle-orm";
+import { BadRequestError, UnAuthorizedError } from "../../../../../../pkg/errors/customError";
 
 export class SalesRepositoryDrizzle implements UserExamAccessRepository {
     db
@@ -23,6 +24,74 @@ export class SalesRepositoryDrizzle implements UserExamAccessRepository {
             }
         })
 
+    }
+
+    AddSaleByItems = async (item: SaleItem, userID: string): Promise<string> => {
+        const exam = await this.db.query.Exams.findFirst({
+            where: eq(Exams.id, item.examID),
+            with: {
+                discounts: true,
+            }
+        })
+        if (!exam) {
+            throw new BadRequestError('Exam does not exist')
+        }
+
+        const user = await this.db.query.Users.findFirst({
+            where: eq(Users.id, userID),
+        })
+        if (!user) {
+            throw new UnAuthorizedError('Exam does not exist')
+        }
+
+        const discount = exam.discounts.find((discount) => discount.month == item.months)
+        let examPrice: number = 0
+        if (!discount) {
+            examPrice = Number(exam.subscriptionAmount) * Number(item.months)
+        } else {
+            if (discount.type == 'flat') {
+                examPrice = (Number(exam.subscriptionAmount) - Number(discount.value)) * discount.month
+            }
+            if (discount.type == 'percent') {
+                const price = Number(exam.subscriptionAmount)
+                const priceDiscount = price * (Number(discount.value) / 100)
+                examPrice = (price - priceDiscount) * discount.month
+            }
+            examPrice = Number(exam.subscriptionAmount) * Number(item.months)
+        }
+
+
+        let saleID = ""
+        await this.db.transaction(async (tx) => {
+            try {
+                const saleRes = await tx.insert(Sales).values(
+                    {
+                        userId: user.id,
+                        amount: examPrice,
+                        email: user.email,
+                    }
+                ).returning({ id: Sales.id })
+                saleID = saleRes[0].id
+
+                const saleItems = [{
+                    months: Number(item.months),
+                    price: Number(examPrice),
+                    saleID: saleID,
+                    examID: item.examID,
+                }]
+
+                await tx.insert(SaleItems).values(saleItems)
+            } catch (error) {
+                tx.rollback()
+                throw error
+            }
+        })
+
+        if (!saleID || saleID == "") {
+            throw new Error("failed to initiate sale")
+        }
+
+        return saleID
     }
 
     AddSale = async (params: AddSaleParams): Promise<{ totalPrice: number, saleID: string }> => {
@@ -78,7 +147,7 @@ export class SalesRepositoryDrizzle implements UserExamAccessRepository {
                             amount: totalPrice,
                             email: params.email,
                         }
-                    ).returning({id: Sales.id})
+                    ).returning({ id: Sales.id })
                     saleID = saleRes[0].id
 
                     const saleItems = cart.cartItems.map((item): Omit<SaleItem, "id"> => {
@@ -100,7 +169,7 @@ export class SalesRepositoryDrizzle implements UserExamAccessRepository {
                 throw new Error("failed to initiate sale")
             }
 
-            return {totalPrice, saleID: saleID}
+            return { totalPrice, saleID: saleID }
         } catch (error) {
             throw error
         }
@@ -245,8 +314,11 @@ export class SalesRepositoryDrizzle implements UserExamAccessRepository {
             if (filter.reference) {
                 filters.push(eq(Sales.reference, filter.reference as string))
             }
+            if (filter.userId) {
+                filters.push(eq(Sales.userId, filter.userId as string))
+            }
             // Get the total count of rows
-            const totalResult = await this.db.select({count: count()}).from(Sales).where(and(...filters));
+            const totalResult = await this.db.select({ count: count() }).from(Sales).where(and(...filters));
             const total = totalResult[0].count;
             if (total <= 0) {
                 return {
@@ -297,7 +369,7 @@ export class SalesRepositoryDrizzle implements UserExamAccessRepository {
                     }
                 }
             }
-            return {sales: [], metadata: {total: 0, perPage: filter.limit, currentPage: filter.page}}
+            return { sales: [], metadata: { total: 0, perPage: filter.limit, currentPage: filter.page } }
 
         } catch (error) {
             throw error

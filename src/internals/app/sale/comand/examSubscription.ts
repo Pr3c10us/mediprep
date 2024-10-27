@@ -1,11 +1,11 @@
 import {SaleItem} from "../../../domain/sales/sale";
 import {UserExamAccessRepository} from "../../../domain/sales/repository";
 import {UserRepository} from "../../../domain/users/repository";
-import {ExamRepository} from "../../../domain/exams/repository";
 import {BadRequestError} from "../../../../pkg/errors/customError";
 
 export interface ExamSubscribe {
-    Handle: (reference: string) => Promise<void>
+    Handle: (reference: string) => Promise<void>;
+    HandleWithoutPay: (item: SaleItem, userID: string) => Promise<void>
 }
 
 export class ExamSubscribeC implements ExamSubscribe {
@@ -17,13 +17,27 @@ export class ExamSubscribeC implements ExamSubscribe {
         this.userRepository = userRepository
     }
 
+    HandleWithoutPay = async (item: SaleItem, userID: string): Promise<void> => {
+        try {
+            const saleID = await this.salesRepository.AddSaleByItems(item, userID)
+            await this.addUserExamAccess(item, userID)
+            await this.salesRepository.UpdateSale({
+                userId: userID,
+                id: saleID,
+                status: "success"
+            })
+        } catch (e) {
+            throw e
+        }
+    }
+
     Handle = async (reference: string) => {
         try {
             const sale = await this.salesRepository.GetSaleByReference(reference)
             if (!sale.saleItems || sale.saleItems.length < 1) {
                 throw new BadRequestError("invalid sale")
             }
-            if (sale.status != "pending"){
+            if (sale.status != "pending") {
                 throw new BadRequestError("sale completed")
             }
 
@@ -33,7 +47,7 @@ export class ExamSubscribeC implements ExamSubscribe {
             }
 
             await this.salesRepository.UpdateSale({
-                userId:sale.userId,
+                userId: sale.userId,
                 id: sale.id,
                 status: "success"
             })

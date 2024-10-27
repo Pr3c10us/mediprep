@@ -15,6 +15,7 @@ export const AdminRoles: AdminRole[] = [
             "edit_exam",
             "delete_exam",
             "read_sales",
+            "create_sales",
             "create_admin",
             "read_admin",
             "edit_admin",
@@ -39,7 +40,7 @@ export const AdminRoles: AdminRole[] = [
     },
     {
         name: "sales",
-        permissions: ["read_sales"],
+        permissions: ["read_sales","create_sales"],
     },
     // Able to update exams assigned to them
     {
@@ -65,6 +66,7 @@ export type Permission =
     | "edit_exam"
     | "delete_exam"
     | "read_sales"
+    | "create_sales"
     | "create_admin"
     | "read_admin"
     | "edit_admin"

@@ -1,11 +1,11 @@
-import {ExamServices} from "../../../../../app/exam/exam";
-import {AdminServices} from "../../../../../app/admin/admin";
-import {Router} from "express";
-import {MulterConfig} from "../../../../../../pkg/utils/multer";
-import {ExamHandler} from "./handler";
+import { ExamServices } from "../../../../../app/exam/exam";
+import { AdminServices } from "../../../../../app/admin/admin";
+import { Router } from "express";
+import { MulterConfig } from "../../../../../../pkg/utils/multer";
+import { ExamHandler } from "./handler";
 import CheckPermission from "../../../../../../pkg/middleware/checkPermission";
 import ValidationMiddleware from "../../../../../../pkg/middleware/validation";
-import {Multer} from 'multer';
+import { Multer } from 'multer';
 import {
     addExamDiscountSchema,
     addExamSchema,
@@ -165,6 +165,13 @@ export class ExamRouter {
             ValidationMiddleware(examIdSchema, "params"),
             this.uploadCSV.single("csv"),
             this.handler.addQuestionFileHandler
+        )
+
+        this.router.route('/:id/report').get(
+            CheckPermission("read_exam"),
+            ValidationMiddleware(examIdSchema, "params"),
+            ValidationMiddleware(getCommandFilterSchema, "query"),
+            this.handler.getReportedQuestions
         )
     }
 }

@@ -114,13 +114,5 @@ export class ExamRouter {
             this.examHandler.reportQuestion
         )
 
-        this.router.route("/:examId/report").get(
-            ValidationMiddleware(userExamIdSchema, "params"),
-            CheckExamAccess(userExamAccessService),
-
-        )
-
-
-
     }
 }
