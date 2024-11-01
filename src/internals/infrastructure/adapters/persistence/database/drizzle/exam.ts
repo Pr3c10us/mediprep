@@ -888,7 +888,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 return {
                     questions: taggedQuestions.map((question: any): QuestionWithReason => {
                         return {
-                            id: question.id as string,
+                            id: question.questionId as string,
                             type: question.type as QuestionType,
                             courseName: question.question.course.name,
                             subjectName: question.question.subject.name,
