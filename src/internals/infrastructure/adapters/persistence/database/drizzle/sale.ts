@@ -11,7 +11,7 @@ import * as schemaCart from "../../../../../../../stack/drizzle/schema/cart";
 import { Carts } from "../../../../../../../stack/drizzle/schema/cart";
 import { AddSaleParams, Sale, SaleItem } from "../../../../../domain/sales/sale";
 import { PaginationFilter, PaginationMetaData } from "../../../../../../pkg/types/pagination";
-import { and, count, eq } from "drizzle-orm";
+import {and, count, eq, gte,lte} from "drizzle-orm";
 import { BadRequestError, UnAuthorizedError } from "../../../../../../pkg/errors/customError";
 
 export class SalesRepositoryDrizzle implements UserExamAccessRepository {
@@ -305,18 +305,19 @@ export class SalesRepositoryDrizzle implements UserExamAccessRepository {
         try {
 
             let filters = []
-            // if (filter.startDate || filter.startDate != undefined) {
-            //     filters.push(gte(Sales.createdAt, filter.startDate as Date))
-            // }
-            // if (filter.endDate || filter.endDate != undefined) {
-            //     filters.push(lte(Sales.createdAt, filter.endDate as Date))
-            // }
+            if (filter.startDate || filter.startDate != undefined) {
+                filters.push(gte(Sales.createdAt, filter.startDate as Date))
+            }
+            if (filter.endDate || filter.endDate != undefined) {
+                filters.push(lte(Sales.createdAt, filter.endDate as Date))
+            }
             if (filter.reference) {
                 filters.push(eq(Sales.reference, filter.reference as string))
             }
             if (filter.userId) {
                 filters.push(eq(Sales.userId, filter.userId as string))
             }
+            console.log(filter)
             // Get the total count of rows
             const totalResult = await this.db.select({ count: count() }).from(Sales).where(and(...filters));
             const total = totalResult[0].count;

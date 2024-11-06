@@ -23,6 +23,7 @@ export const userSchema = z.object({
     country: z.string(),
 })
 
+
 export const updateUserSchema = z.object({
     firstName: z.string().optional(),
     lastName: z.string().optional(),

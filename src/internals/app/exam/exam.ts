@@ -30,6 +30,7 @@ import {GetReportedQuestionsQuery, GetReportedQuestionsQueryC} from "./query/get
 import {GetQuestionByIdQuery, GetQuestionByIdQueryC} from "./query/getQuestionById";
 import {UploadImageCommand, UploadImageCommandC} from "./commands/uploadImage";
 import {GetQuestionBatch, GetQuestionBatchC} from "./query/getBatchSatus";
+import {DeleteDiscountCommandC} from "./commands/deleteDiscount";
 
 export class Commands {
     addExam: AddExamCommand;
@@ -55,6 +56,7 @@ export class Commands {
     reportQuestion: ReportQuestionCommand
 
     addExamDiscount: AddExamDiscountCommand
+    deleteDiscount: DeleteDiscountCommandC
 
     constructor(examRepository: ExamRepository, storageRepository: StorageRepository, queueRepository: QueueRepository) {
         this.addExam = new AddExamCommandC(examRepository)
@@ -80,6 +82,7 @@ export class Commands {
         this.reportQuestion = new ReportQuestionCommandC(examRepository)
 
         this.addExamDiscount = new AddExamDiscountCommandC(examRepository)
+        this.deleteDiscount = new DeleteDiscountCommandC(examRepository)
     }
 }
 

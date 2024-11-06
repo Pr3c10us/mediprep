@@ -1,22 +1,24 @@
-import { ExamServices } from "../../../../../app/exam/exam";
-import { AdminServices } from "../../../../../app/admin/admin";
-import { Router } from "express";
-import { MulterConfig } from "../../../../../../pkg/utils/multer";
-import { ExamHandler } from "./handler";
+import {ExamServices} from "../../../../../app/exam/exam";
+import {AdminServices} from "../../../../../app/admin/admin";
+import {Router} from "express";
+import {MulterConfig} from "../../../../../../pkg/utils/multer";
+import {ExamHandler} from "./handler";
 import CheckPermission from "../../../../../../pkg/middleware/checkPermission";
 import ValidationMiddleware from "../../../../../../pkg/middleware/validation";
-import { Multer } from 'multer';
+import {Multer} from 'multer';
 import {
     addExamDiscountSchema,
     addExamSchema,
     courseIdSchema,
     courseSchema,
+    discountIdSchema,
     editCourseSchema,
     editExamSchema,
     editQuestionSchema,
     editSubjectSchema,
     examIdSchema,
-    getCommandFilterSchema, paginationSchema,
+    getCommandFilterSchema,
+    paginationSchema,
     questionIdSchema,
     questionSchema,
     subjectIdSchema,
@@ -63,9 +65,11 @@ export class ExamRouter {
             ValidationMiddleware(addExamDiscountSchema, "body"),
             this.handler.addExamDiscountHandler
         )
-
-
-
+        this.router.route('/discount/:discountID').delete(
+            CheckPermission("edit_exam"),
+            ValidationMiddleware(discountIdSchema, "params"),
+            this.handler.deleteDiscountHandler
+        )
 
 
         // Courses Route

@@ -1,51 +1,47 @@
 import {Request, Response, Router} from "express";
 import ValidationMiddleware from "../../../../../../pkg/middleware/validation";
-import {updateUserSchema, userSchema} from "../../../../../../pkg/validations/user";
-import {UserServices} from "../../../../../app/user/user";
-import {User} from "../../../../../domain/users/user";
 import {SuccessResponse} from "../../../../../../pkg/responses/success";
 import {AuthorizeUser} from "../../../../../../pkg/middleware/authorization";
-import {BadRequestError} from "../../../../../../pkg/errors/customError";
+import {EmailServices} from "../../../../../app/email/email";
+import {z} from "zod";
+import {Email} from "../../../../../domain/notification/email";
+import {UserServices} from "../../../../../app/user/user";
+import {Environment} from "../../../../../../pkg/configs/env";
 
-export class UserProfileHandler {
-    userServices;
+export class UserSupportHandler {
+    emailService;
+    userServices
     router;
+    environmentVariables;
 
-    constructor(userServices: UserServices) {
+    constructor(emailService: EmailServices, userServices: UserServices, environmentVariables: Environment) {
+        this.emailService = emailService;
         this.userServices = userServices;
         this.router = Router();
-
+        this.environmentVariables = environmentVariables
         this.router
-            .route("/update")
-            .patch(
-                ValidationMiddleware(updateUserSchema, "body"),
-                AuthorizeUser(userServices.userRepository),
+            .route("/")
+            .post(
+                ValidationMiddleware(z.object({
+                    message: z.string()
+                }), "body"),
                 this.updateUserHandler
             );
 
-        this.router
-            .route("/")
-            .get(
-                AuthorizeUser(userServices.userRepository),
-                this.getUserDetails
-            );
 
     }
 
 
     updateUserHandler = async (req: Request, res: Response) => {
-        const user = req.body as Partial<User>;
-        if (user.password) {
-            throw new BadRequestError("password can't be updated here")
+        const userID = req.userD?.id
+        const user = await this.userServices.queries.getUserDetails.handle(userID as string)
+        const emailParams: Email = {
+            mailTo: ["owo.pre.eno@gmail.com"],
+            subject: `support request from : ${user.email}`,
+            plainText: req.body.message,
         }
-        user.id = req.userD?.id
-        await this.userServices.commands.updateUser.Handle(user)
+        await this.emailService.Commands.sendMail.Handle(emailParams)
 
-        new SuccessResponse(res, {message: "account updated"}).send();
+        new SuccessResponse(res, {message: "message sent"}).send();
     };
-
-    getUserDetails = async (req: Request, res: Response) => {
-        new SuccessResponse(res, {user: req.userD}).send();
-    }
-
 }

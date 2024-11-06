@@ -15,6 +15,7 @@ export type User = {
     examsBought?: number;
     testNo?:number;
     mockNo?: number
+    exams?: Exam[];
 }
 
 export type EditUser = {

@@ -1,20 +1,24 @@
-import { Router } from "express";
-import { Services } from "../../../../app/services";
-import { UserOnboardingHandler } from "./onboarding/handle";
-import { ExamRouter } from "./exam/router";
-import { AuthorizeUser } from "../../../../../pkg/middleware/authorization";
-import { TestsHandler } from "./test/handler";
-import { UserProfileHandler } from "./profile/handler";
-import { CartHandler } from "./cart/handler";
-import { SalesHandler } from "./sales/handler";
+import {Router} from "express";
+import {Services} from "../../../../app/services";
+import {UserOnboardingHandler} from "./onboarding/handle";
+import {ExamRouter} from "./exam/router";
+import {AuthorizeUser} from "../../../../../pkg/middleware/authorization";
+import {TestsHandler} from "./test/handler";
+import {UserProfileHandler} from "./profile/handler";
+import {CartHandler} from "./cart/handler";
+import {SalesHandler} from "./sales/handler";
+import {UserSupportHandler} from "./support/handler";
+import {Environment} from "../../../../../pkg/configs/env";
 
 export default class UserRouter {
     router: Router
     services: Services
+    environmentVariables
 
-    constructor(services: Services) {
+    constructor(services: Services, environmentVariables: Environment) {
         this.router = Router()
         this.services = services
+        this.environmentVariables = environmentVariables
 
         this.onboarding();
         this.exam();
@@ -22,6 +26,7 @@ export default class UserRouter {
         this.profile();
         this.cart();
         this.sales();
+        this.support()
     }
 
     onboarding = () => {
@@ -52,5 +57,10 @@ export default class UserRouter {
     sales = () => {
         const router = new SalesHandler(this.services.SalesServices);
         this.router.use("/sales", AuthorizeUser(this.services.UserServices.userRepository), router.router);
+    };
+
+    support = () => {
+        const router = new UserSupportHandler(this.services.EmailServices, this.services.UserServices, this.environmentVariables);
+        this.router.use("/support", AuthorizeUser(this.services.UserServices.userRepository), router.router);
     };
 }

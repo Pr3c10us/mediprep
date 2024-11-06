@@ -1,5 +1,5 @@
-import { ExamRepository } from "../../../../../domain/exams/repository";
-import { drizzle } from "drizzle-orm/node-postgres";
+import {ExamRepository} from "../../../../../domain/exams/repository";
+import {drizzle} from "drizzle-orm/node-postgres";
 import {
     Course,
     EditExamParams,
@@ -28,18 +28,18 @@ import {
     UserReportQuestionRecords,
     UserTagQuestionRecords
 } from "../../../../../../../stack/drizzle/schema/exams"
-import { PaginationFilter, PaginationMetaData } from "../../../../../../pkg/types/pagination";
-import { and, count, eq, ilike, sql } from "drizzle-orm";
-import { BadRequestError } from "../../../../../../pkg/errors/customError";
-import { PoolClient } from "pg";
-import { UserExamAccess } from "../../../../../../../stack/drizzle/schema/users";
-import { SaleItems } from "../../../../../../../stack/drizzle/schema/sales";
+import {PaginationFilter, PaginationMetaData} from "../../../../../../pkg/types/pagination";
+import {and, count, eq, ilike, sql} from "drizzle-orm";
+import {BadRequestError} from "../../../../../../pkg/errors/customError";
+import {PoolClient} from "pg";
+import {UserExamAccess} from "../../../../../../../stack/drizzle/schema/users";
+import {SaleItems} from "../../../../../../../stack/drizzle/schema/sales";
 
 export class ExamRepositoryDrizzle implements ExamRepository {
     db
 
     constructor(pool: PoolClient) {
-        this.db = drizzle(pool, { schema })
+        this.db = drizzle(pool, {schema})
     }
 
     // Add
@@ -118,6 +118,14 @@ export class ExamRepositoryDrizzle implements ExamRepository {
 
         } catch (error) {
             throw error
+        }
+    }
+
+    async DeleteDiscount(id: string): Promise<void> {
+        try {
+            await this.db.delete(ExamDiscounts).where(eq(ExamDiscounts.id, id))
+        } catch (e) {
+            throw e
         }
     }
 
@@ -282,7 +290,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                     ...examParams
                 }
             }
-            const updatedExam = await this.db.update(Exams).set(setParams).where(eq(Exams.id, id)).returning({ id: Exams.id })
+            const updatedExam = await this.db.update(Exams).set(setParams).where(eq(Exams.id, id)).returning({id: Exams.id})
             if (updatedExam.length < 1) {
                 throw new BadRequestError(`exam with id '${id}' does not exist`)
             }
@@ -293,7 +301,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
 
     async EditCourseName(id: string, name: string): Promise<void> {
         try {
-            const updatedCourse = await this.db.update(Courses).set({ name: name }).where(eq(Courses.id, id)).returning({ id: Courses.id })
+            const updatedCourse = await this.db.update(Courses).set({name: name}).where(eq(Courses.id, id)).returning({id: Courses.id})
             if (updatedCourse.length < 1) {
                 throw new BadRequestError(`course with id '${id}' does not exist`)
             }
@@ -304,7 +312,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
 
     async EditSubjectName(id: string, name: string): Promise<void> {
         try {
-            const updatedSubject = await this.db.update(Subjects).set({ name: name }).where(eq(Subjects.id, id)).returning({ id: Subjects.id })
+            const updatedSubject = await this.db.update(Subjects).set({name: name}).where(eq(Subjects.id, id)).returning({id: Subjects.id})
             if (updatedSubject.length < 1) {
                 throw new BadRequestError(`subject with id '${id}' does not exist`)
             }
@@ -317,7 +325,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         try {
             await this.db.transaction(async (tx) => {
                 try {
-                    const updatedQuestion = await tx.update(Questions).set(questionParams).where(eq(Questions.id, questionParams.id as string)).returning({ id: Questions.id })
+                    const updatedQuestion = await tx.update(Questions).set(questionParams).where(eq(Questions.id, questionParams.id as string)).returning({id: Questions.id})
                     if (updatedQuestion.length < 1) throw new BadRequestError(`question with id '${questionParams.id}' does not exist`)
                     if (questionParams.options != undefined && questionParams.options.length > 0) {
                         for await (let option of questionParams.options) {
@@ -340,7 +348,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
 
     async UpdateQuestionBatchStatus(id: string, status: QuestionBatchStatus): Promise<void> {
         try {
-            const updatedQuestionBatch = await this.db.update(QuestionBatch).set({ status: status }).where(eq(QuestionBatch.id, id)).returning({ id: QuestionBatch.id })
+            const updatedQuestionBatch = await this.db.update(QuestionBatch).set({status: status}).where(eq(QuestionBatch.id, id)).returning({id: QuestionBatch.id})
             if (updatedQuestionBatch.length < 1) {
                 throw new BadRequestError(`question batch with id '${id}' does not exist`)
             }
@@ -359,7 +367,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
             }
 
             // Get the total count of rows
-            const totalResult = await this.db.select({ count: count() }).from(Exams).where(and(...filters));
+            const totalResult = await this.db.select({count: count()}).from(Exams).where(and(...filters));
             const total = totalResult[0].count;
             if (total <= 0) {
                 return {
@@ -446,7 +454,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 filters.push(eq(Courses.examId, filter.examId));
             }
             // Get the total count of rows
-            const totalResult = await this.db.select({ count: count() }).from(Courses).where(and(...filters));
+            const totalResult = await this.db.select({count: count()}).from(Courses).where(and(...filters));
             const total = totalResult[0].count;
             if (total <= 0) {
                 return {
@@ -487,7 +495,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 }
             };
         } catch
-        (error) {
+            (error) {
             throw error
         }
     }
@@ -509,7 +517,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
             }
 
             // Get the total count of rows
-            const totalResult = await this.db.select({ count: count() }).from(Subjects).where(and(...filters));
+            const totalResult = await this.db.select({count: count()}).from(Subjects).where(and(...filters));
             const total = totalResult[0].count;
             if (total <= 0) {
                 return {
@@ -552,7 +560,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 }
             };
         } catch
-        (error) {
+            (error) {
             throw error
         }
     }
@@ -579,7 +587,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
             }
 
             // Get the total count of rows
-            const totalResult = await this.db.select({ count: count() }).from(Questions).where(and(...filters));
+            const totalResult = await this.db.select({count: count()}).from(Questions).where(and(...filters));
             const total = totalResult[0].count;
             if (total <= 0) {
                 return {
@@ -635,7 +643,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
                 }
             };
         } catch
-        (error) {
+            (error) {
             throw error
         }
     }
@@ -651,7 +659,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
             }
 
             // Get the total count of rows
-            const totalResult = await this.db.select({ count: count() }).from(QuestionBatch).where(and(...filters));
+            const totalResult = await this.db.select({count: count()}).from(QuestionBatch).where(and(...filters));
             const total = totalResult[0].count;
             if (total <= 0) {
                 return {
@@ -857,7 +865,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         metadata: PaginationMetaData
     }> {
         try {
-            const totalResult = await this.db.select({ count: count() }).from(UserTagQuestionRecords).where(and(eq(UserTagQuestionRecords.userId, filter.userId as string), eq(UserTagQuestionRecords.examId, filter.examId as string)));
+            const totalResult = await this.db.select({count: count()}).from(UserTagQuestionRecords).where(and(eq(UserTagQuestionRecords.userId, filter.userId as string), eq(UserTagQuestionRecords.examId, filter.examId as string)));
             const total = totalResult[0].count;
             if (total <= 0) {
                 return {
@@ -938,7 +946,7 @@ export class ExamRepositoryDrizzle implements ExamRepository {
         metadata: PaginationMetaData
     }> {
         try {
-            const totalResult = await this.db.select({ count: count() }).from(UserReportQuestionRecords).where(eq(UserReportQuestionRecords.examId, filter.examId as string));
+            const totalResult = await this.db.select({count: count()}).from(UserReportQuestionRecords).where(eq(UserReportQuestionRecords.examId, filter.examId as string));
             const total = totalResult[0].count;
             if (total <= 0) {
                 return {

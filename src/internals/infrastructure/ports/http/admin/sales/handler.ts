@@ -37,12 +37,19 @@ export class SalesHandler {
     }
 
     getSales = async (req: Request, res: Response) => {
-        const {limit, page, reference} = req.query
+        const {limit, page, reference, startDate, endDate} = req.query
         const filter: PaginationFilter = {
             limit: Number(limit) || 10,
             page: Number(page) || 1,
             reference: reference as string | undefined,
         };
+
+        if (startDate) {
+            filter.startDate = new Date(startDate as string);
+        }
+        if (endDate) {
+            filter.endDate = new Date(endDate as string);
+        }
 
         const {sales, metadata} = await this.services.queries.getSales.handle(filter)
 

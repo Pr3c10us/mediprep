@@ -29,6 +29,9 @@ export const editExamSchema = z.object({
 export const examIdSchema = z.object({
     id: uuidSchema
 })
+export const discountIdSchema = z.object({
+    discountID: uuidSchema
+})
 
 export const userExamIdSchema = z.object({
     examId: uuidSchema

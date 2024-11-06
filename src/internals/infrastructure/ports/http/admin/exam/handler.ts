@@ -50,6 +50,11 @@ export class ExamHandler {
         await this.examServices.commands.addExamDiscount.Handle(examDiscount)
         new SuccessResponse(res, { message: `discount added` }).send()
     }
+    deleteDiscountHandler = async (req: Request, res: Response) => {
+        await this.examServices.commands.deleteDiscount.Handle(req.params.discountID as string)
+
+        new SuccessResponse(res, { message: `discount deleted` }).send()
+    }
     getExamsHandler = async (req: Request, res: Response) => {
         const { limit, page, name } = req.query;
         const filter: PaginationFilter = {

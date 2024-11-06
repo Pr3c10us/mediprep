@@ -1,22 +1,29 @@
-import {UserRepository} from "../../../../../domain/users/repository";
-import {EditUser, User, UserExamAccess as UEA} from "../../../../../domain/users/user";
-import {PaginationFilter, PaginationMetaData} from "../../../../../../pkg/types/pagination";
-import {drizzle} from "drizzle-orm/node-postgres";
-import {PoolClient} from "pg";
+import { UserRepository } from "../../../../../domain/users/repository";
+import { EditUser, User, UserExamAccess as UEA } from "../../../../../domain/users/user";
+import { PaginationFilter, PaginationMetaData } from "../../../../../../pkg/types/pagination";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { PoolClient } from "pg";
 import * as schema from "../../../../../../../stack/drizzle/schema/users"
-import {UserExamAccess, Users} from "../../../../../../../stack/drizzle/schema/users"
-import {and, count, eq, gte, ilike, lte, ne} from "drizzle-orm";
-import {BadRequestError} from "../../../../../../pkg/errors/customError";
-import {Sales} from "../../../../../../../stack/drizzle/schema/sales";
-import {Tests} from "../../../../../../../stack/drizzle/schema/test";
-import {Carts} from "../../../../../../../stack/drizzle/schema/cart";
+import * as schema2 from "../../../../../../../stack/drizzle/schema/exams"
+import * as schema1 from "../../../../../../../stack/drizzle/schema/sales"
+import { UserExamAccess, Users } from "../../../../../../../stack/drizzle/schema/users"
+import { and, count, eq, gte, ilike, lte, ne } from "drizzle-orm";
+import { BadRequestError } from "../../../../../../pkg/errors/customError";
+import { SaleItems, Sales } from "../../../../../../../stack/drizzle/schema/sales";
+import { Tests } from "../../../../../../../stack/drizzle/schema/test";
+import { Carts } from "../../../../../../../stack/drizzle/schema/cart";
+import { Exam } from "../../../../../domain/exams/exam";
 
 
 export class UserRepositoryDrizzle implements UserRepository {
     db
 
     constructor(client: PoolClient) {
-        this.db = drizzle(client, {schema})
+        this.db = drizzle(client, {
+            schema: {
+                ...schema, ...schema1, ...schema2
+            }
+        })
     }
 
     addUser = async (user: User): Promise<User> => {
@@ -101,7 +108,7 @@ export class UserRepositoryDrizzle implements UserRepository {
 
     editUser = async (id: string, userParams: EditUser): Promise<void> => {
         try {
-            const updatedUser = await this.db.update(Users).set(userParams).where(eq(Users.id, id)).returning({id: Users.id})
+            const updatedUser = await this.db.update(Users).set(userParams).where(eq(Users.id, id)).returning({ id: Users.id })
             if (updatedUser.length < 1) {
                 throw new BadRequestError(`user with id '${id}' does not exist`)
             }
@@ -146,9 +153,35 @@ export class UserRepositoryDrizzle implements UserRepository {
                 throw new BadRequestError(`user with id '${id}' does not exist`)
             }
 
+            let exams: Exam[] = []
+
             const sales = await this.db.select().from(Sales).where(eq(Sales.userId, id))
             const test = await this.db.select().from(Tests).where(and(eq(Tests.userId, id), ne(Tests.type, "mock")))
             const mock = await this.db.select().from(Tests).where(and(eq(Tests.userId, id), eq(Tests.type, "mock")))
+            await Promise.all(sales.map(async (sale) => {
+                const saleItems = await this.db.query.SaleItems.findMany({
+                    where: eq(SaleItems.saleID, sale.id),
+                    with: {
+                        exam: true
+                    },
+                });
+
+                saleItems.forEach((item) => {
+                    const examID = item.exam.id;
+                    const examExist = exams.some((exam) => exam.id === examID);
+                    if (!examExist) {
+                        const exam: Exam = {
+                            name: item.exam.name as string,
+                            description: item.exam.description,
+                            subscriptionAmount: Number(item.exam.subscriptionAmount),
+                            totalMockScores: item.exam.totalMockScores,
+                            mocksTaken: item.exam.mocksTaken,
+                            mockTestTime: item.exam.mockTestTime,
+                        };
+                        exams.push(exam);
+                    }
+                });
+            }));
 
 
             return {
@@ -165,7 +198,8 @@ export class UserRepositoryDrizzle implements UserRepository {
                 updatedAt: user.updatedAt as Date,
                 examsBought: sales.length,
                 testNo: test.length,
-                mockNo: mock.length
+                mockNo: mock.length,
+                exams: exams
             }
         } catch (error) {
             throw error
@@ -229,7 +263,7 @@ export class UserRepositoryDrizzle implements UserRepository {
             }
 
             // Get the total count of rows
-            const totalResult = await this.db.select({count: count()}).from(Users).where(and(...filters));
+            const totalResult = await this.db.select({ count: count() }).from(Users).where(and(...filters));
             const total = totalResult[0].count;
             if (total <= 0) {
                 return {
@@ -271,7 +305,7 @@ export class UserRepositoryDrizzle implements UserRepository {
                     }
                 }
             }
-            return {users: [], metadata: {total: 0, perPage: filter.limit, currentPage: filter.page}}
+            return { users: [], metadata: { total: 0, perPage: filter.limit, currentPage: filter.page } }
         } catch (error) {
             throw error
         }

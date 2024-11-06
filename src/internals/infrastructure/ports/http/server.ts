@@ -118,7 +118,7 @@ export class Server {
     };
 
     user = () => {
-        const router = new UserRouter(this.services);
+        const router = new UserRouter(this.services,this.environmentVariables);
         this.apiRouter.use("/user", router.router);
     };
 

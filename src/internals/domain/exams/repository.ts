@@ -6,7 +6,8 @@ import {
     ExamDiscount,
     Question,
     QuestionBatch,
-    QuestionBatchStatus, QuestionWithReason,
+    QuestionBatchStatus,
+    QuestionWithReason,
     Subject
 } from "./exam";
 import {PaginationFilter, PaginationMetaData} from "../../../pkg/types/pagination";
@@ -20,6 +21,7 @@ export interface ExamRepository {
     GetExamAnalytics: (id: string) => Promise<Exam>
     GetExams: (filter: PaginationFilter) => Promise<{ exams: Exam[], metadata: PaginationMetaData }>
     AddExamDiscount: (discount: ExamDiscount) => Promise<void>
+    DeleteDiscount: (id: string) => Promise<void>
     GetExamDiscounts: (examId: string) => Promise<ExamDiscount[]>
 
     AddCourse: (course: Course) => Promise<Course>
@@ -39,8 +41,14 @@ export interface ExamRepository {
     DeleteQuestion: (id: string) => Promise<void>
     GetQuestionById: (questionId: string) => Promise<Question>
     GetQuestions: (filter: PaginationFilter) => Promise<{ questions: Question[], metadata: PaginationMetaData }> // filer to include subjectId
-    GetReportedQuestions: (filter: PaginationFilter) => Promise<{ questions: QuestionWithReason[], metadata: PaginationMetaData }> // filer to include subjectId
-    GetTaggedQuestions: (filter: PaginationFilter) => Promise<{ questions: QuestionWithReason[], metadata: PaginationMetaData }> // filer to include subjectId
+    GetReportedQuestions: (filter: PaginationFilter) => Promise<{
+        questions: QuestionWithReason[],
+        metadata: PaginationMetaData
+    }> // filer to include subjectId
+    GetTaggedQuestions: (filter: PaginationFilter) => Promise<{
+        questions: QuestionWithReason[],
+        metadata: PaginationMetaData
+    }> // filer to include subjectId
 
 
     AddQuestionBatch: (examId: string) => Promise<QuestionBatch>
